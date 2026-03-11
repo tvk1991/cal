@@ -3,1407 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Máy tính kiểm tra kết quả</title>
+    <title>ClevCalc Fixed No-Scroll</title>
     <style>
-        /* ===== GIỮ NGUYÊN CÁC STYLE CŨ ===== */
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none;
+        :root {
+            --bg-color: #ffffff;
+            --accent: #2ecc71;
+            --text-main: #2c3e50;
+            --op-color: #f39c12;
+            --target-color: #3498db;
+            --danger: #e74c3c;
         }
 
-        body {
-            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-            background: linear-gradient(145deg, #2b3a4a 0%, #1d2a35 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 0;
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             touch-action: manipulation;
-        }
-
-        .calculator {
-            width: 100%;
-            max-width: 340px;
-            background: #1f2a34;
-            border-radius: 40px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.1);
-            padding: 10px 8px 14px;
-            margin: 4px;
-            will-change: transform;
-            -webkit-touch-callout: none;
             user-select: none;
-            display: flex;
-            flex-direction: column;
-            max-height: 98vh;
-            overflow: hidden;
+            font-weight: 600; 
         }
 
-        .display-area {
-            background: #1e282f;
-            border-radius: 24px;
-            padding: 8px 8px 6px;
-            margin-bottom: 8px;
-            box-shadow: inset 0 5px 10px rgba(0,0,0,0.6), 0 2px 5px rgba(255,255,255,0.05);
-            border: 1px solid #3a4a55;
-            flex-shrink: 0;
+        html, body { 
+            height: 100%; margin: 0; overflow: hidden; 
+            background-color: #1a1a1a; display: flex; justify-content: center;
+            position: fixed; width: 100%;
         }
 
-        .main-screen {
-            background: #121b22;
-            border-radius: 16px;
-            padding: 4px 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
-            border: 1px solid #3e5a68;
-            margin-bottom: 6px;
+        .clevcalc-container {
+            width: 100vw; height: 100dvh; max-width: 500px;
+            background: var(--bg-color); position: relative;
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        #display {
-            font-size: 2.4rem;
-            font-weight:bold;
-            color: #b0e0ff;
-            text-shadow: 0 0 12px #4aa3ff;
-            letter-spacing: 1px;
-            flex: 1;
-            text-align: right;
-            font-family: 'Courier New', monospace;
-            transition: text-shadow 0.1s ease;
-            min-height: 2.2rem;
-            max-height: 4rem;
-            overflow-y: auto;
-            word-break: break-all;
-            white-space: pre-wrap;
-            line-height: 1;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        #display::-webkit-scrollbar { display: none; }
-
-        .backspace-btn {
-            background: transparent;
-            border: none;
-            color: #a0c0d0;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0 4px;
-            transition: opacity 0.1s, transform 0.1s;
-            line-height: 1;
-            text-shadow: 0 0 8px #4aa3ff;
-            opacity: 0.8;
-            min-width: 40px;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .backspace-btn:active {
-            opacity: 1;
-            transform: scale(1.1);
-            color: #ffaa00;
+        .display-screen {
+            height: 40%; width: 100%;
+            padding: 20px 20px 10px;
+            display: flex; flex-direction: column; justify-content: flex-end; 
+            text-align: right; position: relative; background: white; z-index: 5;
         }
 
-        .target-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #121b22;
-            border-radius: 14px;
-            padding: 4px 8px;
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
-            border: 1px solid #3e5a68;
-            cursor: pointer;
-        }
-
-        .target-label {
-            color: #aabbcc;
-            font-size: 0.8rem;
+        #expression { 
+            font-size: 2.2rem; color: #7f8c8d; 
+            max-height: 120px; overflow-y: auto; 
+            word-break: break-all; margin-bottom: 5px;
+            transition: font-size 0.2s ease;
+            scroll-behavior: smooth;
             font-weight: 500;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            opacity: 0.8;
+        }
+        
+        /* ĐÃ KHÓA CUỘN: Kết quả không được phép cuộn */
+        #result-preview { 
+            font-size: 3.5rem; 
+            color: var(--text-main); 
+            line-height: 1; 
+            overflow: hidden; /* Tuyệt đối không cuộn */
             white-space: nowrap;
-            pointer-events: none;
+            font-weight: 800; 
+            text-overflow: ellipsis; /* Nếu quá dài sẽ hiện dấu ... thay vì tràn */
         }
 
-        #targetInput {
-            flex: 1;
-            background: transparent;
-            border: none;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #ffde9e;
-            text-shadow: 0 0 10px #ffb347;
-            text-align: right;
-            font-family: 'Courier New', monospace;
-            outline: none;
-            padding: 4px 0;
-            min-width: 0;
-            -webkit-user-select: text;
-            user-select: text;
-            -webkit-appearance: none;
-            appearance: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            readonly: readonly;
-        }
-        #targetInput::-webkit-outer-spin-button,
-        #targetInput::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        #targetInput::placeholder {
-            color: #3f5563;
-            font-size: 1.1rem;
-            text-shadow: none;
-        }
-        #targetInput.editing-mode {
-            background: #1e3a4a;
-            border-radius: 12px;
-            box-shadow: 0 0 0 3px #ffaa00;
-            animation: targetPulse 1.5s infinite;
-            cursor: default;
+        #comparison-msg { 
+            font-size: 1.1rem; 
+            font-weight: 900; 
+            text-align: center; height: 24px; margin: 5px 0; 
+            letter-spacing: 0.5px;
         }
 
-        @keyframes targetPulse {
-            0% { box-shadow: 0 0 0 3px #ffaa00; }
-            50% { box-shadow: 0 0 0 6px #ffaa00; }
-            100% { box-shadow: 0 0 0 3px #ffaa00; }
+        .target-area { 
+            display: flex; align-items: center; background: #f9f9f9; 
+            border-radius: 8px; padding: 5px 12px; border: 1px dashed var(--target-color);
+            margin-top: 5px;
+        }
+        .history-btn { 
+            font-size: 1.3rem; color: #bdc3c7; padding: 5px 10px 5px 0; 
+            cursor: pointer; border-right: 1px solid #eee; margin-right: 10px;
+            display: flex; align-items: center;
+        }
+        .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; margin-right: 8px; }
+        #target-display { flex: 1; font-size: 1.3rem; color: var(--target-color); font-weight: 900; text-align: right; }
+
+        .keypad {
+            height: 60%; width: 100%;
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr);
+            background: #ccc; gap: 1px;
+            position: absolute; bottom: 0; left: 0;
+            padding-bottom: env(safe-area-inset-bottom);
+            z-index: 20;
         }
 
-        /* ===== MESSAGE AREA MỚI ===== */
-        .message-area {
-            margin-top: 4px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            padding: 4px 6px;
-            border-radius: 40px;
-            background: #1a262e;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
-            color: #ddd;
-            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-            border: 1px solid #3f5563;
-            min-height: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            word-break: break-word;
-            will-change: background, box-shadow;
-        }
-
-        .message-text {
-            flex: 1;
-            text-align: center;
-        }
-
-        .history-icon {
-            font-size: 1.4rem;
-            cursor: pointer;
-            padding: 0 5px;
-            opacity: 0.8;
-            transition: opacity 0.2s, transform 0.1s;
-            user-select: none;
-        }
-        .history-icon:active {
-            opacity: 1;
-            transform: scale(1.2);
-            color: #ffaa00;
-        }
-
-        .message-area.success {
-            background: #1f4a3a;
-            color: #b0ffc0;
-            text-shadow: 0 0 10px #36d96b;
-            border-color: #58b87a;
-            box-shadow: 0 0 20px #2ecc71;
-        }
-
-        .message-area.error {
-            background: #5a2e3a;
-            color: #ffb0b0;
-            text-shadow: 0 0 10px #ff4f4f;
-            border-color: #c45a5a;
-            box-shadow: 0 0 20px #e74c3c;
-        }
-
-        .message-area.vibrate {
-            animation: vibrate 0.3s ease-in-out;
-        }
-
-        @keyframes vibrate {
-            0% { transform: translateX(0); filter: brightness(1); }
-            20% { transform: translateX(4px); filter: brightness(1.3); }
-            40% { transform: translateX(-4px); filter: brightness(0.9); }
-            60% { transform: translateX(2px); filter: brightness(1.2); }
-            80% { transform: translateX(-2px); filter: brightness(0.95); }
-            100% { transform: translateX(0); filter: brightness(1); }
-        }
-
-        /* ===== BUTTONS GRID MỚI ===== */
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            margin-top: 4px;
-            flex: 1 1 auto;
-            min-height: 0;
-            overflow: hidden;
-        }
-
-        .btn {
-            border: none;
-            background: #2c3e4c;
-            border-radius: 20px;
-            padding: 8px 2px;
-            font-size: 1.8rem;
-            font-weight: 500;
-            color: #eef5f9;
-            box-shadow: 0 4px 0 #15232b, 0 6px 10px rgba(0,0,0,0.4);
-            cursor: default;
-            transition: transform 0.05s linear, box-shadow 0.05s linear, background 0.05s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #4a6572;
-            text-shadow: 0 2px 3px black;
-            min-height: 78px;
-            touch-action: manipulation;
-            will-change: transform, box-shadow;
-            -webkit-tap-highlight-color: transparent;
-            pointer-events: auto;
-        }
-
-        .btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #15232b, 0 3px 6px rgba(0,0,0,0.4);
-            background: #3a5264;
-        }
-
-        .btn.led-flash {
-            background: #ffd966;
-            color: #1a1a1a;
-            text-shadow: none;
-            box-shadow: 0 0 25px #ffee88;
-            transition: none;
-        }
-
-        .btn.operator {
-            background: #f09b3c;
-            border-color: #ffb45e;
-            color: #1e2b33;
-            text-shadow: 0 1px 2px white;
-        }
-
-        .btn.operator:active {
-            background: #ffb259;
-        }
-
-        .btn.clear {
-            background: #5f4c4c;
-            border-color: #9b7a7a;
-            color: #ffe1c6;
-        }
-
-        .btn.equals {
-            background: #3d8f6f;
-            border-color: #6fc9a3;
+        button {
+            width: 100%; height: 100%; border: none; background: #fff;
+            font-size: 1.8rem; color: #333; outline: none;
+            display: flex; justify-content: center; align-items: center;
             font-weight: 700;
         }
+        button.pressed { background: #f0f0f0; transform: scale(0.95); }
 
-        .btn.plus-long {
-            grid-row: span 2;
-            min-height: 160px;
-        }
-
-        /* Media queries giữ nguyên nhưng điều chỉnh nhẹ */
-        @media (max-width: 340px) {
-            .calculator {
-                max-width: 100%;
-                padding: 6px 4px 10px;
-                border-radius: 30px;
-                margin: 2px;
-            }
-            .btn {
-                padding: 4px 1px;
-                font-size: 1.5rem;
-                min-height: 60px;
-                border-radius: 16px;
-            }
-            .btn.plus-long {
-                min-height: 124px;
-            }
-            #display {
-                font-size: 1.6rem;
-                min-height: 1.9rem;
-            }
-            #targetInput {
-                font-size: 2rem;
-            }
-            .target-label {
-                font-size: 0.7rem;
-            }
-            .message-area {
-                font-size: 0.8rem;
-                padding: 3px 4px;
-                min-height: 1.7rem;
-            }
-            .history-icon {
-                font-size: 1.2rem;
-            }
-            .backspace-btn {
-                font-size: 1.3rem;
-                min-width: 36px;
-                min-height: 36px;
-            }
+        .btn-op { color: var(--op-color); font-weight: 900; }
+        .btn-func { color: var(--accent); font-weight: 900; }
+        .btn-clear { color: var(--danger); font-weight: 900; }
+        .btn-equal { background: var(--accent); color: white; font-size: 2.5rem; font-weight: 900; }
+        .btn-plus { grid-row: span 2; color: var(--op-color); font-weight: 900; }
+        
+        .shake { animation: shake 0.4s both; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
-        @media (min-width: 341px) and (max-width: 380px) {
-            .calculator {
-                max-width: 95%;
-                padding: 8px 6px 12px;
-            }
-            .btn {
-                font-size: 1.7rem;
-                min-height: 70px;
-            }
-            .btn.plus-long {
-                min-height: 144px;
-            }
-            #display {
-                font-size: 2rem;
-            }
+        .history-box {
+            position: absolute; inset: 0;
+            background: white; z-index: 100; display: none; flex-direction: column; padding: 20px;
+            padding-top: env(safe-area-inset-top);
         }
-
-        @media (min-width: 381px) and (max-width: 450px) {
-            .calculator {
-                max-width: 380px;
-                padding: 12px 10px 16px;
-            }
-            .btn {
-                font-size: 2rem;
-                min-height: 85px;
-            }
-            .btn.plus-long {
-                min-height: 174px;
-            }
-            #display {
-                font-size: 2.2rem;
-                min-height: 2.8rem;
-            }
-            #targetInput {
-                font-size: 1.8rem;
-            }
-            .target-label {
-                font-size: 0.9rem;
-            }
-            .message-area {
-                font-size: 1rem;
-                min-height: 2.2rem;
-            }
-        }
-
-        @media (min-width: 451px) and (max-width: 599px) {
-            .calculator {
-                max-width: 420px;
-                padding: 15px 12px 20px;
-                border-radius: 50px;
-            }
-            .btn {
-                font-size: 2.2rem;
-                min-height: 95px;
-                border-radius: 25px;
-            }
-            .btn.plus-long {
-                min-height: 194px;
-            }
-            #display {
-                font-size: 2.5rem;
-                min-height: 3.2rem;
-            }
-            #targetInput {
-                font-size: 2rem;
-            }
-            .target-label {
-                font-size: 1rem;
-            }
-            .message-area {
-                font-size: 1.1rem;
-                min-height: 2.5rem;
-                padding: 6px 10px;
-            }
-            .backspace-btn {
-                font-size: 1.8rem;
-                min-width: 50px;
-                min-height: 50px;
-            }
-        }
-
-        @media (min-width: 600px) and (max-width: 800px) {
-            .calculator {
-                max-width: 500px;
-                padding: 20px 15px 25px;
-            }
-            .btn {
-                font-size: 2.5rem;
-                min-height: 110px;
-            }
-            .btn.plus-long {
-                min-height: 224px;
-            }
-        }
-
-        @media (min-width: 801px) {
-            .calculator {
-                max-width: 550px;
-                padding: 25px 20px 30px;
-                border-radius: 60px;
-            }
-            .btn {
-                font-size: 2.8rem;
-                min-height: 120px;
-                border-radius: 30px;
-            }
-            .btn.plus-long {
-                min-height: 244px;
-            }
-            #display {
-                font-size: 3rem;
-                min-height: 3.8rem;
-            }
-            #targetInput {
-                font-size: 2.5rem;
-            }
-        }
-
-        /* Hỗ trợ safe area */
-        @supports (padding: max(0px)) {
-            .calculator {
-                padding-left: max(8px, env(safe-area-inset-left));
-                padding-right: max(8px, env(safe-area-inset-right));
-                padding-bottom: max(14px, env(safe-area-inset-bottom));
-            }
-        }
-
-        /* Tối ưu OLED */
-        @media (display-mode: browser) {
-            .calculator {
-                background: #1a242e;
-            }
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-        }
-
-        /* ===== MODAL LỊCH SỬ ===== */
-        .history-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(3px);
-        }
-
-        .history-modal.show {
-            display: flex;
-        }
-
-        .history-content {
-            background: #1f2a34;
-            border-radius: 30px;
-            padding: 20px;
-            max-width: 90%;
-            width: 320px;
-            max-height: 70vh;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.1);
-            border: 1px solid #4a6572;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .history-title {
-            color: #ffde9e;
-            font-size: 1.3rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 15px;
-            text-shadow: 0 0 8px #ffb347;
-        }
-
-        .history-list {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            max-height: 40vh;
-            padding: 5px;
-            background: #121b22;
-            border-radius: 16px;
-            border: 1px solid #3e5a68;
-        }
-
-        .history-item {
-            background: #1e282f;
-            color: #b0e0ff;
-            padding: 8px 12px;
-            margin: 5px 0;
-            border-radius: 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            word-break: break-all;
-            border: 1px solid #3f5563;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-        }
-
-        .history-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .history-clear-btn {
-            background: #5f4c4c;
-            border: none;
-            color: #ffe1c6;
-            font-size: 1.2rem;
-            padding: 10px;
-            border-radius: 40px;
-            font-weight: bold;
-            box-shadow: 0 4px 0 #3a2e2e;
-            cursor: pointer;
-            transition: 0.05s linear;
-            border: 1px solid #9b7a7a;
-        }
-        .history-clear-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #3a2e2e;
-        }
-
-        .history-close-btn {
-            margin-top: 10px;
-            background: #2c3e4c;
-            color: white;
-            border: none;
-            padding: 8px;
-            border-radius: 40px;
-            font-size: 1rem;
-            cursor: pointer;
-            border: 1px solid #4a6572;
-        }
-
-        /* Indicator */
-        .editing-indicator {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ffaa00;
-            color: #1a1a1a;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(255, 170, 0, 0.5);
-            z-index: 1000;
-            animation: slideDown 0.3s ease;
-            display: none;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
-        @keyframes slideDown {
-            from { transform: translate(-50%, -100%); }
-            to { transform: translate(-50%, 0); }
-        }
-
-        .editing-indicator.show {
-            display: block;
-        }
+        .history-list { flex: 1; overflow-y: auto; }
+        .history-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        #expression::-webkit-scrollbar { width: 0; background: transparent; }
+        .active-target { background: #e3f2fd !important; }
     </style>
 </head>
-<body>
-    <div class="calculator">
-        <div class="display-area">
-            <div class="main-screen">
-                <div id="display">0</div>
-                <button class="backspace-btn" id="backspaceBtn" tabindex="-1">⌫</button>
-            </div>
-            <div class="target-row">
-                <span class="target-label">Số Kiểm Tra</span>
-                <input type="text" id="targetInput" placeholder="0" inputmode="none" readonly>
-            </div>
-            <!-- Message area với icon lịch sử -->
-            <div class="message-area" id="messageBox">
-                <span class="message-text" id="messageText"></span>
-                <span class="history-icon" id="historyIcon">🕒</span>
-            </div>
+<body oncontextmenu="return false;">
+
+<div class="clevcalc-container">
+    <div id="historyBox" class="history-box">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <b style="color:var(--accent)">LỊCH SỬ</b>
+            <span id="closeHistory" style="font-size: 1.5rem; cursor:pointer; padding: 10px;">✖</span>
         </div>
+        <div id="historyList" class="history-list"></div>
+        <button id="clearHistoryBtn" style="height:50px; background:#f2f2f2; font-size:1rem; border-radius: 8px;">Xóa lịch sử</button>
+    </div>
 
-        <!-- Các nút bấm - Layout mới -->
-        <div class="buttons">
-            <!-- Hàng 1: C, (), %, × -->
-            <button class="btn clear" id="clear" tabindex="-1">C</button>
-            <button class="btn operator" id="brackets" tabindex="-1">( )</button>
-            <button class="btn operator" id="percent" tabindex="-1">%</button>
-            <button class="btn operator" id="multiply" tabindex="-1">×</button>
-
-            <!-- Hàng 2: 7, 8, 9, − -->
-            <button class="btn" id="7" tabindex="-1">7</button>
-            <button class="btn" id="8" tabindex="-1">8</button>
-            <button class="btn" id="9" tabindex="-1">9</button>
-            <button class="btn operator" id="subtract" tabindex="-1">−</button>
-
-            <!-- Hàng 3: 4, 5, 6, + (dài 2 hàng) -->
-            <button class="btn" id="4" tabindex="-1">4</button>
-            <button class="btn" id="5" tabindex="-1">5</button>
-            <button class="btn" id="6" tabindex="-1">6</button>
-            <button class="btn operator plus-long" id="add" tabindex="-1">+</button>
-
-            <!-- Hàng 4: 1, 2, 3 (cột 4 trống) -->
-            <button class="btn" id="1" tabindex="-1">1</button>
-            <button class="btn" id="2" tabindex="-1">2</button>
-            <button class="btn" id="3" tabindex="-1">3</button>
-            <!-- Ô trống hàng 4 cột 4 (do nút + chiếm) -->
-
-            <!-- Hàng 5: 0, 00, ., = -->
-            <button class="btn" id="0" tabindex="-1">0</button>
-            <button class="btn" id="00" tabindex="-1">00</button>
-            <button class="btn operator" id="dot" tabindex="-1">.</button>
-            <button class="btn equals" id="equals" tabindex="-1">=</button>
+    <div class="display-screen">
+        <div id="expression"></div>
+        <div id="result-preview">0</div>
+        <div id="comparison-msg"></div>
+        <div class="target-area">
+            <div class="history-btn" id="openHistory">🕒</div>
+            <div id="target-box" style="display:flex; align-items:center; flex:1; height:100%">
+                <span class="target-label">KIỂM TRA:</span>
+                <div id="target-display">0</div>
+            </div>
         </div>
     </div>
 
-    <!-- Modal lịch sử -->
-    <div class="history-modal" id="historyModal">
-        <div class="history-content">
-            <div class="history-title">📜 Lịch sử tính toán</div>
-            <div class="history-list" id="historyList"></div>
-            <button class="history-clear-btn" id="clearHistoryBtn">🗑️ Xóa tất cả</button>
-            <button class="history-close-btn" id="closeHistoryBtn">Đóng</button>
-        </div>
+    <div class="keypad">
+        <button class="btn-clear" data-val="C">C</button>
+        <button class="btn-func" data-val="()">()</button>
+        <button class="btn-func" data-val="%">%</button>
+        <button class="btn-op" data-val="-">−</button>
+        <button data-val="7">7</button>
+        <button data-val="8">8</button>
+        <button data-val="9">9</button>
+        <button class="btn-op" data-val="*">×</button>
+        <button data-val="4">4</button>
+        <button data-val="5">5</button>
+        <button data-val="6">6</button>
+        <button class="btn-op btn-plus" data-val="+">+</button>
+        <button data-val="1">1</button>
+        <button data-val="2">2</button>
+        <button data-val="3">3</button>
+        <button data-val="back">⌫</button>
+        <button data-val="0">0</button>
+        <button data-val=".">,</button>
+        <button class="btn-equal" data-val="=">=</button>
     </div>
+</div>
 
-    <!-- Indicator -->
-    <div class="editing-indicator" id="editingIndicator">📝 ĐANG NHẬP SỐ KIỂM TRA</div>
+<script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        if (type === 'click') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } else if (type === 'success') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+        } else if (type === 'fail') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        }
+    }
 
-    <!-- MỘT SCRIPT DUY NHẤT - TÍCH HỢP ĐẦY ĐỦ -->
-    <script>
-        (function() {
-            "use strict";
+    let historyExpr = "";
+    let targetInput = "";
+    let isTargetMode = false;
+    let calculationHistory = [];
 
-            // ===== LẤY ELEMENTS =====
-            const mainDisplay = document.getElementById('display');
-            const targetInput = document.getElementById('targetInput');
-            const targetRow = document.querySelector('.target-row');
-            const messageBox = document.getElementById('messageBox');
-            const messageText = document.getElementById('messageText');
-            const backspaceBtn = document.getElementById('backspaceBtn');
-            const clearBtn = document.getElementById('clear');
-            const equalsBtn = document.getElementById('equals');
-            const indicator = document.getElementById('editingIndicator');
-            const historyIcon = document.getElementById('historyIcon');
-            const historyModal = document.getElementById('historyModal');
-            const historyList = document.getElementById('historyList');
-            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-            const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+    const exprDiv = document.getElementById('expression');
+    const resDiv = document.getElementById('result-preview');
+    const targetDiv = document.getElementById('target-display');
+    const targetBox = document.getElementById('target-box');
+    const msgDiv = document.getElementById('comparison-msg');
+    const hBox = document.getElementById('historyBox');
+    const hList = document.getElementById('historyList');
 
-            // ===== BIẾN TRẠNG THÁI MÁY TÍNH =====
-            let currentInput = '0';
-            let previousInput = '';
-            let operator = null;
-            let shouldResetDisplay = false;
-            let lastResult = null;
+    const buttons = document.querySelectorAll('button[data-val]');
+    buttons.forEach(btn => {
+        const handleAction = (e) => {
+            e.preventDefault();
+            playSound('click');
+            btn.classList.add('pressed');
+            const val = btn.getAttribute('data-val');
+            if (val === 'C') clearAll();
+            else if (val === '()') smartParenthesis();
+            else if (val === '%') applyPercent();
+            else if (val === '-') addOp('-');
+            else if (val === '*') addOp('*');
+            else if (val === '+') addOp('+');
+            else if (val === 'back') backspace();
+            else if (val === '=') calculate();
+            else if (val === '.') handleInput('.');
+            else handleInput(val);
+            setTimeout(() => btn.classList.remove('pressed'), 100);
+        };
+        btn.addEventListener('touchstart', handleAction, {passive: false});
+        btn.addEventListener('mousedown', (e) => { if(e.button === 0) handleAction(e); });
+    });
 
-            // ===== BIẾN TRẠNG THÁI CHO CHẾ ĐỘ NHẬP SỐ KIỂM TRA =====
-            let isEditingTarget = false;
-            let tempTargetValue = '';
+    document.getElementById('openHistory').addEventListener('touchstart', (e) => { e.preventDefault(); toggleHistory(); });
+    document.getElementById('closeHistory').addEventListener('touchstart', (e) => { e.preventDefault(); toggleHistory(); });
+    document.getElementById('clearHistoryBtn').addEventListener('touchstart', (e) => { e.preventDefault(); clearHistory(); });
+    targetBox.addEventListener('touchstart', (e) => { e.preventDefault(); toggleTargetMode(); });
 
-            // ===== LỊCH SỬ =====
-            let history = [];  // Mảng lưu các chuỗi biểu thức đã format
-            const MAX_HISTORY = 30;
+    document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-            // ===== CÁC HẰNG SỐ =====
-            const MAX_INTEGER_LENGTH = 12;
-            const MAX_DECIMAL_LENGTH = 4;
+    function formatNumber(val) {
+        if (!val && val !== 0) return "";
+        let s = val.toString();
+        let parts = s.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return parts.length > 1 ? parts[0] + "," + parts[1] : parts[0];
+    }
 
-            // ===== HÀM TIỆN ÍCH CHUNG =====
-            function flashButton(btn) {
-                if (!btn) return;
-                btn.classList.add('led-flash');
-                setTimeout(() => {
-                    btn.classList.remove('led-flash');
-                }, 80);
-            }
+    function toggleHistory() { hBox.style.display = hBox.style.display === 'flex' ? 'none' : 'flex'; renderHistory(); }
+    function renderHistory() {
+        hList.innerHTML = calculationHistory.map(item => `
+            <div class="history-item">
+                <div style="color:#7f8c8d; font-size:0.9rem">${item.expr} =</div>
+                <div style="font-weight:bold; text-align:right; font-size:1.2rem">${formatNumber(item.res)}</div>
+            </div>
+        `).reverse().join('');
+    }
+    function clearHistory() { calculationHistory = []; renderHistory(); }
 
-            // Thêm style cho flash display
-            const style = document.createElement('style');
-            style.textContent = `
-                .led-flash-display {
-                    text-shadow: 0 0 20px #7df9ff !important;
-                }
-            `;
-            document.head.appendChild(style);
+    function toggleTargetMode() {
+        isTargetMode = !isTargetMode;
+        document.querySelector('.target-area').classList.toggle('active-target', isTargetMode);
+        msgDiv.innerText = isTargetMode ? "Đang nhập Số kiểm tra..." : "";
+    }
 
-            // ===== CÁC HÀM XỬ LÝ SỐ (Máy tính) =====
-            function limitNumberLength(numStr) {
-                let parts = numStr.split('.');
-                let intPart = parts[0];
-                if (intPart.length > MAX_INTEGER_LENGTH) {
-                    intPart = intPart.slice(0, MAX_INTEGER_LENGTH);
-                }
-                let decimalPart = parts[1] || '';
-                if (decimalPart.length > MAX_DECIMAL_LENGTH) {
-                    decimalPart = decimalPart.slice(0, MAX_DECIMAL_LENGTH);
-                }
-                if (parts.length > 1) {
-                    return intPart + '.' + decimalPart;
+    function renderDisplay() {
+        if (!isTargetMode) {
+            let displayStr = historyExpr.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ').replace(/\+/g, ' + ').replace(/\-/g, ' − ');
+            displayStr = displayStr.replace(/(\d+(\.\d+)?)/g, (match) => formatNumber(match));
+            exprDiv.innerText = displayStr;
+            const len = exprDiv.innerText.length;
+            if (len > 40) exprDiv.style.fontSize = "1.2rem";
+            else if (len > 20) exprDiv.style.fontSize = "1.6rem";
+            else exprDiv.style.fontSize = "2.2rem";
+            setTimeout(() => { exprDiv.scrollTop = exprDiv.scrollHeight; }, 10);
+            // KHÔNG CUỘN DÒNG KẾT QUẢ NỮA
+        }
+        targetDiv.innerText = formatNumber(targetInput) || "0";
+    }
+
+    function handleInput(n) {
+        if (isTargetMode) { if (n === '.' && targetInput.includes('.')) return; targetInput += n; }
+        else { historyExpr += n; autoPreview(); }
+        renderDisplay();
+    }
+
+    function smartParenthesis() {
+        if (isTargetMode) return;
+        let open = (historyExpr.match(/\(/g) || []).length;
+        let close = (historyExpr.match(/\)/g) || []).length;
+        const last = historyExpr.slice(-1);
+        if (open > close && !['+','-','*','/','('].includes(last)) historyExpr += ")";
+        else historyExpr += "(";
+        renderDisplay(); autoPreview();
+    }
+
+    function addOp(op) {
+        if (isTargetMode) { isTargetMode = false; document.querySelector('.target-area').classList.remove('active-target'); }
+        const last = historyExpr.slice(-1);
+        if (['+','-','*','/'].includes(last)) historyExpr = historyExpr.slice(0, -1) + op;
+        else if (historyExpr !== "" || op === '-') historyExpr += op;
+        renderDisplay();
+    }
+
+    function applyPercent() {
+        if (isTargetMode) return;
+        try {
+            let parts = historyExpr.split(/([\+\-\*\/])/);
+            let lastPart = parts.pop();
+            let op = parts.pop();
+            let base = eval(parts.join("") || "0");
+            let val = (op === '+' || op === '-') ? base * (parseFloat(lastPart) / 100) : parseFloat(lastPart) / 100;
+            historyExpr = parts.join("") + (op || "") + val;
+            renderDisplay(); autoPreview();
+        } catch(e) {}
+    }
+
+    function autoPreview() {
+        try {
+            let temp = historyExpr;
+            if (!temp) { resDiv.innerText = "0"; return; }
+            while (['+','-','*','/','('].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
+            if (!temp) return;
+            let open = (temp.match(/\(/g) || []).length;
+            let close = (temp.match(/\)/g) || []).length;
+            if (open > close) temp += ")".repeat(open - close);
+            resDiv.innerText = formatNumber(Math.round(eval(temp) * 1000000) / 1000000);
+        } catch(e) {}
+    }
+
+    function calculate() {
+        if (isTargetMode) { isTargetMode = false; document.querySelector('.target-area').classList.remove('active-target'); return; }
+        try {
+            let temp = historyExpr;
+            if (!temp) return;
+            while (['+','-','*','/','(','.'].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
+            if (!temp) return;
+            let open = (temp.match(/\(/g) || []).length;
+            let close = (temp.match(/\)/g) || []).length;
+            if (open > close) temp += ")".repeat(open - close);
+            let res = eval(temp);
+            let finalRes = Math.round(res * 1000000) / 1000000;
+            calculationHistory.push({ expr: exprDiv.innerText, res: finalRes });
+            resDiv.innerText = formatNumber(finalRes);
+            if (targetInput !== "") {
+                msgDiv.classList.remove('shake');
+                void msgDiv.offsetWidth;
+                if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
+                    msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.style.color = "var(--accent)";
+                    playSound('success');
                 } else {
-                    return intPart;
+                    msgDiv.innerText = `❌ LỆCH: ${formatNumber(Math.round((finalRes - parseFloat(targetInput)) * 100) / 100)}`;
+                    msgDiv.style.color = "var(--danger)"; msgDiv.classList.add('shake');
+                    playSound('fail');
                 }
             }
+            historyExpr = finalRes.toString(); exprDiv.innerText = "";
+        } catch(e) { resDiv.innerText = "Lỗi"; }
+    }
 
-            function formatNumber(num) {
-                if (num === null || num === undefined || num === '') return '0';
-                let rounded = Math.round(num * 1e10) / 1e10;
-                let parts = rounded.toString().split('.');
-                let intPart = parts[0];
-                if (intPart.length > MAX_INTEGER_LENGTH) {
-                    intPart = intPart.slice(0, MAX_INTEGER_LENGTH);
-                }
-                intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                let decimalPart = parts[1] || '';
-                if (decimalPart.length > MAX_DECIMAL_LENGTH) {
-                    decimalPart = decimalPart.slice(0, MAX_DECIMAL_LENGTH);
-                }
-                return decimalPart ? intPart + ',' + decimalPart : intPart;
-            }
+    function clearAll() {
+        if (isTargetMode) targetInput = "";
+        else { historyExpr = ""; targetInput = ""; msgDiv.innerText = ""; }
+        resDiv.innerText = "0"; renderDisplay();
+    }
 
-            function formatInputForDisplay(str) {
-                if (str === '') return '0';
-                let dotIndex = str.indexOf('.');
-                if (dotIndex === -1) {
-                    let intPart = str;
-                    if (intPart.length > MAX_INTEGER_LENGTH) {
-                        intPart = intPart.slice(0, MAX_INTEGER_LENGTH);
-                    }
-                    return intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                } else {
-                    let intPart = str.substring(0, dotIndex);
-                    let decimalPart = str.substring(dotIndex + 1);
-                    if (intPart.length > MAX_INTEGER_LENGTH) {
-                        intPart = intPart.slice(0, MAX_INTEGER_LENGTH);
-                    }
-                    if (decimalPart.length > MAX_DECIMAL_LENGTH) {
-                        decimalPart = decimalPart.slice(0, MAX_DECIMAL_LENGTH);
-                    }
-                    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                    if (decimalPart === '') {
-                        return intPart + ',';
-                    } else {
-                        return intPart + ',' + decimalPart;
-                    }
-                }
-            }
-
-            function parseInputString(str) {
-                if (!str) return NaN;
-                let normalized = str.replace(/,/g, '.');
-                let cleaned = normalized.replace(/[^\d.]/g, '');
-                let parts = cleaned.split('.');
-                if (parts.length > 2) {
-                    let integerPart = parts.slice(0, -1).join('');
-                    let decimalPart = parts[parts.length - 1];
-                    cleaned = integerPart + '.' + decimalPart;
-                }
-                let dotIndex = cleaned.indexOf('.');
-                let integerPart = dotIndex === -1 ? cleaned : cleaned.substring(0, dotIndex);
-                let decimalPart = dotIndex === -1 ? '' : cleaned.substring(dotIndex + 1);
-                if (integerPart.length > MAX_INTEGER_LENGTH) {
-                    integerPart = integerPart.slice(0, MAX_INTEGER_LENGTH);
-                }
-                if (decimalPart.length > MAX_DECIMAL_LENGTH) {
-                    decimalPart = decimalPart.slice(0, MAX_DECIMAL_LENGTH);
-                }
-                let finalStr = integerPart + (decimalPart ? '.' + decimalPart : '');
-                return parseFloat(finalStr);
-            }
-
-            // ===== CẬP NHẬT MÀN HÌNH MÁY TÍNH =====
-            function updateDisplayInput() {
-                mainDisplay.textContent = formatInputForDisplay(currentInput);
-                mainDisplay.classList.add('led-flash-display');
-                setTimeout(() => {
-                    mainDisplay.classList.remove('led-flash-display');
-                }, 100);
-                mainDisplay.scrollTop = mainDisplay.scrollHeight;
-            }
-
-            function updateDisplayFormatted(value) {
-                let num = parseFloat(value);
-                if (isNaN(num)) num = 0;
-                mainDisplay.textContent = formatNumber(num);
-                mainDisplay.classList.add('led-flash-display');
-                setTimeout(() => {
-                    mainDisplay.classList.remove('led-flash-display');
-                }, 100);
-                mainDisplay.scrollTop = mainDisplay.scrollHeight;
-            }
-
-            // ===== XỬ LÝ TÍNH TOÁN =====
-            function inputNumber(num) {
-                if (shouldResetDisplay) {
-                    currentInput = '';
-                    shouldResetDisplay = false;
-                }
-                if (num === '.') {
-                    if (currentInput.includes('.')) return;
-                    if (currentInput === '') currentInput = '0';
-                }
-                if (currentInput === '0' && num !== '.') {
-                    currentInput = num;
-                } else {
-                    currentInput += num;
-                }
-                currentInput = limitNumberLength(currentInput);
-                updateDisplayInput();
-            }
-
-            function handleOperator(op) {
-                if (operator && !shouldResetDisplay) {
-                    calculate();
-                }
-                previousInput = currentInput;
-                operator = op;
-                shouldResetDisplay = true;
-            }
-
-            function calculate() {
-                if (!operator || shouldResetDisplay) return;
-                let result;
-                const prev = parseFloat(previousInput);
-                const current = parseFloat(currentInput);
-                if (isNaN(prev) || isNaN(current)) return;
-                switch (operator) {
-                    case '+': result = prev + current; break;
-                    case '−': result = prev - current; break;
-                    case '×': result = prev * current; break;
-                    default: return;
-                }
-                // Tạo biểu thức đầy đủ cho lịch sử
-                const expression = formatNumber(prev) + operator + formatNumber(current) + '=' + formatNumber(result);
-                addHistory(expression);
-                
-                currentInput = limitNumberLength(result.toString());
-                lastResult = result;
-                operator = null;
-                previousInput = '';
-                updateDisplayFormatted(currentInput);
-                shouldResetDisplay = true;
-            }
-
-            function calculatePercent() {
-                if (!operator || previousInput === '' || shouldResetDisplay) return;
-                const prev = parseFloat(previousInput);
-                const current = parseFloat(currentInput);
-                if (isNaN(prev) || isNaN(current)) return;
-                let result;
-                switch (operator) {
-                    case '+': result = prev + (prev * current / 100); break;
-                    case '−': result = prev - (prev * current / 100); break;
-                    case '×': result = prev * (current / 100); break;
-                    default: return;
-                }
-                const expression = formatNumber(prev) + operator + formatNumber(current) + '%=' + formatNumber(result);
-                addHistory(expression);
-                
-                currentInput = limitNumberLength(result.toString());
-                lastResult = result;
-                operator = null;
-                previousInput = '';
-                updateDisplayFormatted(currentInput);
-                shouldResetDisplay = true;
-            }
-
-            function handlePercent() {
-                if (operator && previousInput !== '' && !shouldResetDisplay) {
-                    calculatePercent();
-                } else {
-                    if (currentInput !== '0') {
-                        let val = parseFloat(currentInput) / 100;
-                        currentInput = limitNumberLength(val.toString());
-                        updateDisplayFormatted(currentInput);
-                        shouldResetDisplay = true;
-                    }
-                }
-            }
-
-            function handleBrackets() {
-                // Tạm thời chưa xử lý ngoặc, có thể thêm sau
-                messageText.textContent = 'Chức năng đang phát triển';
-                messageBox.classList.add('error');
-                setTimeout(() => {
-                    messageText.textContent = '';
-                    messageBox.classList.remove('error');
-                }, 1000);
-            }
-
-            function clearAll() {
-                currentInput = '0';
-                previousInput = '';
-                operator = null;
-                shouldResetDisplay = false;
-                lastResult = null;
-                updateDisplayInput();
-                if (isEditingTarget) {
-                    exitTargetEditing();
-                } else {
-                    targetInput.value = '';
-                    delete targetInput.dataset.rawValue;
-                }
-                messageText.textContent = '';
-                messageBox.className = 'message-area';
-            }
-
-            function backspace() {
-                if (currentInput.length > 1) {
-                    currentInput = currentInput.slice(0, -1);
-                } else {
-                    currentInput = '0';
-                }
-                updateDisplayInput();
-            }
-
-            // ===== LỊCH SỬ =====
-            function addHistory(entry) {
-                history.unshift(entry); // Thêm vào đầu mảng (mới nhất lên trên)
-                if (history.length > MAX_HISTORY) {
-                    history.pop();
-                }
-                // Không tự động hiển thị modal
-            }
-
-            function renderHistory() {
-                historyList.innerHTML = '';
-                if (history.length === 0) {
-                    historyList.innerHTML = '<div class="history-item" style="color:#aaa; text-align:center;">Chưa có lịch sử</div>';
-                } else {
-                    history.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'history-item';
-                        div.textContent = item;
-                        historyList.appendChild(div);
-                    });
-                }
-            }
-
-            function showHistoryModal() {
-                renderHistory();
-                historyModal.classList.add('show');
-            }
-
-            function hideHistoryModal() {
-                historyModal.classList.remove('show');
-            }
-
-            function clearHistory() {
-                history = [];
-                renderHistory();
-            }
-
-            // ===== AUDIO =====
-            let audioContext = null;
-            function initAudioContext() {
-                if (audioContext) return audioContext;
-                try {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) {
-                    console.warn('Web Audio API không được hỗ trợ');
-                }
-                return audioContext;
-            }
-
-            function playSound(type) {
-                const ctx = initAudioContext();
-                if (!ctx) return;
-                if (ctx.state === 'suspended') ctx.resume();
-                const now = ctx.currentTime;
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                if (type === 'success') {
-                    osc.frequency.value = 880;
-                    gain.gain.setValueAtTime(0.5, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                    osc.start(now);
-                    osc.stop(now + 0.2);
-                } else {
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.exponentialRampToValueAtTime(160, now + 0.15);
-                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.3);
-                    gain.gain.setValueAtTime(0.6, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                    osc.start(now);
-                    osc.stop(now + 0.4);
-                }
-            }
-
-            function vibrateMessage() {
-                messageBox.classList.add('vibrate');
-                setTimeout(() => {
-                    messageBox.classList.remove('vibrate');
-                }, 300);
-            }
-
-            // ===== XỬ LÝ SỐ KIỂM TRA =====
-            function updateTargetInput() {
-                if (tempTargetValue.length > 15) {
-                    tempTargetValue = tempTargetValue.slice(0, 15);
-                }
-                targetInput.value = tempTargetValue;
-                if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                    targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-                } else {
-                    delete targetInput.dataset.rawValue;
-                }
-                targetInput.scrollLeft = targetInput.scrollWidth;
-            }
-
-            function exitTargetEditing() {
-                if (!isEditingTarget) return;
-                isEditingTarget = false;
-                targetInput.classList.remove('editing-mode');
-                indicator.classList.remove('show');
-                if (targetInput.dataset.rawValue) {
-                    targetInput.value = formatNumber(parseFloat(targetInput.dataset.rawValue));
-                } else {
-                    targetInput.value = '';
-                    delete targetInput.dataset.rawValue;
-                }
-                messageText.textContent = '';
-                messageBox.className = 'message-area';
-                if (navigator.vibrate) navigator.vibrate(10);
-            }
-
-            // ===== XỬ LÝ NÚT = (KIỂM TRA KẾT QUẢ) =====
-            function handleEquals() {
-                if (operator) calculate(); // calculate đã thêm lịch sử
-
-                const currentValue = parseFloat(currentInput);
-                let target = NaN;
-                if (targetInput.dataset.rawValue !== undefined) {
-                    target = parseFloat(targetInput.dataset.rawValue);
-                } else if (targetInput.value.trim() !== '') {
-                    target = parseInputString(targetInput.value);
-                }
-
-                if (!isNaN(target)) {
-                    const diff = currentValue - target;
-                    if (Math.abs(diff) < 1e-10) {
-                        messageText.textContent = '✅ Chính xác!';
-                        messageBox.className = 'message-area success';
-                        playSound('success');
-                    } else {
-                        const sign = diff > 0 ? '+' : '';
-                        messageText.textContent = `❌ Sai. Đúng: ${formatNumber(target)} (${sign}${formatNumber(diff)})`;
-                        messageBox.className = 'message-area error';
-                        playSound('error');
-                    }
-                    vibrateMessage();
-                } else {
-                    messageText.textContent = targetInput.value ? 'Nhập số TK hợp lệ!' : '';
-                    messageBox.className = 'message-area';
-                }
-            }
-
-            // ===== XỬ LÝ SỰ KIỆN NHẤN NÚT =====
-            function handleButtonPress(e, callback) {
-                e.preventDefault();
-                e.stopPropagation();
-                targetInput.blur();
-                if (callback) callback();
-            }
-
-            // ===== GẮN SỰ KIỆN =====
-            // Target row
-            targetRow.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isEditingTarget) {
-                    isEditingTarget = true;
-                    targetInput.classList.add('editing-mode');
-                    indicator.classList.add('show');
-                    let currentVal = targetInput.dataset.rawValue || '';
-                    tempTargetValue = currentVal ? currentVal.toString() : '';
-                    targetInput.value = tempTargetValue || '0';
-                    messageText.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
-                    messageBox.className = 'message-area';
-                    if (navigator.vibrate) navigator.vibrate(20);
-                }
-            }, true);
-
-            // Nhấn ra ngoài thoát edit
-            document.addEventListener('click', function(e) {
-                if (isEditingTarget && 
-                    !e.target.closest('.target-row') && 
-                    !e.target.closest('.btn')) {
-                    exitTargetEditing();
-                }
-            }, true);
-
-            // Các nút
-            const allButtons = document.querySelectorAll('.btn');
-            allButtons.forEach(btn => {
-                btn.addEventListener('pointerdown', (e) => {
-                    if (isEditingTarget) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        flashButton(btn);
-                        const id = btn.id;
-                        
-                        if (id.match(/^\d+$/)) {
-                            tempTargetValue += id;
-                            updateTargetInput();
-                        }
-                        else if (id === '00') {
-                            tempTargetValue += '00';
-                            updateTargetInput();
-                        }
-                        else if (id === 'dot') {
-                            if (!tempTargetValue.includes('.')) {
-                                if (tempTargetValue === '') {
-                                    tempTargetValue = '0.';
-                                } else {
-                                    tempTargetValue += '.';
-                                }
-                                updateTargetInput();
-                            }
-                        }
-                        else if (id === 'clear') {
-                            tempTargetValue = '';
-                            targetInput.value = '0';
-                            delete targetInput.dataset.rawValue;
-                        }
-                        else if (id === 'backspaceBtn') {
-                            if (tempTargetValue.length > 0) {
-                                tempTargetValue = tempTargetValue.slice(0, -1);
-                                targetInput.value = tempTargetValue || '0';
-                                if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                                    targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-                                } else {
-                                    delete targetInput.dataset.rawValue;
-                                }
-                            }
-                        }
-                        else if (id === 'equals') {
-                            exitTargetEditing();
-                            setTimeout(() => handleEquals(), 100);
-                        }
-                        else if (id === 'brackets') {
-                            messageText.textContent = '⚠️ Không dùng ngoặc khi nhập số kiểm tra';
-                            messageBox.className = 'message-area error';
-                            setTimeout(() => {
-                                if (isEditingTarget) {
-                                    messageText.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
-                                    messageBox.className = 'message-area';
-                                }
-                            }, 1500);
-                        }
-                        else if (id === 'add' || id === 'subtract' || id === 'multiply' || id === 'percent') {
-                            messageText.textContent = '⚠️ Không dùng toán tử khi nhập số kiểm tra';
-                            messageBox.className = 'message-area error';
-                            setTimeout(() => {
-                                if (isEditingTarget) {
-                                    messageText.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
-                                    messageBox.className = 'message-area';
-                                }
-                            }, 1500);
-                        }
-                        return;
-                    }
-
-                    // Chế độ máy tính bình thường
-                    handleButtonPress(e, () => {
-                        flashButton(btn);
-                        const id = btn.id;
-
-                        if (id.match(/^\d+$/) || id === '00' || id === 'dot') {
-                            if (id === 'dot') inputNumber('.');
-                            else if (id === '00') {
-                                if (shouldResetDisplay) {
-                                    currentInput = '';
-                                    shouldResetDisplay = false;
-                                }
-                                if (currentInput === '0') {
-                                    currentInput = '00';
-                                } else {
-                                    currentInput += '00';
-                                }
-                                currentInput = limitNumberLength(currentInput);
-                                updateDisplayInput();
-                            } else inputNumber(id);
-                        }
-                        else if (id === 'add') handleOperator('+');
-                        else if (id === 'subtract') handleOperator('−');
-                        else if (id === 'multiply') handleOperator('×');
-                        else if (id === 'percent') handlePercent();
-                        else if (id === 'brackets') handleBrackets();
-                        else if (id === 'clear') clearAll();
-                        else if (id === 'equals') handleEquals();
-                    });
-                });
-            });
-
-            // Backspace riêng
-            backspaceBtn.addEventListener('pointerdown', (e) => {
-                if (isEditingTarget) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    flashButton(backspaceBtn);
-                    if (tempTargetValue.length > 0) {
-                        tempTargetValue = tempTargetValue.slice(0, -1);
-                        targetInput.value = tempTargetValue || '0';
-                        if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                            targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-                        } else {
-                            delete targetInput.dataset.rawValue;
-                        }
-                    }
-                    return;
-                }
-                handleButtonPress(e, () => {
-                    flashButton(backspaceBtn);
-                    backspace();
-                });
-            });
-
-            // Lịch sử
-            historyIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showHistoryModal();
-            });
-
-            closeHistoryBtn.addEventListener('click', hideHistoryModal);
-            clearHistoryBtn.addEventListener('click', () => {
-                clearHistory();
-            });
-
-            // Click ra ngoài modal để đóng
-            historyModal.addEventListener('click', (e) => {
-                if (e.target === historyModal) {
-                    hideHistoryModal();
-                }
-            });
-
-            // Xử lý phím tắt
-            window.addEventListener('keydown', (e) => {
-                const key = e.key;
-                if (isEditingTarget) {
-                    e.preventDefault();
-                    if (key >= '0' && key <= '9') {
-                        tempTargetValue += key;
-                        updateTargetInput();
-                        const btn = document.getElementById(key);
-                        if (btn) flashButton(btn);
-                    }
-                    else if (key === '.') {
-                        if (!tempTargetValue.includes('.')) {
-                            if (tempTargetValue === '') {
-                                tempTargetValue = '0.';
-                            } else {
-                                tempTargetValue += '.';
-                            }
-                            updateTargetInput();
-                        }
-                        const btn = document.getElementById('dot');
-                        if (btn) flashButton(btn);
-                    }
-                    else if (key === 'Backspace') {
-                        if (tempTargetValue.length > 0) {
-                            tempTargetValue = tempTargetValue.slice(0, -1);
-                            targetInput.value = tempTargetValue || '0';
-                            if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                                targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-                            } else {
-                                delete targetInput.dataset.rawValue;
-                            }
-                        }
-                        flashButton(backspaceBtn);
-                    }
-                    else if (key === 'Escape') {
-                        exitTargetEditing();
-                    }
-                    else if (key === 'Enter') {
-                        exitTargetEditing();
-                        setTimeout(() => handleEquals(), 100);
-                    }
-                    return;
-                }
-
-                if (document.activeElement === targetInput) {
-                    if (key === 'Enter') {
-                        e.preventDefault();
-                        handleEquals();
-                    }
-                    return;
-                }
-
-                e.preventDefault();
-                if (key >= '0' && key <= '9') {
-                    inputNumber(key);
-                    flashButton(document.getElementById(key));
-                }
-                else if (key === '.') {
-                    inputNumber('.');
-                    flashButton(document.getElementById('dot'));
-                }
-                else if (key === '+') {
-                    handleOperator('+');
-                    flashButton(document.getElementById('add'));
-                }
-                else if (key === '-') {
-                    handleOperator('−');
-                    flashButton(document.getElementById('subtract'));
-                }
-                else if (key === '*') {
-                    handleOperator('×');
-                    flashButton(document.getElementById('multiply'));
-                }
-                else if (key === '%') {
-                    handlePercent();
-                    flashButton(document.getElementById('percent'));
-                }
-                else if (key === '(' || key === ')') {
-                    handleBrackets();
-                    flashButton(document.getElementById('brackets'));
-                }
-                else if (key === 'Enter' || key === '=') {
-                    e.preventDefault();
-                    handleEquals();
-                }
-                else if (key === 'Escape') {
-                    clearAll();
-                    flashButton(document.getElementById('clear'));
-                }
-                else if (key === 'Backspace') {
-                    e.preventDefault();
-                    backspace();
-                    flashButton(backspaceBtn);
-                }
-            });
-
-            // Khởi tạo
-            clearAll();
-        })();
-    </script>
+    function backspace() {
+        if (isTargetMode) targetInput = targetInput.slice(0, -1);
+        else { historyExpr = historyExpr.slice(0, -1); autoPreview(); }
+        renderDisplay();
+    }
+</script>
 </body>
-</html>
+            </html>
