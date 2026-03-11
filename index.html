@@ -5,525 +5,524 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Máy tính kiểm tra kết quả</title>
     <style>
-       /* ===== CHỐNG CUỘN TOÀN TRANG ===== */
-html, body {
-    height: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
-}
+        /* (Giữ nguyên toàn bộ CSS từ file gốc) */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
 
-body {
-    font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-    background: linear-gradient(145deg, #2b3a4a 0%, #1d2a35 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    touch-action: manipulation;
-}
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #2b3a4a 0%, #1d2a35 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
 
-.calculator {
-    width: 100%;
-    max-width: 340px;                 /* Giữ chiều rộng vừa phải */
-    background: #1f2a34;
-    border-radius: 40px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.1);
-    padding: 10px 8px 14px;            /* Giảm padding dọc */
-    margin: 4px;                       /* Giữ một chút không gian viền */
-    will-change: transform;
-    -webkit-touch-callout: none;
-    user-select: none;
-    display: flex;
-    flex-direction: column;
-    max-height: 98vh;                  /* Không chiếm quá 98% viewport */
-    overflow: hidden;
-}
+        .calculator {
+            width: 100%;
+            max-width: 340px;
+            background: #1f2a34;
+            border-radius: 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.1);
+            padding: 10px 8px 14px;
+            margin: 4px;
+            will-change: transform;
+            -webkit-touch-callout: none;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            max-height: 98vh;
+            overflow: hidden;
+        }
 
-.display-area {
-    background: #1e282f;
-    border-radius: 24px;
-    padding: 8px 8px 6px;              /* Giảm padding dọc */
-    margin-bottom: 8px;                 /* Giảm khoảng cách */
-    box-shadow: inset 0 5px 10px rgba(0,0,0,0.6), 0 2px 5px rgba(255,255,255,0.05);
-    border: 1px solid #3a4a55;
-    flex-shrink: 0;
-}
+        .display-area {
+            background: #1e282f;
+            border-radius: 24px;
+            padding: 8px 8px 6px;
+            margin-bottom: 8px;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.6), 0 2px 5px rgba(255,255,255,0.05);
+            border: 1px solid #3a4a55;
+            flex-shrink: 0;
+        }
 
-.main-screen {
-    background: #121b22;
-    border-radius: 16px;
-    padding: 4px 8px;                   /* Giảm padding dọc */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
-    border: 1px solid #3e5a68;
-    margin-bottom: 6px;                  /* Giảm margin */
-}
+        .main-screen {
+            background: #121b22;
+            border-radius: 16px;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+            border: 1px solid #3e5a68;
+            margin-bottom: 6px;
+        }
 
-#display {
-    font-size: 1.8rem;                   /* Giảm cỡ chữ */
-    font-weight: 300;
-    color: #b0e0ff;
-    text-shadow: 0 0 12px #4aa3ff;
-    letter-spacing: 1px;
-    flex: 1;
-    text-align: right;
-    font-family: 'Courier New', monospace;
-    transition: text-shadow 0.1s ease;
-    min-height: 2.2rem;                  /* Giảm chiều cao tối thiểu */
-    max-height: 4rem;
-    overflow-y: auto;
-    word-break: break-all;
-    white-space: pre-wrap;
-    line-height: 1.2;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-#display::-webkit-scrollbar {
-    display: none;
-}
+        #display {
+            font-size: 1.8rem;
+            font-weight: 300;
+            color: #b0e0ff;
+            text-shadow: 0 0 12px #4aa3ff;
+            letter-spacing: 1px;
+            flex: 1;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            transition: text-shadow 0.1s ease;
+            min-height: 2.2rem;
+            max-height: 4rem;
+            overflow-y: auto;
+            word-break: break-all;
+            white-space: pre-wrap;
+            line-height: 1.2;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        #display::-webkit-scrollbar {
+            display: none;
+        }
 
-.backspace-btn {
-    background: transparent;
-    border: none;
-    color: #a0c0d0;
-    font-size: 1.5rem;                   /* Giảm cỡ chữ */
-    cursor: pointer;
-    padding: 0 4px;
-    transition: opacity 0.1s, transform 0.1s;
-    line-height: 1;
-    text-shadow: 0 0 8px #4aa3ff;
-    opacity: 0.8;
-    min-width: 40px;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    tab-index: -1;
-}
-.backspace-btn:active {
-    opacity: 1;
-    transform: scale(1.1);
-    color: #ffaa00;
-}
+        .backspace-btn {
+            background: transparent;
+            border: none;
+            color: #a0c0d0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: opacity 0.1s, transform 0.1s;
+            line-height: 1;
+            text-shadow: 0 0 8px #4aa3ff;
+            opacity: 0.8;
+            min-width: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .backspace-btn:active {
+            opacity: 1;
+            transform: scale(1.1);
+            color: #ffaa00;
+        }
 
-.target-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #121b22;
-    border-radius: 14px;
-    padding: 4px 8px;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
-    border: 1px solid #3e5a68;
-}
+        .target-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #121b22;
+            border-radius: 14px;
+            padding: 4px 8px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+            border: 1px solid #3e5a68;
+            cursor: pointer; /* Thêm cursor pointer để người dùng biết có thể nhấn */
+        }
 
-.target-label {
-    color: #aabbcc;
-    font-size: 0.8rem;                   /* Giảm cỡ chữ */
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    opacity: 0.8;
-    white-space: nowrap;
-    pointer-events: none;
-}
+        .target-label {
+            color: #aabbcc;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            white-space: nowrap;
+            pointer-events: none;
+        }
 
-#targetInput {
-    flex: 1;
-    background: transparent;
-    border: none;
-    font-size: 1.4rem;                   /* Giảm cỡ chữ */
-    font-weight: 300;
-    color: #ffde9e;
-    text-shadow: 0 0 10px #ffb347;
-    text-align: right;
-    font-family: 'Courier New', monospace;
-    outline: none;
-    padding: 4px 0;
-    min-width: 0;
-    -webkit-user-select: text;
-    user-select: text;
-    -webkit-appearance: none;
-    appearance: none;
-    /* THÊM: con trỏ pointer để biết có thể nhấn */
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-#targetInput::-webkit-outer-spin-button,
-#targetInput::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
+        #targetInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            font-size: 1.4rem;
+            font-weight: 300;
+            color: #ffde9e;
+            text-shadow: 0 0 10px #ffb347;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            outline: none;
+            padding: 4px 0;
+            min-width: 0;
+            -webkit-user-select: text;
+            user-select: text;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            /* Chặn bàn phím bằng readonly */
+            readonly: readonly;
+        }
+        #targetInput::-webkit-outer-spin-button,
+        #targetInput::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
 
-#targetInput::placeholder {
-    color: #3f5563;
-    font-size: 1.1rem;
-    text-shadow: none;
-}
+        #targetInput::placeholder {
+            color: #3f5563;
+            font-size: 1.1rem;
+            text-shadow: none;
+        }
 
-/* THÊM: class editing-mode cho ô input */
-#targetInput.editing-mode {
-    background: #1e3a4a;
-    border-radius: 12px;
-    box-shadow: 0 0 0 3px #ffaa00;
-    animation: targetPulse 1.5s infinite;
-    cursor: default;
-}
+        #targetInput.editing-mode {
+            background: #1e3a4a;
+            border-radius: 12px;
+            box-shadow: 0 0 0 3px #ffaa00;
+            animation: targetPulse 1.5s infinite;
+            cursor: default;
+        }
 
-@keyframes targetPulse {
-    0% { box-shadow: 0 0 0 3px #ffaa00; }
-    50% { box-shadow: 0 0 0 6px #ffaa00; }
-    100% { box-shadow: 0 0 0 3px #ffaa00; }
-}
+        @keyframes targetPulse {
+            0% { box-shadow: 0 0 0 3px #ffaa00; }
+            50% { box-shadow: 0 0 0 6px #ffaa00; }
+            100% { box-shadow: 0 0 0 3px #ffaa00; }
+        }
 
-.message-area {
-    margin-top: 4px;                      /* Giảm margin */
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: center;
-    padding: 4px 6px;
-    border-radius: 40px;
-    background: #1a262e;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
-    color: #ddd;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-    border: 1px solid #3f5563;
-    min-height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    word-break: break-word;
-    will-change: background, box-shadow;
-}
+        .message-area {
+            margin-top: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 4px 6px;
+            border-radius: 40px;
+            background: #1a262e;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            color: #ddd;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            border: 1px solid #3f5563;
+            min-height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+            will-change: background, box-shadow;
+        }
 
-.message-area.success {
-    background: #1f4a3a;
-    color: #b0ffc0;
-    text-shadow: 0 0 10px #36d96b;
-    border-color: #58b87a;
-    box-shadow: 0 0 20px #2ecc71;
-}
+        .message-area.success {
+            background: #1f4a3a;
+            color: #b0ffc0;
+            text-shadow: 0 0 10px #36d96b;
+            border-color: #58b87a;
+            box-shadow: 0 0 20px #2ecc71;
+        }
 
-.message-area.error {
-    background: #5a2e3a;
-    color: #ffb0b0;
-    text-shadow: 0 0 10px #ff4f4f;
-    border-color: #c45a5a;
-    box-shadow: 0 0 20px #e74c3c;
-}
+        .message-area.error {
+            background: #5a2e3a;
+            color: #ffb0b0;
+            text-shadow: 0 0 10px #ff4f4f;
+            border-color: #c45a5a;
+            box-shadow: 0 0 20px #e74c3c;
+        }
 
-.message-area.vibrate {
-    animation: vibrate 0.3s ease-in-out;
-}
+        .message-area.vibrate {
+            animation: vibrate 0.3s ease-in-out;
+        }
 
-@keyframes vibrate {
-    0% { transform: translateX(0); filter: brightness(1); }
-    20% { transform: translateX(4px); filter: brightness(1.3); }
-    40% { transform: translateX(-4px); filter: brightness(0.9); }
-    60% { transform: translateX(2px); filter: brightness(1.2); }
-    80% { transform: translateX(-2px); filter: brightness(0.95); }
-    100% { transform: translateX(0); filter: brightness(1); }
-}
+        @keyframes vibrate {
+            0% { transform: translateX(0); filter: brightness(1); }
+            20% { transform: translateX(4px); filter: brightness(1.3); }
+            40% { transform: translateX(-4px); filter: brightness(0.9); }
+            60% { transform: translateX(2px); filter: brightness(1.2); }
+            80% { transform: translateX(-2px); filter: brightness(0.95); }
+            100% { transform: translateX(0); filter: brightness(1); }
+        }
 
-.buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;                            /* Giảm gap */
-    margin-top: 4px;                      /* Giảm margin */
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
-}
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            margin-top: 4px;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: hidden;
+        }
 
-.btn {
-    border: none;
-    background: #2c3e4c;
-    border-radius: 20px;
-    padding: 8px 2px;                     /* Giảm padding dọc */
-    font-size: 1.8rem;                    /* Giảm cỡ chữ */
-    font-weight: 500;
-    color: #eef5f9;
-    box-shadow: 0 4px 0 #15232b, 0 6px 10px rgba(0,0,0,0.4);
-    cursor: default;
-    transition: transform 0.05s linear, box-shadow 0.05s linear, background 0.05s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #4a6572;
-    text-shadow: 0 2px 3px black;
-    min-height: 78px;                     /* Giảm chiều cao tối thiểu */
-    touch-action: manipulation;
-    will-change: transform, box-shadow;
-    -webkit-tap-highlight-color: transparent;
-    pointer-events: auto;
-    tab-index: -1;
-}
+        .btn {
+            border: none;
+            background: #2c3e4c;
+            border-radius: 20px;
+            padding: 8px 2px;
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: #eef5f9;
+            box-shadow: 0 4px 0 #15232b, 0 6px 10px rgba(0,0,0,0.4);
+            cursor: default;
+            transition: transform 0.05s linear, box-shadow 0.05s linear, background 0.05s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #4a6572;
+            text-shadow: 0 2px 3px black;
+            min-height: 78px;
+            touch-action: manipulation;
+            will-change: transform, box-shadow;
+            -webkit-tap-highlight-color: transparent;
+            pointer-events: auto;
+        }
 
-.btn:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 #15232b, 0 3px 6px rgba(0,0,0,0.4);
-    background: #3a5264;
-}
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #15232b, 0 3px 6px rgba(0,0,0,0.4);
+            background: #3a5264;
+        }
 
-.btn.led-flash {
-    background: #ffd966;
-    color: #1a1a1a;
-    text-shadow: none;
-    box-shadow: 0 0 25px #ffee88;
-    transition: none;
-}
+        .btn.led-flash {
+            background: #ffd966;
+            color: #1a1a1a;
+            text-shadow: none;
+            box-shadow: 0 0 25px #ffee88;
+            transition: none;
+        }
 
-.btn.operator {
-    background: #f09b3c;
-    border-color: #ffb45e;
-    color: #1e2b33;
-    text-shadow: 0 1px 2px white;
-}
+        .btn.operator {
+            background: #f09b3c;
+            border-color: #ffb45e;
+            color: #1e2b33;
+            text-shadow: 0 1px 2px white;
+        }
 
-.btn.operator:active {
-    background: #ffb259;
-}
+        .btn.operator:active {
+            background: #ffb259;
+        }
 
-.btn.clear {
-    background: #5f4c4c;
-    border-color: #9b7a7a;
-    color: #ffe1c6;
-}
+        .btn.clear {
+            background: #5f4c4c;
+            border-color: #9b7a7a;
+            color: #ffe1c6;
+        }
 
-.btn.equals {
-    background: #3d8f6f;
-    border-color: #6fc9a3;
-    font-weight: 700;
-}
+        .btn.equals {
+            background: #3d8f6f;
+            border-color: #6fc9a3;
+            font-weight: 700;
+        }
 
-.btn.zero {
-    grid-column: span 2;
-}
+        .btn.zero {
+            grid-column: span 2;
+        }
 
-.btn.plus-long {
-    grid-row: span 2;
-    min-height: 160px;                    /* Chiều cao cho nút + dài 2 hàng */
-}
+        .btn.plus-long {
+            grid-row: span 2;
+            min-height: 160px;
+        }
 
-/* Media queries - giữ nguyên */
-@media (max-width: 340px) {
-    .calculator {
-        max-width: 100%;
-        padding: 6px 4px 10px;
-        border-radius: 30px;
-        margin: 2px;
-    }
-    .btn {
-        padding: 4px 1px;
-        font-size: 1.5rem;
-        min-height: 60px;
-        border-radius: 16px;
-    }
-    .btn.plus-long {
-        min-height: 124px;
-    }
-    #display {
-        font-size: 1.6rem;
-        min-height: 1.9rem;
-    }
-    #targetInput {
-        font-size: 1.2rem;
-    }
-    .target-label {
-        font-size: 0.7rem;
-    }
-    .message-area {
-        font-size: 0.8rem;
-        padding: 3px 4px;
-        min-height: 1.7rem;
-    }
-    .backspace-btn {
-        font-size: 1.3rem;
-        min-width: 36px;
-        min-height: 36px;
-    }
-}
+        /* Media queries */
+        @media (max-width: 340px) {
+            .calculator {
+                max-width: 100%;
+                padding: 6px 4px 10px;
+                border-radius: 30px;
+                margin: 2px;
+            }
+            .btn {
+                padding: 4px 1px;
+                font-size: 1.5rem;
+                min-height: 60px;
+                border-radius: 16px;
+            }
+            .btn.plus-long {
+                min-height: 124px;
+            }
+            #display {
+                font-size: 1.6rem;
+                min-height: 1.9rem;
+            }
+            #targetInput {
+                font-size: 1.2rem;
+            }
+            .target-label {
+                font-size: 0.7rem;
+            }
+            .message-area {
+                font-size: 0.8rem;
+                padding: 3px 4px;
+                min-height: 1.7rem;
+            }
+            .backspace-btn {
+                font-size: 1.3rem;
+                min-width: 36px;
+                min-height: 36px;
+            }
+        }
 
-@media (min-width: 341px) and (max-width: 380px) {
-    .calculator {
-        max-width: 95%;
-        padding: 8px 6px 12px;
-    }
-    .btn {
-        font-size: 1.7rem;
-        min-height: 70px;
-    }
-    .btn.plus-long {
-        min-height: 144px;
-    }
-    #display {
-        font-size: 1.8rem;
-    }
-}
+        @media (min-width: 341px) and (max-width: 380px) {
+            .calculator {
+                max-width: 95%;
+                padding: 8px 6px 12px;
+            }
+            .btn {
+                font-size: 1.7rem;
+                min-height: 70px;
+            }
+            .btn.plus-long {
+                min-height: 144px;
+            }
+            #display {
+                font-size: 1.8rem;
+            }
+        }
 
-@media (min-width: 381px) and (max-width: 450px) {
-    .calculator {
-        max-width: 380px;
-        padding: 12px 10px 16px;
-    }
-    .btn {
-        font-size: 2rem;
-        min-height: 85px;
-    }
-    .btn.plus-long {
-        min-height: 174px;
-    }
-    #display {
-        font-size: 2.2rem;
-        min-height: 2.8rem;
-    }
-    #targetInput {
-        font-size: 1.8rem;
-    }
-    .target-label {
-        font-size: 0.9rem;
-    }
-    .message-area {
-        font-size: 1rem;
-        min-height: 2.2rem;
-    }
-}
+        @media (min-width: 381px) and (max-width: 450px) {
+            .calculator {
+                max-width: 380px;
+                padding: 12px 10px 16px;
+            }
+            .btn {
+                font-size: 2rem;
+                min-height: 85px;
+            }
+            .btn.plus-long {
+                min-height: 174px;
+            }
+            #display {
+                font-size: 2.2rem;
+                min-height: 2.8rem;
+            }
+            #targetInput {
+                font-size: 1.8rem;
+            }
+            .target-label {
+                font-size: 0.9rem;
+            }
+            .message-area {
+                font-size: 1rem;
+                min-height: 2.2rem;
+            }
+        }
 
-@media (min-width: 451px) and (max-width: 599px) {
-    .calculator {
-        max-width: 420px;
-        padding: 15px 12px 20px;
-        border-radius: 50px;
-    }
-    .btn {
-        font-size: 2.2rem;
-        min-height: 95px;
-        border-radius: 25px;
-    }
-    .btn.plus-long {
-        min-height: 194px;
-    }
-    #display {
-        font-size: 2.5rem;
-        min-height: 3.2rem;
-    }
-    #targetInput {
-        font-size: 2rem;
-    }
-    .target-label {
-        font-size: 1rem;
-    }
-    .message-area {
-        font-size: 1.1rem;
-        min-height: 2.5rem;
-        padding: 6px 10px;
-    }
-    .backspace-btn {
-        font-size: 1.8rem;
-        min-width: 50px;
-        min-height: 50px;
-    }
-}
+        @media (min-width: 451px) and (max-width: 599px) {
+            .calculator {
+                max-width: 420px;
+                padding: 15px 12px 20px;
+                border-radius: 50px;
+            }
+            .btn {
+                font-size: 2.2rem;
+                min-height: 95px;
+                border-radius: 25px;
+            }
+            .btn.plus-long {
+                min-height: 194px;
+            }
+            #display {
+                font-size: 2.5rem;
+                min-height: 3.2rem;
+            }
+            #targetInput {
+                font-size: 2rem;
+            }
+            .target-label {
+                font-size: 1rem;
+            }
+            .message-area {
+                font-size: 1.1rem;
+                min-height: 2.5rem;
+                padding: 6px 10px;
+            }
+            .backspace-btn {
+                font-size: 1.8rem;
+                min-width: 50px;
+                min-height: 50px;
+            }
+        }
 
-@media (min-width: 600px) and (max-width: 800px) {
-    .calculator {
-        max-width: 500px;
-        padding: 20px 15px 25px;
-    }
-    .btn {
-        font-size: 2.5rem;
-        min-height: 110px;
-    }
-    .btn.plus-long {
-        min-height: 224px;
-    }
-}
+        @media (min-width: 600px) and (max-width: 800px) {
+            .calculator {
+                max-width: 500px;
+                padding: 20px 15px 25px;
+            }
+            .btn {
+                font-size: 2.5rem;
+                min-height: 110px;
+            }
+            .btn.plus-long {
+                min-height: 224px;
+            }
+        }
 
-@media (min-width: 801px) {
-    .calculator {
-        max-width: 550px;
-        padding: 25px 20px 30px;
-        border-radius: 60px;
-    }
-    .btn {
-        font-size: 2.8rem;
-        min-height: 120px;
-        border-radius: 30px;
-    }
-    .btn.plus-long {
-        min-height: 244px;
-    }
-    #display {
-        font-size: 3rem;
-        min-height: 3.8rem;
-    }
-    #targetInput {
-        font-size: 2.5rem;
-    }
-}
+        @media (min-width: 801px) {
+            .calculator {
+                max-width: 550px;
+                padding: 25px 20px 30px;
+                border-radius: 60px;
+            }
+            .btn {
+                font-size: 2.8rem;
+                min-height: 120px;
+                border-radius: 30px;
+            }
+            .btn.plus-long {
+                min-height: 244px;
+            }
+            #display {
+                font-size: 3rem;
+                min-height: 3.8rem;
+            }
+            #targetInput {
+                font-size: 2.5rem;
+            }
+        }
 
-/* Hỗ trợ iPhone với notch/dynamic island */
-@supports (padding: max(0px)) {
-    .calculator {
-        padding-left: max(8px, env(safe-area-inset-left));
-        padding-right: max(8px, env(safe-area-inset-right));
-        padding-bottom: max(14px, env(safe-area-inset-bottom));
-    }
-}
+        /* Hỗ trợ iPhone với notch/dynamic island */
+        @supports (padding: max(0px)) {
+            .calculator {
+                padding-left: max(8px, env(safe-area-inset-left));
+                padding-right: max(8px, env(safe-area-inset-right));
+                padding-bottom: max(14px, env(safe-area-inset-bottom));
+            }
+        }
 
-/* Tối ưu cho màn hình OLED Samsung */
-@media (display-mode: browser) {
-    .calculator {
-        background: #1a242e;
-    }
-}
+        /* Tối ưu cho màn hình OLED Samsung */
+        @media (display-mode: browser) {
+            .calculator {
+                background: #1a242e;
+            }
+        }
 
-/* Đảm bảo không bị tràn */
-* {
-    box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-}
+        /* Đảm bảo không bị tràn */
+        * {
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+        }
 
-/* ===== THÊM CSS CHO INDICATOR ===== */
-.editing-indicator {
-    position: fixed;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #ffaa00;
-    color: #1a1a1a;
-    padding: 8px 20px;
-    border-radius: 40px;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(255, 170, 0, 0.5);
-    z-index: 1000;
-    animation: slideDown 0.3s ease;
-    display: none;
-    font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
+        /* Indicator */
+        .editing-indicator {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffaa00;
+            color: #1a1a1a;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 170, 0, 0.5);
+            z-index: 1000;
+            animation: slideDown 0.3s ease;
+            display: none;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
 
-@keyframes slideDown {
-    from { transform: translate(-50%, -100%); }
-    to { transform: translate(-50%, 0); }
-}
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); }
+            to { transform: translate(-50%, 0); }
+        }
 
-.editing-indicator.show {
-    display: block;
-}
+        .editing-indicator.show {
+            display: block;
+        }
 
-@media (max-width: 340px) {
-    .editing-indicator {
-        font-size: 0.8rem;
-        padding: 6px 16px;
-    }
-}
+        @media (max-width: 340px) {
+            .editing-indicator {
+                font-size: 0.8rem;
+                padding: 6px 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -536,7 +535,7 @@ body {
             </div>
             <div class="target-row">
                 <span class="target-label">Số Kiểm Tra</span>
-                <input type="text" id="targetInput" placeholder="0" inputmode="numeric" pattern="[0-9,.]*">
+                <input type="text" id="targetInput" placeholder="0" inputmode="none" readonly>
             </div>
             <div class="message-area" id="messageBox"></div>
         </div>
@@ -573,26 +572,58 @@ body {
         </div>
     </div>
 
-    <!-- ===== PHẦN JAVASCRIPT CŨ (GIỮ NGUYÊN) ===== -->
+    <!-- Indicator (nằm ngoài calculator) -->
+    <div class="editing-indicator" id="editingIndicator">📝 ĐANG NHẬP SỐ KIỂM TRA</div>
+
+    <!-- MỘT SCRIPT DUY NHẤT - ĐÃ TÍCH HỢP HOÀN CHỈNH -->
     <script>
         (function() {
             "use strict";
 
+            // ===== LẤY ELEMENTS =====
             const mainDisplay = document.getElementById('display');
             const targetInput = document.getElementById('targetInput');
+            const targetRow = document.querySelector('.target-row');
             const messageBox = document.getElementById('messageBox');
             const backspaceBtn = document.getElementById('backspaceBtn');
+            const clearBtn = document.getElementById('clear');
+            const equalsBtn = document.getElementById('equals');
+            const indicator = document.getElementById('editingIndicator');
 
+            // ===== BIẾN TRẠNG THÁI CHÍNH (Máy tính) =====
             let currentInput = '0';
             let previousInput = '';
             let operator = null;
             let shouldResetDisplay = false;
             let lastResult = null;
 
-            // Giới hạn độ dài
+            // ===== BIẾN TRẠNG THÁI CHO CHẾ ĐỘ NHẬP SỐ KIỂM TRA =====
+            let isEditingTarget = false;
+            let tempTargetValue = '';
+
+            // ===== CÁC HẰNG SỐ =====
             const MAX_INTEGER_LENGTH = 12;
             const MAX_DECIMAL_LENGTH = 4;
 
+            // ===== HÀM TIỆN ÍCH CHUNG =====
+            function flashButton(btn) {
+                if (!btn) return;
+                btn.classList.add('led-flash');
+                setTimeout(() => {
+                    btn.classList.remove('led-flash');
+                }, 80);
+            }
+
+            // Thêm style cho flash display
+            const style = document.createElement('style');
+            style.textContent = `
+                .led-flash-display {
+                    text-shadow: 0 0 20px #7df9ff !important;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // ===== CÁC HÀM XỬ LÝ SỐ (Máy tính) =====
             function limitNumberLength(numStr) {
                 let parts = numStr.split('.');
                 let intPart = parts[0];
@@ -684,37 +715,7 @@ body {
                 return parseFloat(finalStr);
             }
 
-            targetInput.addEventListener('input', function(e) {
-                let raw = e.target.value;
-                let num = parseInputString(raw);
-                if (!isNaN(num)) {
-                    e.target.dataset.rawValue = num;
-                } else {
-                    delete e.target.dataset.rawValue;
-                }
-            });
-
-            targetInput.addEventListener('focus', function(e) {
-                if (e.target.dataset.rawValue !== undefined) {
-                    e.target.value = e.target.dataset.rawValue.toString();
-                }
-            });
-
-            targetInput.addEventListener('blur', function(e) {
-                let rawValue = e.target.dataset.rawValue;
-                if (rawValue !== undefined) {
-                    e.target.value = formatNumber(parseFloat(rawValue));
-                } else {
-                    let num = parseInputString(e.target.value);
-                    if (!isNaN(num)) {
-                        e.target.dataset.rawValue = num;
-                        e.target.value = formatNumber(num);
-                    } else {
-                        e.target.value = '';
-                    }
-                }
-            });
-
+            // ===== CÁC HÀM CẬP NHẬT MÀN HÌNH MÁY TÍNH =====
             function updateDisplayInput() {
                 mainDisplay.textContent = formatInputForDisplay(currentInput);
                 mainDisplay.classList.add('led-flash-display');
@@ -735,22 +736,7 @@ body {
                 mainDisplay.scrollTop = mainDisplay.scrollHeight;
             }
 
-            const style = document.createElement('style');
-            style.textContent = `
-                .led-flash-display {
-                    text-shadow: 0 0 20px #7df9ff !important;
-                }
-            `;
-            document.head.appendChild(style);
-
-            function flashButton(btn) {
-                if (!btn) return;
-                btn.classList.add('led-flash');
-                setTimeout(() => {
-                    btn.classList.remove('led-flash');
-                }, 80);
-            }
-
+            // ===== CÁC HÀM XỬ LÝ TÍNH TOÁN =====
             function inputNumber(num) {
                 if (shouldResetDisplay) {
                     currentInput = '';
@@ -845,8 +831,15 @@ body {
                 shouldResetDisplay = false;
                 lastResult = null;
                 updateDisplayInput();
-                targetInput.value = '';
-                delete targetInput.dataset.rawValue;
+                
+                // Nếu đang ở chế độ chỉnh sửa target thì thoát
+                if (isEditingTarget) {
+                    exitTargetEditing();
+                } else {
+                    targetInput.value = '';
+                    delete targetInput.dataset.rawValue;
+                }
+                
                 messageBox.textContent = '';
                 messageBox.className = 'message-area';
             }
@@ -860,8 +853,8 @@ body {
                 updateDisplayInput();
             }
 
+            // ===== AUDIO =====
             let audioContext = null;
-
             function initAudioContext() {
                 if (audioContext) return audioContext;
                 try {
@@ -907,55 +900,185 @@ body {
                 }, 300);
             }
 
+            // ===== HÀM XỬ LÝ SỐ KIỂM TRA (TARGET) =====
+            function updateTargetInput() {
+                if (tempTargetValue.length > 15) {
+                    tempTargetValue = tempTargetValue.slice(0, 15);
+                }
+                
+                targetInput.value = tempTargetValue;
+                
+                if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
+                    targetInput.dataset.rawValue = parseFloat(tempTargetValue);
+                } else {
+                    delete targetInput.dataset.rawValue;
+                }
+                
+                targetInput.scrollLeft = targetInput.scrollWidth;
+            }
+
+            function exitTargetEditing() {
+                if (!isEditingTarget) return;
+                
+                isEditingTarget = false;
+                targetInput.classList.remove('editing-mode');
+                indicator.classList.remove('show');
+                
+                if (targetInput.dataset.rawValue) {
+                    targetInput.value = formatNumber(parseFloat(targetInput.dataset.rawValue));
+                } else {
+                    targetInput.value = '';
+                    delete targetInput.dataset.rawValue;
+                }
+                
+                messageBox.textContent = '';
+                messageBox.className = 'message-area';
+                
+                if (navigator.vibrate) navigator.vibrate(10);
+            }
+
+            // ===== XỬ LÝ SỰ KIỆN CHO NÚT = (KIỂM TRA KẾT QUẢ) =====
+            function handleEquals() {
+                if (operator) calculate();
+
+                const currentValue = parseFloat(currentInput);
+                let target = NaN;
+                
+                if (targetInput.dataset.rawValue !== undefined) {
+                    target = parseFloat(targetInput.dataset.rawValue);
+                } else if (targetInput.value.trim() !== '') {
+                    target = parseInputString(targetInput.value);
+                }
+
+                if (!isNaN(target)) {
+                    const diff = currentValue - target;
+                    if (Math.abs(diff) < 1e-10) {
+                        messageBox.textContent = '✅ Chính xác!';
+                        messageBox.className = 'message-area success';
+                        playSound('success');
+                    } else {
+                        const sign = diff > 0 ? '+' : '';
+                        messageBox.textContent = `❌ Sai. Đúng: ${formatNumber(target)} (${sign}${formatNumber(diff)})`;
+                        messageBox.className = 'message-area error';
+                        playSound('error');
+                    }
+                    vibrateMessage();
+                } else {
+                    messageBox.textContent = targetInput.value ? 'Nhập số TK hợp lệ!' : '';
+                    messageBox.className = 'message-area';
+                }
+            }
+
+            // ===== XỬ LÝ SỰ KIỆN NHẤN NÚT =====
             function handleButtonPress(e, callback) {
                 e.preventDefault();
                 e.stopPropagation();
-                e.stopImmediatePropagation?.();
-                targetInput.blur();
+                targetInput.blur(); // Đảm bảo mất focus
                 if (callback) callback();
             }
 
-            document.getElementById('equals').addEventListener('pointerdown', (e) => {
-                handleButtonPress(e, () => {
-                    flashButton(e.target);
+            // ===== GẮN SỰ KIỆN =====
 
-                    if (operator) calculate();
+            // --- Sự kiện cho target row (kích hoạt chế độ chỉnh sửa) ---
+            targetRow.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (!isEditingTarget) {
+                    isEditingTarget = true;
+                    targetInput.classList.add('editing-mode');
+                    indicator.classList.add('show');
+                    
+                    let currentVal = targetInput.dataset.rawValue || '';
+                    tempTargetValue = currentVal ? currentVal.toString() : '';
+                    targetInput.value = tempTargetValue || '0';
+                    
+                    messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
+                    messageBox.className = 'message-area';
+                    
+                    if (navigator.vibrate) navigator.vibrate(20);
+                }
+            }, true); // Dùng capture để bắt sự kiện sớm
 
-                    const currentValue = parseFloat(currentInput);
-                    let target = NaN;
-                    if (targetInput.dataset.rawValue !== undefined) {
-                        target = parseFloat(targetInput.dataset.rawValue);
-                    } else if (targetInput.value.trim() !== '') {
-                        target = parseInputString(targetInput.value);
-                    }
+            // --- Nhấn ra ngoài để thoát chế độ chỉnh sửa ---
+            document.addEventListener('click', function(e) {
+                if (isEditingTarget && 
+                    !e.target.closest('.target-row') && 
+                    !e.target.closest('.btn')) {
+                    exitTargetEditing();
+                }
+            }, true);
 
-                    if (!isNaN(target)) {
-                        const diff = currentValue - target;
-                        if (Math.abs(diff) < 1e-10) {
-                            messageBox.textContent = '✅ Chính xác!';
-                            messageBox.className = 'message-area success';
-                            playSound('success');
-                        } else {
-                            const sign = diff > 0 ? '+' : '';
-                            messageBox.textContent = `❌ Sai. Đúng: ${formatNumber(target)} (${sign}${formatNumber(diff)})`;
-                            messageBox.className = 'message-area error';
-                            playSound('error');
-                        }
-                        vibrateMessage();
-                    } else {
-                        messageBox.textContent = targetInput.value ? 'Nhập số TK hợp lệ!' : '';
-                        messageBox.className = 'message-area';
-                    }
-                });
-            });
-
-            const buttons = document.querySelectorAll('.btn');
-            buttons.forEach(btn => {
-                if (btn.id === 'equals') return;
+            // --- Các nút số và toán tử ---
+            const allButtons = document.querySelectorAll('.btn');
+            allButtons.forEach(btn => {
                 btn.addEventListener('pointerdown', (e) => {
-                    handleButtonPress(e, () => {
-                        const id = btn.id;
+                    // Nếu đang ở chế độ chỉnh sửa target
+                    if (isEditingTarget) {
+                        e.preventDefault();
+                        e.stopPropagation();
                         flashButton(btn);
+
+                        const id = btn.id;
+                        
+                        // Xử lý các nút số và dấu chấm
+                        if (id.match(/^\d+$/)) {
+                            tempTargetValue += id;
+                            updateTargetInput();
+                        }
+                        else if (id === '00') {
+                            tempTargetValue += '00';
+                            updateTargetInput();
+                        }
+                        else if (id === 'dot') {
+                            if (!tempTargetValue.includes('.')) {
+                                if (tempTargetValue === '') {
+                                    tempTargetValue = '0.';
+                                } else {
+                                    tempTargetValue += '.';
+                                }
+                                updateTargetInput();
+                            }
+                        }
+                        else if (id === 'clear') {
+                            tempTargetValue = '';
+                            targetInput.value = '0';
+                            delete targetInput.dataset.rawValue;
+                        }
+                        else if (id === 'backspaceBtn') {
+                            if (tempTargetValue.length > 0) {
+                                tempTargetValue = tempTargetValue.slice(0, -1);
+                                targetInput.value = tempTargetValue || '0';
+                                
+                                if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
+                                    targetInput.dataset.rawValue = parseFloat(tempTargetValue);
+                                } else {
+                                    delete targetInput.dataset.rawValue;
+                                }
+                            }
+                        }
+                        else if (id === 'equals') {
+                            exitTargetEditing();
+                            setTimeout(() => handleEquals(), 100);
+                        }
+                        else if (id === 'add' || id === 'subtract' || id === 'multiply' || id === 'percent') {
+                            messageBox.textContent = '⚠️ Không dùng toán tử khi nhập số kiểm tra';
+                            messageBox.className = 'message-area error';
+                            setTimeout(() => {
+                                if (isEditingTarget) {
+                                    messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
+                                    messageBox.className = 'message-area';
+                                }
+                            }, 1500);
+                        }
+                        
+                        return;
+                    }
+
+                    // Nếu KHÔNG ở chế độ chỉnh sửa, xử lý như máy tính bình thường
+                    handleButtonPress(e, () => {
+                        flashButton(btn);
+                        const id = btn.id;
 
                         if (id.match(/^\d+$/) || id === '00' || id === 'dot') {
                             if (id === 'dot') inputNumber('.');
@@ -978,23 +1101,91 @@ body {
                         else if (id === 'multiply') handleOperator('×');
                         else if (id === 'percent') handlePercent();
                         else if (id === 'clear') clearAll();
+                        else if (id === 'equals') handleEquals();
                     });
                 });
             });
 
+            // Xử lý riêng cho backspace (vì nó không phải btn)
             backspaceBtn.addEventListener('pointerdown', (e) => {
+                if (isEditingTarget) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    flashButton(backspaceBtn);
+                    
+                    if (tempTargetValue.length > 0) {
+                        tempTargetValue = tempTargetValue.slice(0, -1);
+                        targetInput.value = tempTargetValue || '0';
+                        
+                        if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
+                            targetInput.dataset.rawValue = parseFloat(tempTargetValue);
+                        } else {
+                            delete targetInput.dataset.rawValue;
+                        }
+                    }
+                    return;
+                }
+                
                 handleButtonPress(e, () => {
                     flashButton(backspaceBtn);
                     backspace();
                 });
             });
 
+            // ===== XỬ LÝ PHÍM TẮT =====
             window.addEventListener('keydown', (e) => {
                 const key = e.key;
+                
+                // Nếu đang ở chế độ chỉnh sửa target
+                if (isEditingTarget) {
+                    e.preventDefault();
+                    
+                    if (key >= '0' && key <= '9') {
+                        tempTargetValue += key;
+                        updateTargetInput();
+                        const btn = document.getElementById(key);
+                        if (btn) flashButton(btn);
+                    }
+                    else if (key === '.') {
+                        if (!tempTargetValue.includes('.')) {
+                            if (tempTargetValue === '') {
+                                tempTargetValue = '0.';
+                            } else {
+                                tempTargetValue += '.';
+                            }
+                            updateTargetInput();
+                        }
+                        const btn = document.getElementById('dot');
+                        if (btn) flashButton(btn);
+                    }
+                    else if (key === 'Backspace') {
+                        if (tempTargetValue.length > 0) {
+                            tempTargetValue = tempTargetValue.slice(0, -1);
+                            targetInput.value = tempTargetValue || '0';
+                            if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
+                                targetInput.dataset.rawValue = parseFloat(tempTargetValue);
+                            } else {
+                                delete targetInput.dataset.rawValue;
+                            }
+                        }
+                        flashButton(backspaceBtn);
+                    }
+                    else if (key === 'Escape') {
+                        exitTargetEditing();
+                    }
+                    else if (key === 'Enter') {
+                        exitTargetEditing();
+                        setTimeout(() => handleEquals(), 100);
+                    }
+                    
+                    return;
+                }
+                
+                // Nếu KHÔNG ở chế độ chỉnh sửa
                 if (document.activeElement === targetInput) {
                     if (key === 'Enter') {
                         e.preventDefault();
-                        document.getElementById('equals').click();
+                        handleEquals();
                     }
                     return;
                 }
@@ -1027,7 +1218,7 @@ body {
                 }
                 else if (key === 'Enter' || key === '=') {
                     e.preventDefault();
-                    document.getElementById('equals').click();
+                    handleEquals();
                 }
                 else if (key === 'Escape') {
                     clearAll();
@@ -1040,272 +1231,9 @@ body {
                 }
             });
 
+            // Khởi tạo
             clearAll();
         })();
     </script>
-    <!-- ===== THÊM PHẦN NÀY VÀO CUỐI - ĐÃ CHẶN BÀN PHÍM ===== -->
-<div class="editing-indicator" id="editingIndicator">📝 ĐANG NHẬP SỐ KIỂM TRA</div>
-
-<script>
-    (function() {
-        "use strict";
-        
-        if (window._targetEditingLoaded) return;
-        window._targetEditingLoaded = true;
-        
-        // ===== BIẾN TRẠNG THÁI =====
-        let isEditingTarget = false;
-        let tempTargetValue = '';
-        
-        // ===== LẤY ELEMENTS =====
-        const targetInput = document.getElementById('targetInput');
-        const targetRow = document.querySelector('.target-row');
-        const messageBox = document.getElementById('messageBox');
-        const backspaceBtn = document.getElementById('backspaceBtn');
-        const clearBtn = document.getElementById('clear');
-        const equalsBtn = document.getElementById('equals');
-        const indicator = document.getElementById('editingIndicator');
-        
-        // ===== CHẶN HOÀN TOÀN BÀN PHÍM HỆ THỐNG TRÊN Ô INPUT =====
-        // Giữ readonly để ngăn bàn phím mềm, đồng thời chặn mọi sự kiện có thể gây focus
-        targetInput.setAttribute('readonly', 'true');
-        
-        // Chặn tất cả các sự kiện chuột và cảm ứng ở giai đoạn capture
-        targetInput.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        }, true); // capture
-        
-        targetInput.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        }, true);
-        
-        targetInput.addEventListener('focus', (e) => {
-            e.preventDefault();
-            e.target.blur(); // Buộc mất focus ngay lập tức
-        }, true);
-        
-        // ===== KÍCH HOẠT CHẾ ĐỘ EDIT KHI CLICK VÀO TARGET-ROW (kể cả label) =====
-        targetRow.addEventListener('click', function(e) {
-            e.preventDefault();          // Ngăn focus vào input (nếu có)
-            e.stopPropagation();
-            
-            if (!isEditingTarget) {
-                isEditingTarget = true;
-                targetInput.classList.add('editing-mode');
-                indicator.classList.add('show');
-                
-                // Lấy giá trị hiện tại (nếu có)
-                let currentVal = targetInput.dataset.rawValue || '';
-                tempTargetValue = currentVal ? currentVal.toString() : '';
-                targetInput.value = tempTargetValue || '0';
-                
-                messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
-                messageBox.className = 'message-area';
-                
-                if (navigator.vibrate) navigator.vibrate(20);
-            }
-        }, true);   // Dùng capture để bắt sự kiện sớm
-        
-        // ===== XỬ LÝ NHẤN RA NGOÀI =====
-        document.addEventListener('click', function(e) {
-            if (isEditingTarget && 
-                !e.target.closest('.target-row') && 
-                !e.target.closest('.btn')) {
-                exitTargetEditing();
-            }
-        }, true);
-        
-        // ===== XỬ LÝ CÁC NÚT SỐ (khi đang chỉnh sửa) =====
-        document.querySelectorAll('.btn').forEach(btn => {
-            if (btn.id === 'clear' || btn.id === 'equals') return;
-            
-            btn.addEventListener('pointerdown', function(e) {
-                if (!isEditingTarget) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                
-                if (typeof flashButton === 'function') flashButton(this);
-                
-                const id = this.id;
-                
-                if (id.match(/^\d+$/)) {
-                    tempTargetValue += id;
-                    updateTargetInput();
-                }
-                else if (id === '00') {
-                    tempTargetValue += '00';
-                    updateTargetInput();
-                }
-                else if (id === 'dot') {
-                    if (!tempTargetValue.includes('.')) {
-                        if (tempTargetValue === '') {
-                            tempTargetValue = '0.';
-                        } else {
-                            tempTargetValue += '.';
-                        }
-                        updateTargetInput();
-                    }
-                }
-                else if (id === 'add' || id === 'subtract' || id === 'multiply' || id === 'percent') {
-                    messageBox.textContent = '⚠️ Không dùng toán tử khi nhập số kiểm tra';
-                    messageBox.className = 'message-area error';
-                    setTimeout(() => {
-                        if (isEditingTarget) {
-                            messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
-                            messageBox.className = 'message-area';
-                        }
-                    }, 1500);
-                }
-            }, true);
-        });
-        
-        // ===== XỬ LÝ NÚT C =====
-        clearBtn.addEventListener('pointerdown', function(e) {
-            if (!isEditingTarget) return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            if (typeof flashButton === 'function') flashButton(this);
-            
-            tempTargetValue = '';
-            targetInput.value = '0';
-            delete targetInput.dataset.rawValue;
-        }, true);
-        
-        // ===== XỬ LÝ NÚT BACKSPACE =====
-        backspaceBtn.addEventListener('pointerdown', function(e) {
-            if (!isEditingTarget) return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            if (typeof flashButton === 'function') flashButton(this);
-            
-            if (tempTargetValue.length > 0) {
-                tempTargetValue = tempTargetValue.slice(0, -1);
-                targetInput.value = tempTargetValue || '0';
-                
-                if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                    targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-                } else {
-                    delete targetInput.dataset.rawValue;
-                }
-            }
-        }, true);
-        
-        // ===== XỬ LÝ NÚT = (KẾT THÚC) =====
-        equalsBtn.addEventListener('pointerdown', function(e) {
-            if (!isEditingTarget) return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            if (typeof flashButton === 'function') flashButton(this);
-            
-            exitTargetEditing();
-            
-            // Gọi lại sự kiện = gốc để kiểm tra kết quả
-            setTimeout(() => {
-                equalsBtn.click();
-            }, 100);
-        }, true);
-        
-        // ===== XỬ LÝ PHÍM TẮT =====
-        window.addEventListener('keydown', function(e) {
-            if (!isEditingTarget) return;
-            if (document.activeElement === targetInput) return;
-            
-            e.preventDefault();
-            
-            const key = e.key;
-            
-            if (key >= '0' && key <= '9') {
-                tempTargetValue += key;
-                updateTargetInput();
-                const btn = document.getElementById(key);
-                if (btn && typeof flashButton === 'function') flashButton(btn);
-            }
-            else if (key === '.') {
-                if (!tempTargetValue.includes('.')) {
-                    if (tempTargetValue === '') {
-                        tempTargetValue = '0.';
-                    } else {
-                        tempTargetValue += '.';
-                    }
-                    updateTargetInput();
-                }
-                const btn = document.getElementById('dot');
-                if (btn && typeof flashButton === 'function') flashButton(btn);
-            }
-            else if (key === 'Backspace') {
-                if (tempTargetValue.length > 0) {
-                    tempTargetValue = tempTargetValue.slice(0, -1);
-                    targetInput.value = tempTargetValue || '0';
-                    if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                        targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-                    } else {
-                        delete targetInput.dataset.rawValue;
-                    }
-                }
-                if (typeof flashButton === 'function') flashButton(backspaceBtn);
-            }
-            else if (key === 'Escape') {
-                exitTargetEditing();
-            }
-            else if (key === 'Enter') {
-                exitTargetEditing();
-                setTimeout(() => equalsBtn.click(), 100);
-            }
-        }, true);
-        
-        // ===== HÀM CẬP NHẬT INPUT =====
-        function updateTargetInput() {
-            if (tempTargetValue.length > 15) {
-                tempTargetValue = tempTargetValue.slice(0, 15);
-            }
-            
-            targetInput.value = tempTargetValue;
-            
-            if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-            } else {
-                delete targetInput.dataset.rawValue;
-            }
-            
-            targetInput.scrollLeft = targetInput.scrollWidth;
-        }
-        
-        // ===== HÀM THOÁT CHẾ ĐỘ CHỈNH SỬA =====
-        function exitTargetEditing() {
-            if (!isEditingTarget) return;
-            
-            isEditingTarget = false;
-            targetInput.classList.remove('editing-mode');
-            indicator.classList.remove('show');
-            
-            if (targetInput.dataset.rawValue) {
-                if (typeof formatNumber === 'function') {
-                    targetInput.value = formatNumber(parseFloat(targetInput.dataset.rawValue));
-                } else {
-                    targetInput.value = targetInput.dataset.rawValue.toString();
-                }
-            } else {
-                targetInput.value = '';
-                delete targetInput.dataset.rawValue;
-            }
-            
-            messageBox.textContent = '';
-            messageBox.className = 'message-area';
-            
-            if (navigator.vibrate) navigator.vibrate(10);
-        }
-        
-        console.log('✅ Chế độ nhập số kiểm tra bằng cách nhấn vào ô hoặc label đã sẵn sàng, bàn phím hệ thống đã bị chặn!');
-    })();
-</script>
-
-  
 </body>
 </html>
-
