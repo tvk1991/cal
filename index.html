@@ -12,7 +12,6 @@
     <title>ClevCalc Sentinel Dual</title>
     <style>
         :root {
-            /* Light Mode Variables */
             --bg-color: #ffffff;
             --screen-bg: #ffffff;
             --keypad-bg: #f1f2f6;
@@ -22,12 +21,10 @@
             --expr-text: #bdc3c7;
             --target-area-bg: #fffaf5;
             --target-border: #ffecdb;
-            
             --accent: #27ae60;
             --op-color: #f39c12;
             --target-color: #e67e22;
             --danger: #c0392b;
-
             --led-green: #27ae60;
             --led-green-glow: 0 0 6px rgba(39, 174, 96, 0.2);
             --led-orange: #e67e22;
@@ -36,7 +33,6 @@
             --led-red-glow: 0 0 10px rgba(231, 76, 60, 0.4);
         }
 
-        /* Dark Mode Overrides */
         [data-theme="dark"] {
             --bg-color: #000000;
             --screen-bg: #000000;
@@ -47,7 +43,6 @@
             --expr-text: #555555;
             --target-area-bg: #1a1510;
             --target-border: #3d2b1f;
-            
             --led-green: #2ecc71;
             --led-green-glow: 0 0 12px rgba(46, 204, 113, 0.4);
             --led-orange: #f39c12;
@@ -55,8 +50,7 @@
         }
 
         * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
+            box-sizing: border-box; -webkit-tap-highlight-color: transparent; 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             touch-action: manipulation; user-select: none; font-weight: 600; 
             transition: background 0.3s, color 0.3s;
@@ -74,14 +68,6 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* Theme Toggle */
-        #theme-toggle {
-            position: absolute; top: calc(env(safe-area-inset-top) + 10px); left: 15px;
-            z-index: 20; padding: 8px; cursor: pointer; border-radius: 50%;
-            background: var(--target-area-bg); border: 1px solid var(--target-border);
-        }
-        #theme-toggle svg { width: 20px; height: 20px; fill: var(--target-color); }
-
         .display-screen {
             height: 40%; width: 100%;
             padding: 20px 25px;
@@ -89,27 +75,28 @@
             text-align: right; background: var(--screen-bg); z-index: 5;
         }
 
-        #expression { 
-            font-size: 1.2rem; color: var(--expr-text); 
-            max-height: 80px; overflow-y: auto; margin-bottom: 5px; font-weight: 500;
-        }
-        
-        #result-preview { 
-            font-size: 2.2rem; 
-            color: var(--led-green); text-shadow: var(--led-green-glow);
-            line-height: 1.2; overflow: hidden; white-space: nowrap; font-weight: 800; 
-            text-overflow: ellipsis; margin-bottom: 12px;
-        }
-
+        #expression { font-size: 1.2rem; color: var(--expr-text); max-height: 80px; overflow-y: auto; margin-bottom: 5px; font-weight: 500; }
+        #result-preview { font-size: 2.2rem; color: var(--led-green); text-shadow: var(--led-green-glow); line-height: 1.2; overflow: hidden; white-space: nowrap; font-weight: 800; text-overflow: ellipsis; margin-bottom: 12px; }
         #comparison-msg { font-size: 0.9rem; font-weight: 800; text-align: center; height: 20px; margin-bottom: 15px; }
 
+        /* THANH ĐIỀU KHIỂN GỘP CHUNG */
         .target-area { 
             display: flex; align-items: center; background: var(--target-area-bg); 
             border-radius: 12px; padding: 10px 15px; border: 1px solid var(--target-border);
+            gap: 10px;
         }
 
-        .history-btn { padding-right: 12px; border-right: 1px solid var(--target-border); margin-right: 12px; display: flex; align-items: center; }
-        .history-btn svg { width: 18px; height: 18px; stroke: var(--target-color); stroke-width: 2.5; fill: none; }
+        .control-btn { 
+            display: flex; align-items: center; justify-content: center;
+            padding: 5px; cursor: pointer;
+        }
+        .control-btn svg { width: 20px; height: 20px; stroke-width: 2.5; fill: none; }
+        
+        #openHistory svg { stroke: var(--target-color); }
+        #theme-toggle svg { fill: var(--target-color); }
+
+        .divider { width: 1px; height: 20px; background: var(--target-border); }
+
         .target-label { font-size: 0.65rem; color: var(--target-color); font-weight: 800; }
         #target-display { flex: 1; font-size: 1.4rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); font-weight: 900; }
 
@@ -119,10 +106,7 @@
             background: var(--keypad-bg); gap: 1px; padding-bottom: env(safe-area-inset-bottom);
         }
 
-        button {
-            background: var(--key-bg); border: none; font-size: 1.6rem; color: var(--key-text);
-            display: flex; justify-content: center; align-items: center;
-        }
+        button { background: var(--key-bg); border: none; font-size: 1.6rem; color: var(--key-text); display: flex; justify-content: center; align-items: center; }
         button:active { background: var(--key-active); }
 
         .btn-back svg { width: 24px; height: 24px; stroke: var(--key-text); stroke-width: 2.5; fill: none; }
@@ -150,10 +134,6 @@
 <body oncontextmenu="return false;">
 
 <div class="clevcalc-container">
-    <div id="theme-toggle">
-        <svg id="theme-icon" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
-    </div>
-
     <div id="historyBox" class="history-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
             <span style="font-size: 1.3rem; font-weight: 900; color: var(--accent);">Lịch sử</span>
@@ -169,10 +149,16 @@
         <div id="expression"></div>
         <div id="result-preview">0</div>
         <div id="comparison-msg"></div>
+        
         <div class="target-area">
-            <div class="history-btn" id="openHistory">
+            <div class="control-btn" id="openHistory">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
+            <div class="divider"></div>
+            <div class="control-btn" id="theme-toggle">
+                <svg id="theme-icon" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+            </div>
+            <div class="divider"></div>
             <div id="target-box" style="display:flex; align-items:center; flex:1; height:100%">
                 <span class="target-label">MỤC TIÊU:</span>
                 <div id="target-display">0</div>
@@ -206,23 +192,24 @@
 </div>
 
 <script>
-    // Theme Toggle Logic
+    /* LOGIC THAY ĐỔI THEME */
     const themeToggle = document.getElementById('theme-toggle');
-    const body = document.body;
-    themeToggle.addEventListener('click', () => {
+    themeToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        const body = document.body;
         const isDark = body.getAttribute('data-theme') === 'dark';
         body.setAttribute('data-theme', isDark ? 'light' : 'dark');
         document.getElementById('theme-icon').innerHTML = isDark ? 
             '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>' :
             '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+        playSound('click');
     });
 
-    // GIỮ NGUYÊN TOÀN BỘ LOGIC CŨ 100%
+    /* GIỮ NGUYÊN TOÀN BỘ LOGIC TÍNH TOÁN VÀ PHANH AN TOÀN */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         if (type === 'click') {
             osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
@@ -261,15 +248,9 @@
 
     function handleCommand(val) {
         playSound('click');
-        if (val === 'C') clearAll();
-        else if (val === '()') smartParenthesis();
-        else if (val === '%') applyPercent();
-        else if (val === '-') addOp('-');
-        else if (val === '*') addOp('*');
-        else if (val === '+') addOp('+');
-        else if (val === 'back') backspace();
-        else if (val === '=') calculate();
-        else if (val === '.') handleInput('.');
+        if (val === 'C') clearAll(); else if (val === '()') smartParenthesis(); else if (val === '%') applyPercent();
+        else if (val === '-') addOp('-'); else if (val === '*') addOp('*'); else if (val === '+') addOp('+');
+        else if (val === 'back') backspace(); else if (val === '=') calculate(); else if (val === '.') handleInput('.');
         else handleInput(val);
     }
 
@@ -280,8 +261,7 @@
 
     function formatNumber(val) {
         if (!val && val !== 0) return "";
-        let s = val.toString();
-        let parts = s.split('.');
+        let s = val.toString(); let parts = s.split('.');
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         return parts.length > 1 ? parts[0] + "," + parts[1] : parts[0];
     }
@@ -314,10 +294,8 @@
     }
 
     function handleInput(n) {
-        if (isTargetMode) { 
-            if (n === '.' && targetInput.includes('.')) return; 
-            targetInput += n; 
-        } else {
+        if (isTargetMode) { if (n === '.' && targetInput.includes('.')) return; targetInput += n; }
+        else {
             if (targetInput !== "" && !isNaN(n)) {
                 let cleanedExpr = historyExpr + n;
                 while (['+','-','*','/','(','.'].includes(cleanedExpr.slice(-1))) { cleanedExpr = cleanedExpr.slice(0, -1); }
@@ -332,8 +310,7 @@
                         msgDiv.classList.add('shake');
                         resDiv.classList.add('neon-danger');
                         setTimeout(() => msgDiv.classList.remove('shake'), 400);
-                        playSound('fail');
-                        return;
+                        playSound('fail'); return;
                     }
                 } catch(e) {}
             }
@@ -347,8 +324,7 @@
         let open = (historyExpr.match(/\(/g) || []).length;
         let close = (historyExpr.match(/\)/g) || []).length;
         const last = historyExpr.slice(-1);
-        if (open > close && !['+','-','*','/','('].includes(last)) historyExpr += ")";
-        else historyExpr += "(";
+        if (open > close && !['+','-','*','/','('].includes(last)) historyExpr += ")"; else historyExpr += "(";
         renderDisplay(); autoPreview();
     }
 
@@ -357,16 +333,14 @@
         const last = historyExpr.slice(-1);
         if (['+','-','*','/'].includes(last)) historyExpr = historyExpr.slice(0, -1) + op;
         else if (historyExpr !== "" || op === '-') historyExpr += op;
-        resDiv.classList.remove('neon-danger');
-        renderDisplay(); autoPreview();
+        resDiv.classList.remove('neon-danger'); renderDisplay(); autoPreview();
     }
 
     function applyPercent() {
         if (isTargetMode) return;
         try {
             let parts = historyExpr.split(/([\+\-\*\/])/);
-            let lastPart = parts.pop();
-            let op = parts.pop();
+            let lastPart = parts.pop(); let op = parts.pop();
             let base = eval(parts.join("") || "0");
             let val = (op === '+' || op === '-') ? base * (parseFloat(lastPart) / 100) : parseFloat(lastPart) / 100;
             historyExpr = parts.join("") + (op || "") + val;
@@ -376,21 +350,18 @@
 
     function autoPreview() {
         try {
-            let temp = historyExpr;
-            if (!temp) { resDiv.innerText = "0"; return; }
+            let temp = historyExpr; if (!temp) { resDiv.innerText = "0"; return; }
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
+            if (!temp) { resDiv.innerText = "0"; return; }
             let open = (temp.match(/\(/g) || []).length;
             let close = (temp.match(/\)/g) || []).length;
             if (open > close) temp += ")".repeat(open - close);
             let pVal = Math.round(eval(temp) * 1000000) / 1000000;
             resDiv.innerText = formatNumber(pVal);
             if (targetInput !== "" && pVal > parseFloat(targetInput)) {
-                resDiv.classList.add('neon-danger');
-                msgDiv.innerText = "⚠️ VƯỢT QUÁ!";
-                msgDiv.style.color = "var(--danger)";
+                resDiv.classList.add('neon-danger'); msgDiv.innerText = "⚠️ VƯỢT QUÁ!"; msgDiv.style.color = "var(--danger)";
             } else {
-                resDiv.classList.remove('neon-danger');
-                if(!isTargetMode) msgDiv.innerText = "";
+                resDiv.classList.remove('neon-danger'); if(!isTargetMode) msgDiv.innerText = "";
             }
         } catch(e) { resDiv.innerText = "0"; }
     }
@@ -403,18 +374,15 @@
             let res = eval(temp); let finalRes = Math.round(res * 1000000) / 1000000;
             if (targetInput !== "") {
                 if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
-                    msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.style.color = "var(--accent)";
-                    playSound('success');
+                    msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.style.color = "var(--accent)"; playSound('success');
                 } else {
                     let diff = Math.round((finalRes - parseFloat(targetInput)) * 100) / 100;
                     msgDiv.innerText = (diff > 0 ? "❌ VƯỢT: " : "❌ THIẾU: ") + formatNumber(Math.abs(diff));
-                    msgDiv.style.color = "var(--danger)";
-                    playSound('fail');
+                    msgDiv.style.color = "var(--danger)"; playSound('fail');
                 }
             }
             calculationHistory.push({ expr: exprDiv.innerText, res: finalRes });
-            resDiv.innerText = formatNumber(finalRes);
-            historyExpr = finalRes.toString(); exprDiv.innerText = "";
+            resDiv.innerText = formatNumber(finalRes); historyExpr = finalRes.toString(); exprDiv.innerText = "";
         } catch(e) { resDiv.innerText = "Lỗi"; }
     }
 
