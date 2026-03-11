@@ -1043,8 +1043,7 @@ body {
             clearAll();
         })();
     </script>
-
-   <!-- ===== THÊM PHẦN NÀY VÀO CUỐI - ĐÃ CẢI TIẾN ===== -->
+    <!-- ===== THÊM PHẦN NÀY VÀO CUỐI - ĐÃ CHẶN BÀN PHÍM ===== -->
 <div class="editing-indicator" id="editingIndicator">📝 ĐANG NHẬP SỐ KIỂM TRA</div>
 
 <script>
@@ -1067,7 +1066,27 @@ body {
         const equalsBtn = document.getElementById('equals');
         const indicator = document.getElementById('editingIndicator');
         
-        // ===== KÍCH HOẠT CHẾ ĐỘ EDIT KHI CLICK VÀO TARGET-ROW =====
+        // ===== CHẶN HOÀN TOÀN BÀN PHÍM HỆ THỐNG TRÊN Ô INPUT =====
+        // Giữ readonly để ngăn bàn phím mềm, đồng thời chặn mọi sự kiện có thể gây focus
+        targetInput.setAttribute('readonly', 'true');
+        
+        // Chặn tất cả các sự kiện chuột và cảm ứng ở giai đoạn capture
+        targetInput.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, true); // capture
+        
+        targetInput.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, true);
+        
+        targetInput.addEventListener('focus', (e) => {
+            e.preventDefault();
+            e.target.blur(); // Buộc mất focus ngay lập tức
+        }, true);
+        
+        // ===== KÍCH HOẠT CHẾ ĐỘ EDIT KHI CLICK VÀO TARGET-ROW (kể cả label) =====
         targetRow.addEventListener('click', function(e) {
             e.preventDefault();          // Ngăn focus vào input (nếu có)
             e.stopPropagation();
@@ -1077,6 +1096,7 @@ body {
                 targetInput.classList.add('editing-mode');
                 indicator.classList.add('show');
                 
+                // Lấy giá trị hiện tại (nếu có)
                 let currentVal = targetInput.dataset.rawValue || '';
                 tempTargetValue = currentVal ? currentVal.toString() : '';
                 targetInput.value = tempTargetValue || '0';
@@ -1281,9 +1301,11 @@ body {
             if (navigator.vibrate) navigator.vibrate(10);
         }
         
-        console.log('✅ Chế độ nhập số kiểm tra bằng cách nhấn vào ô hoặc label đã sẵn sàng!');
+        console.log('✅ Chế độ nhập số kiểm tra bằng cách nhấn vào ô hoặc label đã sẵn sàng, bàn phím hệ thống đã bị chặn!');
     })();
+</script>
 
-    </script>
+  
 </body>
 </html>
+
