@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Máy tính kiểm tra kết quả</title>
     <style>
-        /* (Giữ nguyên toàn bộ CSS từ file gốc) */
+        /* ===== GIỮ NGUYÊN CÁC STYLE CŨ ===== */
         html, body {
             height: 100%;
             overflow: hidden;
@@ -81,9 +81,7 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-        #display::-webkit-scrollbar {
-            display: none;
-        }
+        #display::-webkit-scrollbar { display: none; }
 
         .backspace-btn {
             background: transparent;
@@ -119,7 +117,7 @@
             padding: 4px 8px;
             box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
             border: 1px solid #3e5a68;
-            cursor: pointer; /* Thêm cursor pointer để người dùng biết có thể nhấn */
+            cursor: pointer;
         }
 
         .target-label {
@@ -152,7 +150,6 @@
             appearance: none;
             cursor: pointer;
             transition: all 0.2s ease;
-            /* Chặn bàn phím bằng readonly */
             readonly: readonly;
         }
         #targetInput::-webkit-outer-spin-button,
@@ -160,13 +157,11 @@
             -webkit-appearance: none;
             margin: 0;
         }
-
         #targetInput::placeholder {
             color: #3f5563;
             font-size: 1.1rem;
             text-shadow: none;
         }
-
         #targetInput.editing-mode {
             background: #1e3a4a;
             border-radius: 12px;
@@ -181,11 +176,11 @@
             100% { box-shadow: 0 0 0 3px #ffaa00; }
         }
 
+        /* ===== MESSAGE AREA MỚI ===== */
         .message-area {
             margin-top: 4px;
             font-size: 0.9rem;
             font-weight: 600;
-            text-align: center;
             padding: 4px 6px;
             border-radius: 40px;
             background: #1a262e;
@@ -196,9 +191,28 @@
             min-height: 2rem;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             word-break: break-word;
             will-change: background, box-shadow;
+        }
+
+        .message-text {
+            flex: 1;
+            text-align: center;
+        }
+
+        .history-icon {
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 0 5px;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.1s;
+            user-select: none;
+        }
+        .history-icon:active {
+            opacity: 1;
+            transform: scale(1.2);
+            color: #ffaa00;
         }
 
         .message-area.success {
@@ -230,6 +244,7 @@
             100% { transform: translateX(0); filter: brightness(1); }
         }
 
+        /* ===== BUTTONS GRID MỚI ===== */
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -300,16 +315,12 @@
             font-weight: 700;
         }
 
-        .btn.zero {
-            grid-column: span 2;
-        }
-
         .btn.plus-long {
             grid-row: span 2;
             min-height: 160px;
         }
 
-        /* Media queries */
+        /* Media queries giữ nguyên nhưng điều chỉnh nhẹ */
         @media (max-width: 340px) {
             .calculator {
                 max-width: 100%;
@@ -340,6 +351,9 @@
                 font-size: 0.8rem;
                 padding: 3px 4px;
                 min-height: 1.7rem;
+            }
+            .history-icon {
+                font-size: 1.2rem;
             }
             .backspace-btn {
                 font-size: 1.3rem;
@@ -466,7 +480,7 @@
             }
         }
 
-        /* Hỗ trợ iPhone với notch/dynamic island */
+        /* Hỗ trợ safe area */
         @supports (padding: max(0px)) {
             .calculator {
                 padding-left: max(8px, env(safe-area-inset-left));
@@ -475,17 +489,115 @@
             }
         }
 
-        /* Tối ưu cho màn hình OLED Samsung */
+        /* Tối ưu OLED */
         @media (display-mode: browser) {
             .calculator {
                 background: #1a242e;
             }
         }
 
-        /* Đảm bảo không bị tràn */
         * {
             box-sizing: border-box;
             -webkit-box-sizing: border-box;
+        }
+
+        /* ===== MODAL LỊCH SỬ ===== */
+        .history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(3px);
+        }
+
+        .history-modal.show {
+            display: flex;
+        }
+
+        .history-content {
+            background: #1f2a34;
+            border-radius: 30px;
+            padding: 20px;
+            max-width: 90%;
+            width: 320px;
+            max-height: 70vh;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.1);
+            border: 1px solid #4a6572;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-title {
+            color: #ffde9e;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 0 0 8px #ffb347;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            max-height: 40vh;
+            padding: 5px;
+            background: #121b22;
+            border-radius: 16px;
+            border: 1px solid #3e5a68;
+        }
+
+        .history-item {
+            background: #1e282f;
+            color: #b0e0ff;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            word-break: break-all;
+            border: 1px solid #3f5563;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .history-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .history-clear-btn {
+            background: #5f4c4c;
+            border: none;
+            color: #ffe1c6;
+            font-size: 1.2rem;
+            padding: 10px;
+            border-radius: 40px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #3a2e2e;
+            cursor: pointer;
+            transition: 0.05s linear;
+            border: 1px solid #9b7a7a;
+        }
+        .history-clear-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #3a2e2e;
+        }
+
+        .history-close-btn {
+            margin-top: 10px;
+            background: #2c3e4c;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: 1px solid #4a6572;
         }
 
         /* Indicator */
@@ -516,17 +628,9 @@
         .editing-indicator.show {
             display: block;
         }
-
-        @media (max-width: 340px) {
-            .editing-indicator {
-                font-size: 0.8rem;
-                padding: 6px 16px;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Phần HTML giữ nguyên -->
     <div class="calculator">
         <div class="display-area">
             <div class="main-screen">
@@ -537,13 +641,18 @@
                 <span class="target-label">Số Kiểm Tra</span>
                 <input type="text" id="targetInput" placeholder="0" inputmode="none" readonly>
             </div>
-            <div class="message-area" id="messageBox"></div>
+            <!-- Message area với icon lịch sử -->
+            <div class="message-area" id="messageBox">
+                <span class="message-text" id="messageText"></span>
+                <span class="history-icon" id="historyIcon">🕒</span>
+            </div>
         </div>
 
+        <!-- Các nút bấm - Layout mới -->
         <div class="buttons">
-            <!-- Hàng 1: C, ., %, × -->
+            <!-- Hàng 1: C, (), %, × -->
             <button class="btn clear" id="clear" tabindex="-1">C</button>
-            <button class="btn operator" id="dot" tabindex="-1">.</button>
+            <button class="btn operator" id="brackets" tabindex="-1">( )</button>
             <button class="btn operator" id="percent" tabindex="-1">%</button>
             <button class="btn operator" id="multiply" tabindex="-1">×</button>
 
@@ -553,29 +662,40 @@
             <button class="btn" id="9" tabindex="-1">9</button>
             <button class="btn operator" id="subtract" tabindex="-1">−</button>
 
-            <!-- Hàng 3: 4, 5, 6, + (bắt đầu của nút dài) -->
+            <!-- Hàng 3: 4, 5, 6, + (dài 2 hàng) -->
             <button class="btn" id="4" tabindex="-1">4</button>
             <button class="btn" id="5" tabindex="-1">5</button>
             <button class="btn" id="6" tabindex="-1">6</button>
             <button class="btn operator plus-long" id="add" tabindex="-1">+</button>
 
-            <!-- Hàng 4: 1, 2, 3, (ô trống cho nút + dài) -->
+            <!-- Hàng 4: 1, 2, 3 (cột 4 trống) -->
             <button class="btn" id="1" tabindex="-1">1</button>
             <button class="btn" id="2" tabindex="-1">2</button>
             <button class="btn" id="3" tabindex="-1">3</button>
-            <!-- Ô thứ 4 hàng 4 để trống vì nút + đã chiếm 2 hàng -->
+            <!-- Ô trống hàng 4 cột 4 (do nút + chiếm) -->
 
-            <!-- Hàng 5: 0, 00, = -->
-            <button class="btn zero" id="0" tabindex="-1">0</button>
+            <!-- Hàng 5: 0, 00, ., = -->
+            <button class="btn" id="0" tabindex="-1">0</button>
             <button class="btn" id="00" tabindex="-1">00</button>
-            <button class="btn equals" id="equals" tabindex="-1">=</button>        
+            <button class="btn operator" id="dot" tabindex="-1">.</button>
+            <button class="btn equals" id="equals" tabindex="-1">=</button>
         </div>
     </div>
 
-    <!-- Indicator (nằm ngoài calculator) -->
+    <!-- Modal lịch sử -->
+    <div class="history-modal" id="historyModal">
+        <div class="history-content">
+            <div class="history-title">📜 Lịch sử tính toán</div>
+            <div class="history-list" id="historyList"></div>
+            <button class="history-clear-btn" id="clearHistoryBtn">🗑️ Xóa tất cả</button>
+            <button class="history-close-btn" id="closeHistoryBtn">Đóng</button>
+        </div>
+    </div>
+
+    <!-- Indicator -->
     <div class="editing-indicator" id="editingIndicator">📝 ĐANG NHẬP SỐ KIỂM TRA</div>
 
-    <!-- MỘT SCRIPT DUY NHẤT - ĐÃ TÍCH HỢP HOÀN CHỈNH -->
+    <!-- MỘT SCRIPT DUY NHẤT - TÍCH HỢP ĐẦY ĐỦ -->
     <script>
         (function() {
             "use strict";
@@ -585,12 +705,18 @@
             const targetInput = document.getElementById('targetInput');
             const targetRow = document.querySelector('.target-row');
             const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
             const backspaceBtn = document.getElementById('backspaceBtn');
             const clearBtn = document.getElementById('clear');
             const equalsBtn = document.getElementById('equals');
             const indicator = document.getElementById('editingIndicator');
+            const historyIcon = document.getElementById('historyIcon');
+            const historyModal = document.getElementById('historyModal');
+            const historyList = document.getElementById('historyList');
+            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+            const closeHistoryBtn = document.getElementById('closeHistoryBtn');
 
-            // ===== BIẾN TRẠNG THÁI CHÍNH (Máy tính) =====
+            // ===== BIẾN TRẠNG THÁI MÁY TÍNH =====
             let currentInput = '0';
             let previousInput = '';
             let operator = null;
@@ -600,6 +726,10 @@
             // ===== BIẾN TRẠNG THÁI CHO CHẾ ĐỘ NHẬP SỐ KIỂM TRA =====
             let isEditingTarget = false;
             let tempTargetValue = '';
+
+            // ===== LỊCH SỬ =====
+            let history = [];  // Mảng lưu các chuỗi biểu thức đã format
+            const MAX_HISTORY = 30;
 
             // ===== CÁC HẰNG SỐ =====
             const MAX_INTEGER_LENGTH = 12;
@@ -686,36 +816,28 @@
 
             function parseInputString(str) {
                 if (!str) return NaN;
-                // Chuẩn hóa: chuyển tất cả dấu phẩy thành dấu chấm
                 let normalized = str.replace(/,/g, '.');
-                // Loại bỏ tất cả ký tự không phải số và dấu chấm
                 let cleaned = normalized.replace(/[^\d.]/g, '');
-                
-                // Xử lý nhiều dấu chấm - chỉ giữ dấu chấm cuối cùng
                 let parts = cleaned.split('.');
                 if (parts.length > 2) {
-                    // Nếu có nhiều hơn 1 dấu chấm, giữ phần nguyên và phần thập phân từ dấu chấm cuối
                     let integerPart = parts.slice(0, -1).join('');
                     let decimalPart = parts[parts.length - 1];
                     cleaned = integerPart + '.' + decimalPart;
                 }
-                
                 let dotIndex = cleaned.indexOf('.');
                 let integerPart = dotIndex === -1 ? cleaned : cleaned.substring(0, dotIndex);
                 let decimalPart = dotIndex === -1 ? '' : cleaned.substring(dotIndex + 1);
-                
                 if (integerPart.length > MAX_INTEGER_LENGTH) {
                     integerPart = integerPart.slice(0, MAX_INTEGER_LENGTH);
                 }
                 if (decimalPart.length > MAX_DECIMAL_LENGTH) {
                     decimalPart = decimalPart.slice(0, MAX_DECIMAL_LENGTH);
                 }
-                
                 let finalStr = integerPart + (decimalPart ? '.' + decimalPart : '');
                 return parseFloat(finalStr);
             }
 
-            // ===== CÁC HÀM CẬP NHẬT MÀN HÌNH MÁY TÍNH =====
+            // ===== CẬP NHẬT MÀN HÌNH MÁY TÍNH =====
             function updateDisplayInput() {
                 mainDisplay.textContent = formatInputForDisplay(currentInput);
                 mainDisplay.classList.add('led-flash-display');
@@ -736,24 +858,21 @@
                 mainDisplay.scrollTop = mainDisplay.scrollHeight;
             }
 
-            // ===== CÁC HÀM XỬ LÝ TÍNH TOÁN =====
+            // ===== XỬ LÝ TÍNH TOÁN =====
             function inputNumber(num) {
                 if (shouldResetDisplay) {
                     currentInput = '';
                     shouldResetDisplay = false;
                 }
-
                 if (num === '.') {
                     if (currentInput.includes('.')) return;
                     if (currentInput === '') currentInput = '0';
                 }
-
                 if (currentInput === '0' && num !== '.') {
                     currentInput = num;
                 } else {
                     currentInput += num;
                 }
-
                 currentInput = limitNumberLength(currentInput);
                 updateDisplayInput();
             }
@@ -769,20 +888,20 @@
 
             function calculate() {
                 if (!operator || shouldResetDisplay) return;
-
                 let result;
                 const prev = parseFloat(previousInput);
                 const current = parseFloat(currentInput);
-
                 if (isNaN(prev) || isNaN(current)) return;
-
                 switch (operator) {
                     case '+': result = prev + current; break;
                     case '−': result = prev - current; break;
                     case '×': result = prev * current; break;
                     default: return;
                 }
-
+                // Tạo biểu thức đầy đủ cho lịch sử
+                const expression = formatNumber(prev) + operator + formatNumber(current) + '=' + formatNumber(result);
+                addHistory(expression);
+                
                 currentInput = limitNumberLength(result.toString());
                 lastResult = result;
                 operator = null;
@@ -803,6 +922,9 @@
                     case '×': result = prev * (current / 100); break;
                     default: return;
                 }
+                const expression = formatNumber(prev) + operator + formatNumber(current) + '%=' + formatNumber(result);
+                addHistory(expression);
+                
                 currentInput = limitNumberLength(result.toString());
                 lastResult = result;
                 operator = null;
@@ -824,6 +946,16 @@
                 }
             }
 
+            function handleBrackets() {
+                // Tạm thời chưa xử lý ngoặc, có thể thêm sau
+                messageText.textContent = 'Chức năng đang phát triển';
+                messageBox.classList.add('error');
+                setTimeout(() => {
+                    messageText.textContent = '';
+                    messageBox.classList.remove('error');
+                }, 1000);
+            }
+
             function clearAll() {
                 currentInput = '0';
                 previousInput = '';
@@ -831,16 +963,13 @@
                 shouldResetDisplay = false;
                 lastResult = null;
                 updateDisplayInput();
-                
-                // Nếu đang ở chế độ chỉnh sửa target thì thoát
                 if (isEditingTarget) {
                     exitTargetEditing();
                 } else {
                     targetInput.value = '';
                     delete targetInput.dataset.rawValue;
                 }
-                
-                messageBox.textContent = '';
+                messageText.textContent = '';
                 messageBox.className = 'message-area';
             }
 
@@ -851,6 +980,43 @@
                     currentInput = '0';
                 }
                 updateDisplayInput();
+            }
+
+            // ===== LỊCH SỬ =====
+            function addHistory(entry) {
+                history.unshift(entry); // Thêm vào đầu mảng (mới nhất lên trên)
+                if (history.length > MAX_HISTORY) {
+                    history.pop();
+                }
+                // Không tự động hiển thị modal
+            }
+
+            function renderHistory() {
+                historyList.innerHTML = '';
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="history-item" style="color:#aaa; text-align:center;">Chưa có lịch sử</div>';
+                } else {
+                    history.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'history-item';
+                        div.textContent = item;
+                        historyList.appendChild(div);
+                    });
+                }
+            }
+
+            function showHistoryModal() {
+                renderHistory();
+                historyModal.classList.add('show');
+            }
+
+            function hideHistoryModal() {
+                historyModal.classList.remove('show');
+            }
+
+            function clearHistory() {
+                history = [];
+                renderHistory();
             }
 
             // ===== AUDIO =====
@@ -869,13 +1035,11 @@
                 const ctx = initAudioContext();
                 if (!ctx) return;
                 if (ctx.state === 'suspended') ctx.resume();
-
                 const now = ctx.currentTime;
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain);
                 gain.connect(ctx.destination);
-
                 if (type === 'success') {
                     osc.frequency.value = 880;
                     gain.gain.setValueAtTime(0.5, now);
@@ -900,50 +1064,42 @@
                 }, 300);
             }
 
-            // ===== HÀM XỬ LÝ SỐ KIỂM TRA (TARGET) =====
+            // ===== XỬ LÝ SỐ KIỂM TRA =====
             function updateTargetInput() {
                 if (tempTargetValue.length > 15) {
                     tempTargetValue = tempTargetValue.slice(0, 15);
                 }
-                
                 targetInput.value = tempTargetValue;
-                
                 if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
                     targetInput.dataset.rawValue = parseFloat(tempTargetValue);
                 } else {
                     delete targetInput.dataset.rawValue;
                 }
-                
                 targetInput.scrollLeft = targetInput.scrollWidth;
             }
 
             function exitTargetEditing() {
                 if (!isEditingTarget) return;
-                
                 isEditingTarget = false;
                 targetInput.classList.remove('editing-mode');
                 indicator.classList.remove('show');
-                
                 if (targetInput.dataset.rawValue) {
                     targetInput.value = formatNumber(parseFloat(targetInput.dataset.rawValue));
                 } else {
                     targetInput.value = '';
                     delete targetInput.dataset.rawValue;
                 }
-                
-                messageBox.textContent = '';
+                messageText.textContent = '';
                 messageBox.className = 'message-area';
-                
                 if (navigator.vibrate) navigator.vibrate(10);
             }
 
-            // ===== XỬ LÝ SỰ KIỆN CHO NÚT = (KIỂM TRA KẾT QUẢ) =====
+            // ===== XỬ LÝ NÚT = (KIỂM TRA KẾT QUẢ) =====
             function handleEquals() {
-                if (operator) calculate();
+                if (operator) calculate(); // calculate đã thêm lịch sử
 
                 const currentValue = parseFloat(currentInput);
                 let target = NaN;
-                
                 if (targetInput.dataset.rawValue !== undefined) {
                     target = parseFloat(targetInput.dataset.rawValue);
                 } else if (targetInput.value.trim() !== '') {
@@ -953,18 +1109,18 @@
                 if (!isNaN(target)) {
                     const diff = currentValue - target;
                     if (Math.abs(diff) < 1e-10) {
-                        messageBox.textContent = '✅ Chính xác!';
+                        messageText.textContent = '✅ Chính xác!';
                         messageBox.className = 'message-area success';
                         playSound('success');
                     } else {
                         const sign = diff > 0 ? '+' : '';
-                        messageBox.textContent = `❌ Sai. Đúng: ${formatNumber(target)} (${sign}${formatNumber(diff)})`;
+                        messageText.textContent = `❌ Sai. Đúng: ${formatNumber(target)} (${sign}${formatNumber(diff)})`;
                         messageBox.className = 'message-area error';
                         playSound('error');
                     }
                     vibrateMessage();
                 } else {
-                    messageBox.textContent = targetInput.value ? 'Nhập số TK hợp lệ!' : '';
+                    messageText.textContent = targetInput.value ? 'Nhập số TK hợp lệ!' : '';
                     messageBox.className = 'message-area';
                 }
             }
@@ -973,34 +1129,29 @@
             function handleButtonPress(e, callback) {
                 e.preventDefault();
                 e.stopPropagation();
-                targetInput.blur(); // Đảm bảo mất focus
+                targetInput.blur();
                 if (callback) callback();
             }
 
             // ===== GẮN SỰ KIỆN =====
-
-            // --- Sự kiện cho target row (kích hoạt chế độ chỉnh sửa) ---
+            // Target row
             targetRow.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
                 if (!isEditingTarget) {
                     isEditingTarget = true;
                     targetInput.classList.add('editing-mode');
                     indicator.classList.add('show');
-                    
                     let currentVal = targetInput.dataset.rawValue || '';
                     tempTargetValue = currentVal ? currentVal.toString() : '';
                     targetInput.value = tempTargetValue || '0';
-                    
-                    messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
+                    messageText.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
                     messageBox.className = 'message-area';
-                    
                     if (navigator.vibrate) navigator.vibrate(20);
                 }
-            }, true); // Dùng capture để bắt sự kiện sớm
+            }, true);
 
-            // --- Nhấn ra ngoài để thoát chế độ chỉnh sửa ---
+            // Nhấn ra ngoài thoát edit
             document.addEventListener('click', function(e) {
                 if (isEditingTarget && 
                     !e.target.closest('.target-row') && 
@@ -1009,19 +1160,16 @@
                 }
             }, true);
 
-            // --- Các nút số và toán tử ---
+            // Các nút
             const allButtons = document.querySelectorAll('.btn');
             allButtons.forEach(btn => {
                 btn.addEventListener('pointerdown', (e) => {
-                    // Nếu đang ở chế độ chỉnh sửa target
                     if (isEditingTarget) {
                         e.preventDefault();
                         e.stopPropagation();
                         flashButton(btn);
-
                         const id = btn.id;
                         
-                        // Xử lý các nút số và dấu chấm
                         if (id.match(/^\d+$/)) {
                             tempTargetValue += id;
                             updateTargetInput();
@@ -1049,7 +1197,6 @@
                             if (tempTargetValue.length > 0) {
                                 tempTargetValue = tempTargetValue.slice(0, -1);
                                 targetInput.value = tempTargetValue || '0';
-                                
                                 if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
                                     targetInput.dataset.rawValue = parseFloat(tempTargetValue);
                                 } else {
@@ -1061,21 +1208,30 @@
                             exitTargetEditing();
                             setTimeout(() => handleEquals(), 100);
                         }
-                        else if (id === 'add' || id === 'subtract' || id === 'multiply' || id === 'percent') {
-                            messageBox.textContent = '⚠️ Không dùng toán tử khi nhập số kiểm tra';
+                        else if (id === 'brackets') {
+                            messageText.textContent = '⚠️ Không dùng ngoặc khi nhập số kiểm tra';
                             messageBox.className = 'message-area error';
                             setTimeout(() => {
                                 if (isEditingTarget) {
-                                    messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
+                                    messageText.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
                                     messageBox.className = 'message-area';
                                 }
                             }, 1500);
                         }
-                        
+                        else if (id === 'add' || id === 'subtract' || id === 'multiply' || id === 'percent') {
+                            messageText.textContent = '⚠️ Không dùng toán tử khi nhập số kiểm tra';
+                            messageBox.className = 'message-area error';
+                            setTimeout(() => {
+                                if (isEditingTarget) {
+                                    messageText.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
+                                    messageBox.className = 'message-area';
+                                }
+                            }, 1500);
+                        }
                         return;
                     }
 
-                    // Nếu KHÔNG ở chế độ chỉnh sửa, xử lý như máy tính bình thường
+                    // Chế độ máy tính bình thường
                     handleButtonPress(e, () => {
                         flashButton(btn);
                         const id = btn.id;
@@ -1100,23 +1256,22 @@
                         else if (id === 'subtract') handleOperator('−');
                         else if (id === 'multiply') handleOperator('×');
                         else if (id === 'percent') handlePercent();
+                        else if (id === 'brackets') handleBrackets();
                         else if (id === 'clear') clearAll();
                         else if (id === 'equals') handleEquals();
                     });
                 });
             });
 
-            // Xử lý riêng cho backspace (vì nó không phải btn)
+            // Backspace riêng
             backspaceBtn.addEventListener('pointerdown', (e) => {
                 if (isEditingTarget) {
                     e.preventDefault();
                     e.stopPropagation();
                     flashButton(backspaceBtn);
-                    
                     if (tempTargetValue.length > 0) {
                         tempTargetValue = tempTargetValue.slice(0, -1);
                         targetInput.value = tempTargetValue || '0';
-                        
                         if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
                             targetInput.dataset.rawValue = parseFloat(tempTargetValue);
                         } else {
@@ -1125,21 +1280,35 @@
                     }
                     return;
                 }
-                
                 handleButtonPress(e, () => {
                     flashButton(backspaceBtn);
                     backspace();
                 });
             });
 
-            // ===== XỬ LÝ PHÍM TẮT =====
+            // Lịch sử
+            historyIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showHistoryModal();
+            });
+
+            closeHistoryBtn.addEventListener('click', hideHistoryModal);
+            clearHistoryBtn.addEventListener('click', () => {
+                clearHistory();
+            });
+
+            // Click ra ngoài modal để đóng
+            historyModal.addEventListener('click', (e) => {
+                if (e.target === historyModal) {
+                    hideHistoryModal();
+                }
+            });
+
+            // Xử lý phím tắt
             window.addEventListener('keydown', (e) => {
                 const key = e.key;
-                
-                // Nếu đang ở chế độ chỉnh sửa target
                 if (isEditingTarget) {
                     e.preventDefault();
-                    
                     if (key >= '0' && key <= '9') {
                         tempTargetValue += key;
                         updateTargetInput();
@@ -1177,11 +1346,9 @@
                         exitTargetEditing();
                         setTimeout(() => handleEquals(), 100);
                     }
-                    
                     return;
                 }
-                
-                // Nếu KHÔNG ở chế độ chỉnh sửa
+
                 if (document.activeElement === targetInput) {
                     if (key === 'Enter') {
                         e.preventDefault();
@@ -1191,7 +1358,6 @@
                 }
 
                 e.preventDefault();
-
                 if (key >= '0' && key <= '9') {
                     inputNumber(key);
                     flashButton(document.getElementById(key));
@@ -1215,6 +1381,10 @@
                 else if (key === '%') {
                     handlePercent();
                     flashButton(document.getElementById('percent'));
+                }
+                else if (key === '(' || key === ')') {
+                    handleBrackets();
+                    flashButton(document.getElementById('brackets'));
                 }
                 else if (key === 'Enter' || key === '=') {
                     e.preventDefault();
