@@ -3,29 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClevCalc Fixed No-Scroll</title>
+    <title>ClevCalc Sentinel Orange Edition</title>
     <style>
         :root {
             --bg-color: #ffffff;
-            --accent: #2ecc71;
+            --accent: #27ae60;
             --text-main: #2c3e50;
             --op-color: #f39c12;
-            --target-color: #3498db;
-            --danger: #e74c3c;
+            --target-color: #e67e22; /* Màu Cam Carrot chuyên nghiệp */
+            --danger: #c0392b;
+            --key-bg: #ffffff;
+            --key-active: #f1f2f6;
+
+            /* LED Soft Glow - Hiệu ứng Cam mượt */
+            --led-green: #27ae60;
+            --led-green-glow: 0 0 8px rgba(39, 174, 96, 0.3);
+            
+            --led-orange: #e67e22;
+            --led-orange-glow: 0 0 10px rgba(230, 126, 34, 0.4);
+
+            --led-red: #e74c3c;
+            --led-red-glow: 0 0 12px rgba(231, 76, 60, 0.5);
         }
 
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            touch-action: manipulation;
-            user-select: none;
-            font-weight: 600; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            touch-action: manipulation; user-select: none; font-weight: 600; 
         }
 
         html, body { 
             height: 100%; margin: 0; overflow: hidden; 
-            background-color: #1a1a1a; display: flex; justify-content: center;
+            background-color: #000; display: flex; justify-content: center;
             position: fixed; width: 100%;
         }
 
@@ -37,102 +47,108 @@
 
         .display-screen {
             height: 40%; width: 100%;
-            padding: 20px 20px 10px;
+            padding: 20px 25px 15px;
             display: flex; flex-direction: column; justify-content: flex-end; 
-            text-align: right; position: relative; background: white; z-index: 5;
+            text-align: right; background: #fff; z-index: 5;
         }
 
         #expression { 
-            font-size: 2.2rem; color: #7f8c8d; 
+            font-size: 2.2rem; color: #bdc3c7; 
             max-height: 120px; overflow-y: auto; 
-            word-break: break-all; margin-bottom: 5px;
-            transition: font-size 0.2s ease;
-            scroll-behavior: smooth;
-            font-weight: 500;
+            word-break: break-all; margin-bottom: 8px;
+            font-weight: 500; scroll-behavior: smooth;
         }
         
-        /* ĐÃ KHÓA CUỘN: Kết quả không được phép cuộn */
         #result-preview { 
-            font-size: 3.5rem; 
-            color: var(--text-main); 
-            line-height: 1; 
-            overflow: hidden; /* Tuyệt đối không cuộn */
-            white-space: nowrap;
-            font-weight: 800; 
-            text-overflow: ellipsis; /* Nếu quá dài sẽ hiện dấu ... thay vì tràn */
+            font-size: 3.8rem; 
+            color: var(--led-green);
+            text-shadow: var(--led-green-glow);
+            line-height: 1.1; overflow: hidden; white-space: nowrap; font-weight: 800; 
+            text-overflow: ellipsis; margin-bottom: 10px;
+            transition: all 0.2s ease;
         }
 
         #comparison-msg { 
-            font-size: 1.5rem; 
-            font-weight: 900; 
-            text-align: center; height: 24px; margin: 5px 0; 
-            letter-spacing: 0.5px;
+            font-size: 1.1rem; font-weight: 900; 
+            text-align: center; height: 28px; margin-bottom: 10px;
         }
 
         .target-area { 
-            display: flex; align-items: center; background: #f9f9f9; 
-            border-radius: 8px; padding: 5px 12px; border: 1px dashed var(--target-color);
-            margin-top: 5px;
+            display: flex; align-items: center; background: #fffaf5; /* Nền hơi cam nhạt rất nhẹ */
+            border-radius: 12px; padding: 8px 15px; 
+            border: 1.5px solid #ffecdb;
         }
+
         .history-btn { 
-            font-size: 1.3rem; color: #bdc3c7; padding: 5px 10px 5px 0; 
-            cursor: pointer; border-right: 1px solid #eee; margin-right: 10px;
+            padding-right: 15px; border-right: 1px solid #ffecdb; margin-right: 15px;
             display: flex; align-items: center;
         }
-        .target-label { font-size: 1.2rem; color: var(--target-color); font-weight: 800; margin-right: 8px; }
-        #target-display { flex: 1; font-size: 1.7rem; color: var(--target-color); font-weight: 900; text-align: right; }
+        .history-btn svg { width: 20px; height: 20px; stroke: #e67e22; stroke-width: 2; fill: none; }
+
+        .target-label { font-size: 0.7rem; color: #d35400; font-weight: 800; letter-spacing: 0.5px; }
+        
+        #target-display { 
+            flex: 1; font-size: 1.5rem; 
+            color: var(--led-orange);
+            text-shadow: var(--led-orange-glow);
+            font-weight: 900; text-align: right; 
+        }
 
         .keypad {
             height: 60%; width: 100%;
             display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr);
-            background: #ccc; gap: 1px;
-            position: absolute; bottom: 0; left: 0;
+            background: #f1f2f6; gap: 1px; position: absolute; bottom: 0;
             padding-bottom: env(safe-area-inset-bottom);
-            z-index: 20;
         }
 
         button {
-            width: 100%; height: 100%; border: none; background: #fff;
-            font-size: 1.8rem; color: #333; outline: none;
+            background: var(--key-bg); border: none; font-size: 1.9rem; color: #2d3436;
             display: flex; justify-content: center; align-items: center;
-            font-weight: 700;
         }
-        button.pressed { background: #f0f0f0; transform: scale(0.95); }
+        button:active { background: var(--key-active); }
+
+        .btn-back svg { width: 26px; height: 26px; stroke: #2d3436; stroke-width: 2; fill: none; }
 
         .btn-op { color: var(--op-color); font-weight: 900; }
         .btn-func { color: var(--accent); font-weight: 900; }
         .btn-clear { color: var(--danger); font-weight: 900; }
-        .btn-equal { background: var(--accent); color: white; font-size: 2.5rem; font-weight: 900; }
+        .btn-equal { background: var(--accent); color: white; font-size: 2.8rem; font-weight: 800; }
         .btn-plus { grid-row: span 2; color: var(--op-color); font-weight: 900; }
         
         .shake { animation: shake 0.4s both; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        .neon-danger {
+            color: var(--led-red) !important;
+            text-shadow: var(--led-red-glow) !important;
         }
 
         .history-box {
-            position: absolute; inset: 0;
-            background: white; z-index: 100; display: none; flex-direction: column; padding: 20px;
-            padding-top: env(safe-area-inset-top);
+            position: absolute; inset: 0; background: white; z-index: 100; 
+            display: none; flex-direction: column; padding: 25px;
+            padding-top: calc(env(safe-area-inset-top) + 20px);
         }
         .history-list { flex: 1; overflow-y: auto; }
-        .history-item { border-bottom: 1px solid #eee; padding: 15px 0; }
-        #expression::-webkit-scrollbar { width: 0; background: transparent; }
-        .active-target { background: #e3f2fd !important; }
+        .history-item { border-bottom: 1px solid #f1f1f1; padding: 18px 0; }
+        .active-target { background: #fff5eb !important; border-color: var(--target-color) !important; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div class="clevcalc-container">
     <div id="historyBox" class="history-box">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <b style="color:var(--accent)">LỊCH SỬ</b>
-            <span id="closeHistory" style="font-size: 1.5rem; cursor:pointer; padding: 10px;">✖</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <span style="font-size: 1.5rem; font-weight: 900; color: var(--accent);">Lịch sử</span>
+            <div id="closeHistory" style="padding: 10px; cursor: pointer;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </div>
         </div>
         <div id="historyList" class="history-list"></div>
-        <button id="clearHistoryBtn" style="height:50px; background:#f2f2f2; font-size:1rem; border-radius: 8px;">Xóa lịch sử</button>
+        <button id="clearHistoryBtn" style="margin-top: 15px; height: 55px; background: #f8f9fa; font-size: 1rem; border-radius: 15px; color: #e74c3c;">Xóa tất cả</button>
     </div>
 
     <div class="display-screen">
@@ -140,9 +156,11 @@
         <div id="result-preview">0</div>
         <div id="comparison-msg"></div>
         <div class="target-area">
-            <div class="history-btn" id="openHistory">🕒</div>
+            <div class="history-btn" id="openHistory">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
             <div id="target-box" style="display:flex; align-items:center; flex:1; height:100%">
-                <span class="target-label">KIỂM TRA:</span>
+                <span class="target-label">MỤC TIÊU:</span>
                 <div id="target-display">0</div>
             </div>
         </div>
@@ -152,11 +170,11 @@
         <button class="btn-clear" data-val="C">C</button>
         <button class="btn-func" data-val="()">()</button>
         <button class="btn-func" data-val="%">%</button>
-        <button class="btn-op" data-val="*">×</button>
+        <button class="btn-op" data-val="-">−</button>
         <button data-val="7">7</button>
         <button data-val="8">8</button>
         <button data-val="9">9</button>
-        <button class="btn-op" data-val="-">−</button>
+        <button class="btn-op" data-val="*">×</button>
         <button data-val="4">4</button>
         <button data-val="5">5</button>
         <button data-val="6">6</button>
@@ -164,7 +182,9 @@
         <button data-val="1">1</button>
         <button data-val="2">2</button>
         <button data-val="3">3</button>
-        <button data-val="back">⌫</button>
+        <button class="btn-back" data-val="back">
+            <svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+        </button>
         <button data-val="0">0</button>
         <button data-val=".">,</button>
         <button class="btn-equal" data-val="=">=</button>
@@ -173,27 +193,25 @@
 
 <script>
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        osc.connect(gain); gain.connect(audioCtx.destination);
         if (type === 'click') {
             osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         } else if (type === 'success') {
             osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 0.3);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
             osc.start(); osc.stop(audioCtx.currentTime + 0.4);
         } else if (type === 'fail') {
             osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
             osc.start(); osc.stop(audioCtx.currentTime + 0.5);
         }
@@ -216,31 +234,31 @@
     buttons.forEach(btn => {
         const handleAction = (e) => {
             e.preventDefault();
-            playSound('click');
-            btn.classList.add('pressed');
             const val = btn.getAttribute('data-val');
-            if (val === 'C') clearAll();
-            else if (val === '()') smartParenthesis();
-            else if (val === '%') applyPercent();
-            else if (val === '-') addOp('-');
-            else if (val === '*') addOp('*');
-            else if (val === '+') addOp('+');
-            else if (val === 'back') backspace();
-            else if (val === '=') calculate();
-            else if (val === '.') handleInput('.');
-            else handleInput(val);
-            setTimeout(() => btn.classList.remove('pressed'), 100);
+            handleCommand(val);
         };
         btn.addEventListener('touchstart', handleAction, {passive: false});
         btn.addEventListener('mousedown', (e) => { if(e.button === 0) handleAction(e); });
     });
 
+    function handleCommand(val) {
+        playSound('click');
+        if (val === 'C') clearAll();
+        else if (val === '()') smartParenthesis();
+        else if (val === '%') applyPercent();
+        else if (val === '-') addOp('-');
+        else if (val === '*') addOp('*');
+        else if (val === '+') addOp('+');
+        else if (val === 'back') backspace();
+        else if (val === '=') calculate();
+        else if (val === '.') handleInput('.');
+        else handleInput(val);
+    }
+
     document.getElementById('openHistory').addEventListener('touchstart', (e) => { e.preventDefault(); toggleHistory(); });
     document.getElementById('closeHistory').addEventListener('touchstart', (e) => { e.preventDefault(); toggleHistory(); });
     document.getElementById('clearHistoryBtn').addEventListener('touchstart', (e) => { e.preventDefault(); clearHistory(); });
     targetBox.addEventListener('touchstart', (e) => { e.preventDefault(); toggleTargetMode(); });
-
-    document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
     function formatNumber(val) {
         if (!val && val !== 0) return "";
@@ -255,7 +273,7 @@
         hList.innerHTML = calculationHistory.map(item => `
             <div class="history-item">
                 <div style="color:#7f8c8d; font-size:0.9rem">${item.expr} =</div>
-                <div style="font-weight:bold; text-align:right; font-size:1.2rem">${formatNumber(item.res)}</div>
+                <div style="font-weight:bold; text-align:right; font-size:1.4rem">${formatNumber(item.res)}</div>
             </div>
         `).reverse().join('');
     }
@@ -264,7 +282,8 @@
     function toggleTargetMode() {
         isTargetMode = !isTargetMode;
         document.querySelector('.target-area').classList.toggle('active-target', isTargetMode);
-        msgDiv.innerText = isTargetMode ? "Đang nhập Số kiểm tra..." : "";
+        msgDiv.innerText = isTargetMode ? "Đang nhập Mục tiêu..." : "";
+        msgDiv.style.color = "#d35400";
     }
 
     function renderDisplay() {
@@ -277,14 +296,36 @@
             else if (len > 20) exprDiv.style.fontSize = "1.6rem";
             else exprDiv.style.fontSize = "2.2rem";
             setTimeout(() => { exprDiv.scrollTop = exprDiv.scrollHeight; }, 10);
-            // KHÔNG CUỘN DÒNG KẾT QUẢ NỮA
         }
         targetDiv.innerText = formatNumber(targetInput) || "0";
     }
 
     function handleInput(n) {
-        if (isTargetMode) { if (n === '.' && targetInput.includes('.')) return; targetInput += n; }
-        else { historyExpr += n; autoPreview(); }
+        if (isTargetMode) { 
+            if (n === '.' && targetInput.includes('.')) return; 
+            targetInput += n; 
+        } else {
+            if (targetInput !== "" && !isNaN(n)) {
+                let cleanedExpr = historyExpr + n;
+                while (['+','-','*','/','(','.'].includes(cleanedExpr.slice(-1))) { cleanedExpr = cleanedExpr.slice(0, -1); }
+                try {
+                    let open = (cleanedExpr.match(/\(/g) || []).length;
+                    let close = (cleanedExpr.match(/\)/g) || []).length;
+                    if (open > close) cleanedExpr += ")".repeat(open - close);
+                    let potential = Math.round(eval(cleanedExpr) * 1000000) / 1000000;
+                    if (potential > parseFloat(targetInput)) {
+                        msgDiv.innerText = "⚠️ SẼ VƯỢT MỤC TIÊU!";
+                        msgDiv.style.color = "var(--danger)";
+                        msgDiv.classList.add('shake');
+                        resDiv.classList.add('neon-danger');
+                        setTimeout(() => msgDiv.classList.remove('shake'), 400);
+                        playSound('fail');
+                        return;
+                    }
+                } catch(e) {}
+            }
+            historyExpr += n; autoPreview();
+        }
         renderDisplay();
     }
 
@@ -303,7 +344,8 @@
         const last = historyExpr.slice(-1);
         if (['+','-','*','/'].includes(last)) historyExpr = historyExpr.slice(0, -1) + op;
         else if (historyExpr !== "" || op === '-') historyExpr += op;
-        renderDisplay();
+        resDiv.classList.remove('neon-danger');
+        renderDisplay(); autoPreview();
     }
 
     function applyPercent() {
@@ -323,13 +365,23 @@
         try {
             let temp = historyExpr;
             if (!temp) { resDiv.innerText = "0"; return; }
-            while (['+','-','*','/','('].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
-            if (!temp) return;
+            while (['+','-','*','/','(','.'].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
+            if (!temp) { resDiv.innerText = "0"; return; }
             let open = (temp.match(/\(/g) || []).length;
             let close = (temp.match(/\)/g) || []).length;
             if (open > close) temp += ")".repeat(open - close);
-            resDiv.innerText = formatNumber(Math.round(eval(temp) * 1000000) / 1000000);
-        } catch(e) {}
+            let pVal = Math.round(eval(temp) * 1000000) / 1000000;
+            resDiv.innerText = formatNumber(pVal);
+            
+            if (targetInput !== "" && pVal > parseFloat(targetInput)) {
+                resDiv.classList.add('neon-danger');
+                msgDiv.innerText = "⚠️ VƯỢT QUÁ!";
+                msgDiv.style.color = "var(--danger)";
+            } else {
+                resDiv.classList.remove('neon-danger');
+                if(!isTargetMode) msgDiv.innerText = "";
+            }
+        } catch(e) { resDiv.innerText = "0"; }
     }
 
     function calculate() {
@@ -338,26 +390,24 @@
             let temp = historyExpr;
             if (!temp) return;
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
-            if (!temp) return;
             let open = (temp.match(/\(/g) || []).length;
             let close = (temp.match(/\)/g) || []).length;
             if (open > close) temp += ")".repeat(open - close);
             let res = eval(temp);
             let finalRes = Math.round(res * 1000000) / 1000000;
+            
+            if (targetInput !== "" && Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
+                msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.style.color = "var(--accent)";
+                playSound('success');
+            } else if (targetInput !== "") {
+                let diff = Math.round((finalRes - parseFloat(targetInput)) * 100) / 100;
+                msgDiv.innerText = (diff > 0 ? "❌ VƯỢT: " : "❌ THIẾU: ") + formatNumber(Math.abs(diff));
+                msgDiv.style.color = "var(--danger)";
+                playSound('fail');
+            }
+
             calculationHistory.push({ expr: exprDiv.innerText, res: finalRes });
             resDiv.innerText = formatNumber(finalRes);
-            if (targetInput !== "") {
-                msgDiv.classList.remove('shake');
-                void msgDiv.offsetWidth;
-                if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
-                    msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.style.color = "var(--accent)";
-                    playSound('success');
-                } else {
-                    msgDiv.innerText = `❌ LỆCH: ${formatNumber(Math.round((finalRes - parseFloat(targetInput)) * 100) / 100)}`;
-                    msgDiv.style.color = "var(--danger)"; msgDiv.classList.add('shake');
-                    playSound('fail');
-                }
-            }
             historyExpr = finalRes.toString(); exprDiv.innerText = "";
         } catch(e) { resDiv.innerText = "Lỗi"; }
     }
@@ -365,7 +415,7 @@
     function clearAll() {
         if (isTargetMode) targetInput = "";
         else { historyExpr = ""; targetInput = ""; msgDiv.innerText = ""; }
-        resDiv.innerText = "0"; renderDisplay();
+        resDiv.innerText = "0"; resDiv.classList.remove('neon-danger'); renderDisplay();
     }
 
     function backspace() {
