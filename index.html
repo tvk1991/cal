@@ -7,22 +7,27 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Sentinel Calc">
-    
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2344/2344132.png">
     
-    <title>ClevCalc Sentinel Compact</title>
+    <title>ClevCalc Sentinel Dual</title>
     <style>
         :root {
+            /* Light Mode Variables */
             --bg-color: #ffffff;
+            --screen-bg: #ffffff;
+            --keypad-bg: #f1f2f6;
+            --key-bg: #ffffff;
+            --key-text: #2d3436;
+            --key-active: #e2e4e9;
+            --expr-text: #bdc3c7;
+            --target-area-bg: #fffaf5;
+            --target-border: #ffecdb;
+            
             --accent: #27ae60;
-            --text-main: #2c3e50;
             --op-color: #f39c12;
             --target-color: #e67e22;
             --danger: #c0392b;
-            --key-bg: #ffffff;
-            --key-active: #f1f2f6;
 
-            /* LED Soft Glow */
             --led-green: #27ae60;
             --led-green-glow: 0 0 6px rgba(39, 174, 96, 0.2);
             --led-orange: #e67e22;
@@ -31,16 +36,35 @@
             --led-red-glow: 0 0 10px rgba(231, 76, 60, 0.4);
         }
 
+        /* Dark Mode Overrides */
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --screen-bg: #000000;
+            --keypad-bg: #121212;
+            --key-bg: #1e1e1e;
+            --key-text: #ffffff;
+            --key-active: #333333;
+            --expr-text: #555555;
+            --target-area-bg: #1a1510;
+            --target-border: #3d2b1f;
+            
+            --led-green: #2ecc71;
+            --led-green-glow: 0 0 12px rgba(46, 204, 113, 0.4);
+            --led-orange: #f39c12;
+            --led-orange-glow: 0 0 15px rgba(243, 156, 18, 0.5);
+        }
+
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             touch-action: manipulation; user-select: none; font-weight: 600; 
+            transition: background 0.3s, color 0.3s;
         }
 
         html, body { 
             height: 100%; margin: 0; overflow: hidden; 
-            background-color: #ffffff; display: flex; justify-content: center;
+            background-color: var(--bg-color); display: flex; justify-content: center;
             position: fixed; width: 100%;
         }
 
@@ -50,18 +74,24 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* Màng hình 40% - Cỡ chữ đã giảm theo ý phen */
+        /* Theme Toggle */
+        #theme-toggle {
+            position: absolute; top: calc(env(safe-area-inset-top) + 10px); left: 15px;
+            z-index: 20; padding: 8px; cursor: pointer; border-radius: 50%;
+            background: var(--target-area-bg); border: 1px solid var(--target-border);
+        }
+        #theme-toggle svg { width: 20px; height: 20px; fill: var(--target-color); }
+
         .display-screen {
             height: 40%; width: 100%;
             padding: 20px 25px;
             display: flex; flex-direction: column; justify-content: flex-end; 
-            text-align: right; background: #fff; z-index: 5;
+            text-align: right; background: var(--screen-bg); z-index: 5;
         }
 
         #expression { 
-            font-size: 1.2rem; color: #bdc3c7; 
-            max-height: 80px; overflow-y: auto; 
-            word-break: break-all; margin-bottom: 5px; font-weight: 500;
+            font-size: 1.2rem; color: var(--expr-text); 
+            max-height: 80px; overflow-y: auto; margin-bottom: 5px; font-weight: 500;
         }
         
         #result-preview { 
@@ -69,43 +99,33 @@
             color: var(--led-green); text-shadow: var(--led-green-glow);
             line-height: 1.2; overflow: hidden; white-space: nowrap; font-weight: 800; 
             text-overflow: ellipsis; margin-bottom: 12px;
-            transition: all 0.2s ease;
         }
 
-        #comparison-msg { 
-            font-size: 0.9rem; font-weight: 800; 
-            text-align: center; height: 20px; margin-bottom: 15px;
-        }
+        #comparison-msg { font-size: 0.9rem; font-weight: 800; text-align: center; height: 20px; margin-bottom: 15px; }
 
         .target-area { 
-            display: flex; align-items: center; background: #fffaf5; 
-            border-radius: 12px; padding: 10px 15px; 
-            border: 1px solid #ffecdb;
+            display: flex; align-items: center; background: var(--target-area-bg); 
+            border-radius: 12px; padding: 10px 15px; border: 1px solid var(--target-border);
         }
 
-        .history-btn { padding-right: 12px; border-right: 1px solid #ffecdb; margin-right: 12px; display: flex; align-items: center; }
-        .history-btn svg { width: 18px; height: 18px; stroke: #e67e22; stroke-width: 2.5; fill: none; }
-        .target-label { font-size: 0.65rem; color: #d35400; font-weight: 800; }
-        
-        #target-display { 
-            flex: 1; font-size: 1.4rem; 
-            color: var(--led-orange); text-shadow: var(--led-orange-glow); font-weight: 900; 
-        }
+        .history-btn { padding-right: 12px; border-right: 1px solid var(--target-border); margin-right: 12px; display: flex; align-items: center; }
+        .history-btn svg { width: 18px; height: 18px; stroke: var(--target-color); stroke-width: 2.5; fill: none; }
+        .target-label { font-size: 0.65rem; color: var(--target-color); font-weight: 800; }
+        #target-display { flex: 1; font-size: 1.4rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); font-weight: 900; }
 
-        /* Phím 60% */
         .keypad {
             height: 60%; width: 100%;
             display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr);
-            background: #f1f2f6; gap: 1px; padding-bottom: env(safe-area-inset-bottom);
+            background: var(--keypad-bg); gap: 1px; padding-bottom: env(safe-area-inset-bottom);
         }
 
         button {
-            background: var(--key-bg); border: none; font-size: 1.6rem; color: #2d3436;
+            background: var(--key-bg); border: none; font-size: 1.6rem; color: var(--key-text);
             display: flex; justify-content: center; align-items: center;
         }
         button:active { background: var(--key-active); }
 
-        .btn-back svg { width: 24px; height: 24px; stroke: #2d3436; stroke-width: 2.5; fill: none; }
+        .btn-back svg { width: 24px; height: 24px; stroke: var(--key-text); stroke-width: 2.5; fill: none; }
         .btn-op { color: var(--op-color); font-weight: 900; }
         .btn-func { color: var(--accent); font-weight: 900; }
         .btn-clear { color: var(--danger); font-weight: 900; }
@@ -113,36 +133,36 @@
         .btn-plus { grid-row: span 2; color: var(--op-color); font-weight: 900; }
         
         .shake { animation: shake 0.4s both; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); }
-            75% { transform: translateX(4px); }
-        }
-
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
         .neon-danger { color: var(--led-red) !important; text-shadow: var(--led-red-glow) !important; }
 
         .history-box {
-            position: absolute; inset: 0; background: white; z-index: 100; 
+            position: absolute; inset: 0; background: var(--screen-bg); z-index: 100; 
             display: none; flex-direction: column; padding: 25px;
             padding-top: calc(env(safe-area-inset-top) + 20px);
         }
-        .history-list { flex: 1; overflow-y: auto; }
-        .history-item { border-bottom: 1px solid #f1f1f1; padding: 15px 0; }
+        .history-list { flex: 1; overflow-y: auto; color: var(--key-text); }
+        .history-item { border-bottom: 1px solid var(--keypad-bg); padding: 15px 0; }
         .active-target { background: #fff5eb !important; border-color: var(--target-color) !important; }
+        [data-theme="dark"] .active-target { background: #2a1f15 !important; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div class="clevcalc-container">
+    <div id="theme-toggle">
+        <svg id="theme-icon" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+    </div>
+
     <div id="historyBox" class="history-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
             <span style="font-size: 1.3rem; font-weight: 900; color: var(--accent);">Lịch sử</span>
             <div id="closeHistory" style="padding: 10px; cursor: pointer;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--key-text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </div>
         </div>
         <div id="historyList" class="history-list"></div>
-        <button id="clearHistoryBtn" style="margin-top: 15px; height: 50px; background: #f8f9fa; font-size: 0.9rem; border-radius: 12px; color: #e74c3c; width:100%">Xóa tất cả</button>
+        <button id="clearHistoryBtn" style="margin-top: 15px; height: 50px; background: var(--keypad-bg); font-size: 0.9rem; border-radius: 12px; color: var(--danger); width:100%">Xóa tất cả</button>
     </div>
 
     <div class="display-screen">
@@ -164,11 +184,11 @@
         <button class="btn-clear" data-val="C">C</button>
         <button class="btn-func" data-val="()">()</button>
         <button class="btn-func" data-val="%">%</button>
-        <button class="btn-op" data-val="*">×</button>
+        <button class="btn-op" data-val="-">−</button>
         <button data-val="7">7</button>
         <button data-val="8">8</button>
         <button data-val="9">9</button>
-        <button class="btn-op" data-val="-">−</button>
+        <button class="btn-op" data-val="*">×</button>
         <button data-val="4">4</button>
         <button data-val="5">5</button>
         <button data-val="6">6</button>
@@ -186,7 +206,18 @@
 </div>
 
 <script>
-    /* GIỮ NGUYÊN TOÀN BỘ LOGIC CŨ */
+    // Theme Toggle Logic
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    themeToggle.addEventListener('click', () => {
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.getElementById('theme-icon').innerHTML = isDark ? 
+            '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>' :
+            '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+    });
+
+    // GIỮ NGUYÊN TOÀN BỘ LOGIC CŨ 100%
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -259,7 +290,7 @@
     function renderHistory() {
         hList.innerHTML = calculationHistory.map(item => `
             <div class="history-item">
-                <div style="color:#7f8c8d; font-size:0.8rem">${item.expr} =</div>
+                <div style="color:var(--expr-text); font-size:0.8rem">${item.expr} =</div>
                 <div style="font-weight:bold; text-align:right; font-size:1.1rem">${formatNumber(item.res)}</div>
             </div>
         `).reverse().join('');
@@ -270,7 +301,7 @@
         isTargetMode = !isTargetMode;
         document.querySelector('.target-area').classList.toggle('active-target', isTargetMode);
         msgDiv.innerText = isTargetMode ? "Đang nhập Mục tiêu..." : "";
-        msgDiv.style.color = "#d35400";
+        msgDiv.style.color = "var(--target-color)";
     }
 
     function renderDisplay() {
