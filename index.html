@@ -1044,199 +1044,82 @@ body {
         })();
     </script>
 
-    <!-- ===== THÊM PHẦN NÀY VÀO CUỐI - CHỈ THÊM, KHÔNG SỬA ===== -->
-    <div class="editing-indicator" id="editingIndicator">📝 ĐANG NHẬP SỐ KIỂM TRA</div>
+   <!-- ===== THÊM PHẦN NÀY VÀO CUỐI - ĐÃ CẢI TIẾN ===== -->
+<div class="editing-indicator" id="editingIndicator">📝 ĐANG NHẬP SỐ KIỂM TRA</div>
 
-    <script>
-        (function() {
-            "use strict";
+<script>
+    (function() {
+        "use strict";
+        
+        if (window._targetEditingLoaded) return;
+        window._targetEditingLoaded = true;
+        
+        // ===== BIẾN TRẠNG THÁI =====
+        let isEditingTarget = false;
+        let tempTargetValue = '';
+        
+        // ===== LẤY ELEMENTS =====
+        const targetInput = document.getElementById('targetInput');
+        const targetRow = document.querySelector('.target-row');
+        const messageBox = document.getElementById('messageBox');
+        const backspaceBtn = document.getElementById('backspaceBtn');
+        const clearBtn = document.getElementById('clear');
+        const equalsBtn = document.getElementById('equals');
+        const indicator = document.getElementById('editingIndicator');
+        
+        // ===== KÍCH HOẠT CHẾ ĐỘ EDIT KHI CLICK VÀO TARGET-ROW =====
+        targetRow.addEventListener('click', function(e) {
+            e.preventDefault();          // Ngăn focus vào input (nếu có)
+            e.stopPropagation();
             
-            // Kiểm tra nếu đã chạy rồi thì không chạy lại
-            if (window._targetEditingLoaded) return;
-            window._targetEditingLoaded = true;
-            
-            // ===== BIẾN TRẠNG THÁI =====
-            let isEditingTarget = false;
-            let tempTargetValue = '';
-            
-            // ===== LẤY ELEMENTS =====
-            const targetInput = document.getElementById('targetInput');
-            const messageBox = document.getElementById('messageBox');
-            const backspaceBtn = document.getElementById('backspaceBtn');
-            const clearBtn = document.getElementById('clear');
-            const equalsBtn = document.getElementById('equals');
-            const indicator = document.getElementById('editingIndicator');
-            
-            // ===== CHẶN BÀN PHÍM HỆ THỐNG =====
-            // Thêm thuộc tính readonly để chặn bàn phím
-            targetInput.setAttribute('readonly', 'true');
-            
-            // Chặn mọi sự kiện có thể gọi bàn phím
-            targetInput.addEventListener('mousedown', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }, true);
-            
-            targetInput.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }, true);
-            
-            targetInput.addEventListener('focus', function(e) {
-                e.preventDefault();
-                this.blur();
-                return false;
-            }, true);
-            
-            // ===== XỬ LÝ NHẤP VÀO Ô SỐ KIỂM TRA =====
-            targetInput.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+            if (!isEditingTarget) {
+                isEditingTarget = true;
+                targetInput.classList.add('editing-mode');
+                indicator.classList.add('show');
                 
-                if (!isEditingTarget) {
-                    // Bật chế độ chỉnh sửa
-                    isEditingTarget = true;
-                    this.classList.add('editing-mode');
-                    indicator.classList.add('show');
-                    
-                    // Lấy giá trị hiện tại
-                    let currentVal = this.dataset.rawValue || '';
-                    tempTargetValue = currentVal ? currentVal.toString() : '';
-                    this.value = tempTargetValue || '0';
-                    
-                    // Thông báo
-                    messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
-                    messageBox.className = 'message-area';
-                    
-                    // Rung nhẹ nếu có
-                    if (navigator.vibrate) navigator.vibrate(20);
-                }
+                let currentVal = targetInput.dataset.rawValue || '';
+                tempTargetValue = currentVal ? currentVal.toString() : '';
+                targetInput.value = tempTargetValue || '0';
                 
-                return false;
-            }, true);
-            
-            // ===== XỬ LÝ NHẤN RA NGOÀI =====
-            document.addEventListener('click', function(e) {
-                if (isEditingTarget && 
-                    !e.target.closest('#targetInput') && 
-                    !e.target.closest('.btn')) {
-                    exitTargetEditing();
-                }
-            }, true);
-            
-            // ===== XỬ LÝ CÁC NÚT SỐ =====
-            document.querySelectorAll('.btn').forEach(btn => {
-                if (btn.id === 'clear' || btn.id === 'equals') return;
+                messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
+                messageBox.className = 'message-area';
                 
-                btn.addEventListener('pointerdown', function(e) {
-                    if (!isEditingTarget) return;
-                    
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // Gọi flashButton từ code cũ nếu có
-                    if (typeof flashButton === 'function') flashButton(this);
-                    
-                    const id = this.id;
-                    
-                    if (id.match(/^\d+$/)) {
-                        tempTargetValue += id;
-                        updateTargetInput();
-                    }
-                    else if (id === '00') {
-                        tempTargetValue += '00';
-                        updateTargetInput();
-                    }
-                    else if (id === 'dot') {
-                        if (!tempTargetValue.includes('.')) {
-                            if (tempTargetValue === '') {
-                                tempTargetValue = '0.';
-                            } else {
-                                tempTargetValue += '.';
-                            }
-                            updateTargetInput();
-                        }
-                    }
-                    else if (id === 'add' || id === 'subtract' || id === 'multiply' || id === 'percent') {
-                        messageBox.textContent = '⚠️ Không dùng toán tử khi nhập số kiểm tra';
-                        messageBox.className = 'message-area error';
-                        setTimeout(() => {
-                            if (isEditingTarget) {
-                                messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
-                                messageBox.className = 'message-area';
-                            }
-                        }, 1500);
-                    }
-                }, true);
-            });
-            
-            // ===== XỬ LÝ NÚT C =====
-            clearBtn.addEventListener('pointerdown', function(e) {
-                if (!isEditingTarget) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                if (typeof flashButton === 'function') flashButton(this);
-                
-                tempTargetValue = '';
-                targetInput.value = '0';
-                delete targetInput.dataset.rawValue;
-            }, true);
-            
-            // ===== XỬ LÝ NÚT BACKSPACE =====
-            backspaceBtn.addEventListener('pointerdown', function(e) {
-                if (!isEditingTarget) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                if (typeof flashButton === 'function') flashButton(this);
-                
-                if (tempTargetValue.length > 0) {
-                    tempTargetValue = tempTargetValue.slice(0, -1);
-                    targetInput.value = tempTargetValue || '0';
-                    
-                    if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                        targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-                    } else {
-                        delete targetInput.dataset.rawValue;
-                    }
-                }
-            }, true);
-            
-            // ===== XỬ LÝ NÚT = (KẾT THÚC) =====
-            equalsBtn.addEventListener('pointerdown', function(e) {
-                if (!isEditingTarget) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                if (typeof flashButton === 'function') flashButton(this);
-                
+                if (navigator.vibrate) navigator.vibrate(20);
+            }
+        }, true);   // Dùng capture để bắt sự kiện sớm
+        
+        // ===== XỬ LÝ NHẤN RA NGOÀI =====
+        document.addEventListener('click', function(e) {
+            if (isEditingTarget && 
+                !e.target.closest('.target-row') && 
+                !e.target.closest('.btn')) {
                 exitTargetEditing();
-                
-                // Gọi lại sự kiện = từ code cũ để kiểm tra
-                setTimeout(() => {
-                    equalsBtn.click();
-                }, 100);
-            }, true);
+            }
+        }, true);
+        
+        // ===== XỬ LÝ CÁC NÚT SỐ (khi đang chỉnh sửa) =====
+        document.querySelectorAll('.btn').forEach(btn => {
+            if (btn.id === 'clear' || btn.id === 'equals') return;
             
-            // ===== XỬ LÝ PHÍM TẮT =====
-            window.addEventListener('keydown', function(e) {
+            btn.addEventListener('pointerdown', function(e) {
                 if (!isEditingTarget) return;
-                if (document.activeElement === targetInput) return;
                 
                 e.preventDefault();
+                e.stopPropagation();
                 
-                const key = e.key;
+                if (typeof flashButton === 'function') flashButton(this);
                 
-                if (key >= '0' && key <= '9') {
-                    tempTargetValue += key;
+                const id = this.id;
+                
+                if (id.match(/^\d+$/)) {
+                    tempTargetValue += id;
                     updateTargetInput();
-                    const btn = document.getElementById(key);
-                    if (btn && typeof flashButton === 'function') flashButton(btn);
                 }
-                else if (key === '.') {
+                else if (id === '00') {
+                    tempTargetValue += '00';
+                    updateTargetInput();
+                }
+                else if (id === 'dot') {
                     if (!tempTargetValue.includes('.')) {
                         if (tempTargetValue === '') {
                             tempTargetValue = '0.';
@@ -1245,74 +1128,162 @@ body {
                         }
                         updateTargetInput();
                     }
-                    const btn = document.getElementById('dot');
-                    if (btn && typeof flashButton === 'function') flashButton(btn);
                 }
-                else if (key === 'Backspace') {
-                    if (tempTargetValue.length > 0) {
-                        tempTargetValue = tempTargetValue.slice(0, -1);
-                        targetInput.value = tempTargetValue || '0';
-                        if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
-                            targetInput.dataset.rawValue = parseFloat(tempTargetValue);
-                        } else {
-                            delete targetInput.dataset.rawValue;
+                else if (id === 'add' || id === 'subtract' || id === 'multiply' || id === 'percent') {
+                    messageBox.textContent = '⚠️ Không dùng toán tử khi nhập số kiểm tra';
+                    messageBox.className = 'message-area error';
+                    setTimeout(() => {
+                        if (isEditingTarget) {
+                            messageBox.textContent = 'Đang nhập số kiểm tra - Nhấn ra ngoài để thoát';
+                            messageBox.className = 'message-area';
                         }
-                    }
-                    if (typeof flashButton === 'function') flashButton(backspaceBtn);
-                }
-                else if (key === 'Escape') {
-                    exitTargetEditing();
-                }
-                else if (key === 'Enter') {
-                    exitTargetEditing();
-                    setTimeout(() => equalsBtn.click(), 100);
+                    }, 1500);
                 }
             }, true);
+        });
+        
+        // ===== XỬ LÝ NÚT C =====
+        clearBtn.addEventListener('pointerdown', function(e) {
+            if (!isEditingTarget) return;
             
-            // ===== HÀM CẬP NHẬT INPUT =====
-            function updateTargetInput() {
-                if (tempTargetValue.length > 15) {
-                    tempTargetValue = tempTargetValue.slice(0, 15);
-                }
-                
-                targetInput.value = tempTargetValue;
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof flashButton === 'function') flashButton(this);
+            
+            tempTargetValue = '';
+            targetInput.value = '0';
+            delete targetInput.dataset.rawValue;
+        }, true);
+        
+        // ===== XỬ LÝ NÚT BACKSPACE =====
+        backspaceBtn.addEventListener('pointerdown', function(e) {
+            if (!isEditingTarget) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof flashButton === 'function') flashButton(this);
+            
+            if (tempTargetValue.length > 0) {
+                tempTargetValue = tempTargetValue.slice(0, -1);
+                targetInput.value = tempTargetValue || '0';
                 
                 if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
                     targetInput.dataset.rawValue = parseFloat(tempTargetValue);
                 } else {
                     delete targetInput.dataset.rawValue;
                 }
-                
-                targetInput.scrollLeft = targetInput.scrollWidth;
             }
+        }, true);
+        
+        // ===== XỬ LÝ NÚT = (KẾT THÚC) =====
+        equalsBtn.addEventListener('pointerdown', function(e) {
+            if (!isEditingTarget) return;
             
-            // ===== HÀM THOÁT CHẾ ĐỘ CHỈNH SỬA =====
-            function exitTargetEditing() {
-                if (!isEditingTarget) return;
-                
-                isEditingTarget = false;
-                targetInput.classList.remove('editing-mode');
-                indicator.classList.remove('show');
-                
-                if (targetInput.dataset.rawValue) {
-                    if (typeof formatNumber === 'function') {
-                        targetInput.value = formatNumber(parseFloat(targetInput.dataset.rawValue));
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof flashButton === 'function') flashButton(this);
+            
+            exitTargetEditing();
+            
+            // Gọi lại sự kiện = gốc để kiểm tra kết quả
+            setTimeout(() => {
+                equalsBtn.click();
+            }, 100);
+        }, true);
+        
+        // ===== XỬ LÝ PHÍM TẮT =====
+        window.addEventListener('keydown', function(e) {
+            if (!isEditingTarget) return;
+            if (document.activeElement === targetInput) return;
+            
+            e.preventDefault();
+            
+            const key = e.key;
+            
+            if (key >= '0' && key <= '9') {
+                tempTargetValue += key;
+                updateTargetInput();
+                const btn = document.getElementById(key);
+                if (btn && typeof flashButton === 'function') flashButton(btn);
+            }
+            else if (key === '.') {
+                if (!tempTargetValue.includes('.')) {
+                    if (tempTargetValue === '') {
+                        tempTargetValue = '0.';
                     } else {
-                        targetInput.value = targetInput.dataset.rawValue.toString();
+                        tempTargetValue += '.';
                     }
-                } else {
-                    targetInput.value = '';
-                    delete targetInput.dataset.rawValue;
+                    updateTargetInput();
                 }
-                
-                messageBox.textContent = '';
-                messageBox.className = 'message-area';
-                
-                if (navigator.vibrate) navigator.vibrate(10);
+                const btn = document.getElementById('dot');
+                if (btn && typeof flashButton === 'function') flashButton(btn);
+            }
+            else if (key === 'Backspace') {
+                if (tempTargetValue.length > 0) {
+                    tempTargetValue = tempTargetValue.slice(0, -1);
+                    targetInput.value = tempTargetValue || '0';
+                    if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
+                        targetInput.dataset.rawValue = parseFloat(tempTargetValue);
+                    } else {
+                        delete targetInput.dataset.rawValue;
+                    }
+                }
+                if (typeof flashButton === 'function') flashButton(backspaceBtn);
+            }
+            else if (key === 'Escape') {
+                exitTargetEditing();
+            }
+            else if (key === 'Enter') {
+                exitTargetEditing();
+                setTimeout(() => equalsBtn.click(), 100);
+            }
+        }, true);
+        
+        // ===== HÀM CẬP NHẬT INPUT =====
+        function updateTargetInput() {
+            if (tempTargetValue.length > 15) {
+                tempTargetValue = tempTargetValue.slice(0, 15);
             }
             
-            console.log('✅ Chế độ nhập số kiểm tra bằng cách nhấn vào ô đã sẵn sàng!');
-        })();
+            targetInput.value = tempTargetValue;
+            
+            if (tempTargetValue && !isNaN(parseFloat(tempTargetValue))) {
+                targetInput.dataset.rawValue = parseFloat(tempTargetValue);
+            } else {
+                delete targetInput.dataset.rawValue;
+            }
+            
+            targetInput.scrollLeft = targetInput.scrollWidth;
+        }
+        
+        // ===== HÀM THOÁT CHẾ ĐỘ CHỈNH SỬA =====
+        function exitTargetEditing() {
+            if (!isEditingTarget) return;
+            
+            isEditingTarget = false;
+            targetInput.classList.remove('editing-mode');
+            indicator.classList.remove('show');
+            
+            if (targetInput.dataset.rawValue) {
+                if (typeof formatNumber === 'function') {
+                    targetInput.value = formatNumber(parseFloat(targetInput.dataset.rawValue));
+                } else {
+                    targetInput.value = targetInput.dataset.rawValue.toString();
+                }
+            } else {
+                targetInput.value = '';
+                delete targetInput.dataset.rawValue;
+            }
+            
+            messageBox.textContent = '';
+            messageBox.className = 'message-area';
+            
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+        
+        console.log('✅ Chế độ nhập số kiểm tra bằng cách nhấn vào ô hoặc label đã sẵn sàng!');
+    })();
+
     </script>
 </body>
 </html>
