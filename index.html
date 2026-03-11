@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Sentinel Calc">
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2344/2344132.png">
+    
     <title>ClevCalc Sentinel Compact</title>
     <style>
         :root {
@@ -15,7 +22,7 @@
             --key-bg: #ffffff;
             --key-active: #f1f2f6;
 
-            /* LED Soft Glow - Giữ độ sang trọng */
+            /* LED Soft Glow */
             --led-green: #27ae60;
             --led-green-glow: 0 0 6px rgba(39, 174, 96, 0.2);
             --led-orange: #e67e22;
@@ -33,7 +40,7 @@
 
         html, body { 
             height: 100%; margin: 0; overflow: hidden; 
-            background-color: #000; display: flex; justify-content: center;
+            background-color: #ffffff; display: flex; justify-content: center;
             position: fixed; width: 100%;
         }
 
@@ -43,7 +50,7 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* Màn hình 40% - Căn chỉnh lại cỡ chữ */
+        /* Màng hình 40% - Cỡ chữ đã giảm theo ý phen */
         .display-screen {
             height: 40%; width: 100%;
             padding: 20px 25px;
@@ -52,15 +59,13 @@
         }
 
         #expression { 
-            font-size: 1.2rem; /* Giảm cỡ biểu thức */
-            color: #bdc3c7; 
+            font-size: 1.2rem; color: #bdc3c7; 
             max-height: 80px; overflow-y: auto; 
-            word-break: break-all; margin-bottom: 5px;
-            font-weight: 500;
+            word-break: break-all; margin-bottom: 5px; font-weight: 500;
         }
         
         #result-preview { 
-            font-size: 2.2rem; /* Cỡ số chính đã giảm (xấp xỉ mức phen yêu cầu) */
+            font-size: 2.2rem; 
             color: var(--led-green); text-shadow: var(--led-green-glow);
             line-height: 1.2; overflow: hidden; white-space: nowrap; font-weight: 800; 
             text-overflow: ellipsis; margin-bottom: 12px;
@@ -83,7 +88,7 @@
         .target-label { font-size: 0.65rem; color: #d35400; font-weight: 800; }
         
         #target-display { 
-            flex: 1; font-size: 1.4rem; /* Cỡ số mục tiêu cam */
+            flex: 1; font-size: 1.4rem; 
             color: var(--led-orange); text-shadow: var(--led-orange-glow); font-weight: 900; 
         }
 
@@ -181,7 +186,7 @@
 </div>
 
 <script>
-    /* TOÀN BỘ LOGIC GIỮ NGUYÊN 100% ĐỂ ĐẢM BẢO ĐỘ CHUẨN */
+    /* GIỮ NGUYÊN TOÀN BỘ LOGIC CŨ */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -207,11 +212,7 @@
         }
     }
 
-    let historyExpr = "";
-    let targetInput = "";
-    let isTargetMode = false;
-    let calculationHistory = [];
-
+    let historyExpr = ""; let targetInput = ""; let isTargetMode = false; let calculationHistory = [];
     const exprDiv = document.getElementById('expression');
     const resDiv = document.getElementById('result-preview');
     const targetDiv = document.getElementById('target-display');
@@ -222,11 +223,7 @@
 
     const buttons = document.querySelectorAll('button[data-val]');
     buttons.forEach(btn => {
-        const handleAction = (e) => {
-            e.preventDefault();
-            const val = btn.getAttribute('data-val');
-            handleCommand(val);
-        };
+        const handleAction = (e) => { e.preventDefault(); const val = btn.getAttribute('data-val'); handleCommand(val); };
         btn.addEventListener('touchstart', handleAction, {passive: false});
         btn.addEventListener('mousedown', (e) => { if(e.button === 0) handleAction(e); });
     });
@@ -351,7 +348,6 @@
             let temp = historyExpr;
             if (!temp) { resDiv.innerText = "0"; return; }
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
-            if (!temp) { resDiv.innerText = "0"; return; }
             let open = (temp.match(/\(/g) || []).length;
             let close = (temp.match(/\)/g) || []).length;
             if (open > close) temp += ")".repeat(open - close);
@@ -371,11 +367,9 @@
     function calculate() {
         if (isTargetMode) { isTargetMode = false; document.querySelector('.target-area').classList.remove('active-target'); return; }
         try {
-            let temp = historyExpr;
-            if (!temp) return;
+            let temp = historyExpr; if (!temp) return;
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
-            let res = eval(temp);
-            let finalRes = Math.round(res * 1000000) / 1000000;
+            let res = eval(temp); let finalRes = Math.round(res * 1000000) / 1000000;
             if (targetInput !== "") {
                 if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
                     msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.style.color = "var(--accent)";
