@@ -476,6 +476,20 @@
         else { historyExpr = historyExpr.slice(0, -1); autoPreview(); }
         renderDisplay();
     }
+    document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        // Khi người dùng vuốt thoát hoặc ẩn app:
+        // 1. Dừng mọi âm thanh đang phát để giải phóng AudioContext
+        if (audioCtx) audioCtx.suspend();
+        
+        // 2. Xóa biểu thức tạm thời nếu bạn muốn sự riêng tư (tùy chọn)
+        // historyExpr = ""; 
+        
+        // 3. Giải phóng các tiến trình vẽ màn hình
+        renderPending = false;
+    }
+});
+
 </script>
 </body>
 </html>
