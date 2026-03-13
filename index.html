@@ -3,172 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Sentinel Calc">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2344/2344132.png">
+    <meta name="mobile-web-app-capable" content="yes">
+	<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2344/2344132.png">
     
     <title>ClevCalc Sentinel History+</title>
     <style>
-        /* Khai báo biến CSS cho giao diện sáng (light theme) */
         :root {
-            --bg-color: #ffffff;
-            --screen-bg: #ffffff;
-            --keypad-bg: #f1f2f6;
-            --key-bg: #ffffff;
-            --key-text: #2d3436;
-            --key-active: #e2e4e9;
-            --expr-text: #000000;
-            --target-area-bg: #fffaf5;
-            --target-border: #ffecdb;
-            --accent: #27ae60;
-            --op-color: #f39c12;
-            --target-color: #e67e22;
-            --danger: #c0392b;
-            --led-green: #27ae60;
-            --led-green-glow: 0 0 6px rgba(39, 174, 96, 0.2);
-            --led-orange: #e67e22;
-            --led-orange-glow: 0 0 8px rgba(230, 126, 34, 0.3);
-            --led-red: #e74c3c;
-            --led-red-glow: 0 0 10px rgba(231, 76, 60, 0.4);
+            --bg-color: #ffffff; --screen-bg: #ffffff; --keypad-bg: #f1f2f6;
+            --key-bg: #ffffff; --key-text: #2d3436; --key-active: #e2e4e9;
+            --expr-text: #2d3436; --target-area-bg: #fffaf5; --target-border: #ffecdb;
+            --accent: #27ae60; --op-color: #f39c12; --target-color: #e67e22;
+            --danger: #c0392b; --led-green: #27ae60; --led-green-glow: 0 0 6px rgba(39, 174, 96, 0.2);
+            --led-orange: #e67e22; --led-orange-glow: 0 0 8px rgba(230, 126, 34, 0.3);
+            --led-red: #e74c3c; --led-red-glow: 0 0 10px rgba(231, 76, 60, 0.4);
         }
 
-        /* Ghi đè biến CSS cho giao diện tối (dark theme) */
         [data-theme="dark"] {
-            --bg-color: #000000;
-            --screen-bg: #000000;
-            --keypad-bg: #121212;
-            --key-bg: #1e1e1e;
-            --key-text: #ffffff;
-            --key-active: #333333;
-            --expr-text: #555555;
-            --target-area-bg: #1a1510;
-            --target-border: #3d2b1f;
-            --led-green: #2ecc71;
-            --led-green-glow: 0 0 12px rgba(46, 204, 113, 0.4);
-            --led-orange: #f39c12;
-            --led-orange-glow: 0 0 15px rgba(243, 156, 18, 0.5);
+            --bg-color: #000000; --screen-bg: #000000; --keypad-bg: #121212;
+            --key-bg: #1e1e1e; --key-text: #ffffff; --key-active: #333333;
+            --expr-text: #888888; --target-area-bg: #1a1510; --target-border: #3d2b1f;
+            --led-green: #2ecc71; --led-green-glow: 0 0 12px rgba(46, 204, 113, 0.4);
+            --led-orange: #f39c12; --led-orange-glow: 0 0 15px rgba(243, 156, 18, 0.5);
         }
 
-        /* Reset box-sizing và loại bỏ highlight khi chạm trên mobile */
         * { 
-            box-sizing: border-box; -webkit-tap-highlight-color: transparent; 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            touch-action: manipulation; /* Ngăn cuộn trang khi chạm vào nút */
-            user-select: none; /* Không cho bôi đen văn bản */
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            touch-action: manipulation; 
             font-weight: 600; 
-            transition: background 0.3s, color 0.3s; /* Hiệu ứng chuyển đổi theme mượt */
+            transition: background 0.2s, color 0.2s;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
 
-        /* Thiết lập body và html chiếm toàn bộ màn hình, không cuộn */
         html, body { 
             height: 100%; margin: 0; overflow: hidden; 
-            background-color: var(--bg-color); display: flex; justify-content: center;
-            position: fixed; width: 100%;
+            background-color: var(--bg-color); position: fixed; width: 100%;
+            overscroll-behavior-y: contain;
         }
 
-        /* Container chính của máy tính, giới hạn chiều rộng tối đa 500px */
         .clevcalc-container {
             width: 100vw; height: 100dvh; max-width: 500px;
-            background: var(--bg-color); position: relative;
-            display: flex; flex-direction: column; overflow: hidden;
+            background: var(--bg-color); display: flex; flex-direction: column; 
+            overflow: hidden; margin: 0 auto;
         }
 
-        /* Phần màn hình hiển thị biểu thức và kết quả */
         .display-screen {
-            height: 48%; width: 100%;
-            padding: 20px 25px;
+            flex: 1; 
+            width: 100%; 
+            padding: calc(env(safe-area-inset-top) + 10px) 25px 10px 25px;
             display: flex; flex-direction: column; 
-            justify-content: flex-end; /* HIỆU CHỈNH: Căn nội dung xuống đáy */
+            justify-content: flex-end; 
             text-align: right; background: var(--screen-bg); z-index: 5;
         }
 
-        /* Vùng hiển thị biểu thức đã nhập */
-        #expression { font-size: 1.5rem; color: var(--expr-text); max-height: 120px; overflow-y: auto; margin-bottom: 8px; font-weight: 500; }
-        /* Vùng hiển thị kết quả tạm thời (preview) */
-        #result-preview { font-size: 2.3rem; color: var(--led-green); text-shadow: var(--led-green-glow); line-height: 1.2; overflow: hidden; white-space: nowrap; font-weight: 800; text-overflow: ellipsis; margin-bottom: 20px;padding-bottom: 5px; }
-        /* Vùng hiển thị thông báo so sánh với mục tiêu */
-        #comparison-msg { font-size: 0.95rem; font-weight: 800; text-align: center; height: 24px; margin-bottom: 20px; }
+        #expression { 
+            font-size: 1.3rem; 
+            line-height: 1.5; 
+            color: var(--expr-text); 
+            min-height: 9.75rem; 
+            max-height: 9.75rem; 
+            overflow-y: auto; 
+            margin-bottom: 8px; 
+            font-weight: 500; 
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: normal; 
+            white-space: pre-wrap; 
+            scrollbar-width: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #expression::-webkit-scrollbar { display: none; }
+        
+        #result-preview { 
+            font-size: clamp(2.2rem, 10vw, 2.8rem); 
+            color: var(--led-green); 
+            text-shadow: var(--led-green-glow); 
+            line-height: 1.1; 
+            overflow: hidden; white-space: nowrap; font-weight: 800; 
+            text-overflow: ellipsis; margin-bottom: 8px;
+        }
 
-        /* Khu vực nhập mục tiêu (target) */
+        #comparison-msg { font-size: 0.9rem; font-weight: 800; text-align: center; min-height: 22px; margin-bottom: 12px; }
+
         .target-area { 
             display: flex; align-items: center; background: var(--target-area-bg); 
-            border-radius: 14px; padding: 12px 18px; border: 1px solid var(--target-border);
-            gap: 12px; margin-bottom: 10px;
+            border-radius: 14px; padding: 10px 15px; border: 1px solid var(--target-border);
+            gap: 10px; margin-bottom: 5px;
         }
 
-        /* Bàn phím số, chia lưới 4 cột 5 hàng */
         .keypad {
-            height: 52%; width: 100%;
-            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr);
-            background: var(--keypad-bg); gap: 1px; padding-bottom: env(safe-area-inset-bottom); /* Đệm cho vùng an toàn dưới màn hình */
+            height: 50%; 
+            width: 100%; display: grid; 
+            grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr);
+            background: var(--keypad-bg); gap: 1px; 
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* Nút điều khiển (mở lịch sử, đổi theme) */
-        .control-btn { display: flex; align-items: center; justify-content: center; padding: 5px; cursor: pointer; }
-        .control-btn svg { width: 22px; height: 22px; stroke-width: 2.5; fill: none; }
+        .control-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 5px; }
+        .control-btn svg { width: 22px; height: 22px; stroke-width: 2.5; fill: none; pointer-events: none; }
         #openHistory svg { stroke: var(--target-color); }
         #theme-toggle svg { fill: var(--target-color); }
-        .divider { width: 1px; height: 22px; background: var(--target-border); }
-        .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; }
-        #target-display { flex: 1; font-size: 1.5rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); font-weight: 900; }
-
-        /* Các nút bấm số và chức năng */
-        button { background: var(--key-bg); border: none; font-size: 1.5rem; color: var(--key-text); display: flex; justify-content: center; align-items: center; }
-        button:active { background: var(--key-active); } /* Hiệu ứng khi nhấn */
-        .btn-back svg { width: 24px; height: 24px; stroke: var(--key-text); stroke-width: 2.5; fill: none; }
-        .btn-op { color: var(--op-color); font-weight: 900; } /* Toán tử */
-        .btn-func { color: var(--accent); font-weight: 900; } /* Chức năng () % */
-        .btn-clear { color: var(--danger); font-weight: 900; } /* Nút C */
-        .btn-equal { background: var(--accent); color: white; font-size: 2.2rem; font-weight: 800; } /* Nút = */
-        .btn-plus { grid-row: span 2; color: var(--op-color); font-weight: 900; } /* Nút + chiếm 2 hàng */
         
-        /* CẢI THIỆN LỊCH SỬ */
+        /* Màu riêng cho nút Back trong target-area để dễ nhận diện */
+        .btn-back-ctrl svg { stroke: var(--key-text); }
+        
+        .divider { width: 1px; height: 20px; background: var(--target-border); }
+        .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; }
+        #target-display { flex: 1; font-size: 1.4rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); font-weight: 900; }
+
+        button { 
+            background: var(--key-bg); border: none; font-size: 1.6rem; 
+            color: var(--key-text); display: flex; justify-content: center; 
+            align-items: center; cursor: pointer;
+            -webkit-user-drag: none;
+        }
+        button:active { background: var(--key-active); }
+        
+        .btn-op { color: var(--op-color); font-weight: 900; }
+        .btn-func { color: var(--accent); font-weight: 900; }
+        .btn-clear { color: var(--danger); font-weight: 900; }
+        .btn-equal { background: var(--accent); color: white; font-size: 2.2rem; font-weight: 800; }
+        .btn-plus { grid-row: span 2; color: var(--op-color); font-weight: 900; }
+        
         .history-box {
             position: absolute; inset: 0; background: var(--screen-bg); z-index: 100; 
-            display: none; flex-direction: column; padding: 25px;
-            padding-top: calc(env(safe-area-inset-top) + 20px); /* Đệm cho vùng an toàn trên */
+            display: none; flex-direction: column; padding: 20px;
+            padding-top: calc(env(safe-area-inset-top) + 15px);
         }
-        .history-list { flex: 1; overflow-y: auto; color: var(--key-text); }
-        .history-item { border-bottom: 1px solid var(--keypad-bg); padding: 20px 0; } /* Tăng khoảng cách */
-        .history-expr { color: var(--expr-text); font-size: 1.6rem; margin-bottom: 5px; } /* Cỡ chữ biểu thức lớn hơn */
-        .history-res { font-weight: 900; text-align: right; font-size: 1.7rem; color: var(--led-green); text-shadow: var(--led-green-glow);} /* Cỡ chữ kết quả lớn rõ rệt */
+        .history-list { flex: 1; overflow-y: auto; }
+        .history-item { border-bottom: 1px solid var(--keypad-bg); padding: 15px 0; }
+        .history-expr { color: var(--expr-text); font-size: 1.1rem; margin-bottom: 4px; opacity: 0.7; }
+        .history-res { font-weight: 900; text-align: right; font-size: 1.6rem; color: var(--led-green); }
 
-        /* Hiệu ứng khi kích hoạt chế độ nhập mục tiêu */
-        .active-target { background: #fff5eb !important; border-color: var(--target-color) !important; }
+        .active-target { background: #fff5eb !important; border-color: var(--target-color) !important; outline: 2px solid var(--target-color); }
         [data-theme="dark"] .active-target { background: #2a1f15 !important; }
-        /* Hiệu ứng lắc */
+        
         .shake { animation: shake 0.4s both; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-        /* Màu đỏ neon khi vượt mục tiêu */
         .neon-danger { color: var(--led-red) !important; text-shadow: var(--led-red-glow) !important; }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div class="clevcalc-container">
+<body oncontextmenu="return false;"> 
+<div class="clevcalc-container">
     <div id="historyBox" class="history-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <span style="font-size: 1.5rem; font-weight: 900; color: var(--accent);">Lịch sử</span>
-            <div id="closeHistory" style="padding: 10px; cursor: pointer;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--key-text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <span style="font-size: 1.6rem; font-weight: 900; color: var(--accent);">Lịch sử</span>
+            <div id="closeHistory" class="control-btn">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--key-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </div>
         </div>
-        <div id="historyList" class="history-list"></div> <button id="clearHistoryBtn" style="margin-top: 15px; height: 60px; background: var(--keypad-bg); font-size: 1rem; border-radius: 12px; color: var(--danger); width:100%">Xóa tất cả</button>
+        <div id="historyList" class="history-list"></div> 
+        <button id="clearHistoryBtn" style="margin-top: 15px; min-height: 55px; background: var(--keypad-bg); font-size: 1rem; border-radius: 12px; color: var(--danger); width:100%">Xóa tất cả lịch sử</button>
     </div>
 
     <div class="display-screen">
-        <div id="expression"></div>   <div id="result-preview">0</div>  <div id="comparison-msg"></div>    <div class="target-area">
+        <div id="expression"></div>   
+        <div id="result-preview">0</div>  
+        <div id="comparison-msg"></div>    
+        <div class="target-area" id="target-area-container">
+            <!-- Nút Lịch sử -->
             <div class="control-btn" id="openHistory">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
             <div class="divider"></div>
+            <!-- Nút Theme -->
             <div class="control-btn" id="theme-toggle">
                 <svg id="theme-icon" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
             </div>
+            
             <div class="divider"></div>
-            <div id="target-box" style="display:flex; align-items:center; flex:1; height:100%">
+            <!-- Vùng hiển thị Mục tiêu -->
+            <div id="target-box" style="display:flex; align-items:center; flex:1; height:100%; cursor:pointer;">
                 <span class="target-label">MỤC TIÊU:</span>
                 <div id="target-display">0</div>
+            </div>
+			 <div class="control-btn btn-back-ctrl" data-val="back">
+                <svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
             </div>
         </div>
     </div>
@@ -177,52 +193,52 @@
         <button class="btn-clear" data-val="C">C</button>
         <button class="btn-func" data-val="()">()</button>
         <button class="btn-func" data-val="%">%</button>
-        <button class="btn-back" data-val="back">
-                  <svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
-        </button>
+		<button class="btn-op" data-val="*">×</button>
+        
+        
         <button data-val="7">7</button>
         <button data-val="8">8</button>
         <button data-val="9">9</button>
-        <button class="btn-op" data-val="*">×</button>
+        <button class="btn-op" data-val="-">−</button>
+        
         <button data-val="4">4</button>
         <button data-val="5">5</button>
         <button data-val="6">6</button>
         <button class="btn-op btn-plus" data-val="+">+</button>
+        
         <button data-val="1">1</button>
         <button data-val="2">2</button>
         <button data-val="3">3</button>
-        <button class="btn-op" data-val="-">−</button>
-       
-      
         <button data-val="0">0</button>
+        
+        <button data-val="00">00</button>
         <button data-val=".">,</button>
         <button class="btn-equal" data-val="=">=</button>
     </div>
 </div>
 
 <script>
-    /* TOÀN BỘ LOGIC CŨ GIỮ NGUYÊN */
-    
-    // Xử lý sự kiện chuyển đổi theme
-    const themeToggle = document.getElementById('theme-toggle');
-    themeToggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        const body = document.body;
-        const isDark = body.getAttribute('data-theme') === 'dark';
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        // Thay đổi icon cho phù hợp (mặt trời cho sáng, mặt trăng cho tối)
-        document.getElementById('theme-icon').innerHTML = isDark ? 
-            '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>' :
-            '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
-        playSound('click'); // Phát âm thanh click
-    });
-
-    // Khởi tạo AudioContext để phát âm thanh
+    /* GIỮ NGUYÊN TOÀN BỘ LOGIC 100% */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // Hàm phát âm thanh với các loại khác nhau: click, success, fail
+    let historyExpr = "";          
+    let targetInput = "";          
+    let isTargetMode = false;      
+    let calculationHistory = JSON.parse(localStorage.getItem('calc_history') || '[]');
+
+    const exprDiv = document.getElementById('expression');
+    const resDiv = document.getElementById('result-preview');
+    const targetDiv = document.getElementById('target-display');
+    const targetBox = document.getElementById('target-box');
+    const msgDiv = document.getElementById('comparison-msg');
+    const hBox = document.getElementById('historyBox');
+    const hList = document.getElementById('historyList');
+
+    function vibrate() { if (navigator.vibrate) navigator.vibrate(15); }
+
     function playSound(type) {
-        if (audioCtx.state === 'suspended') audioCtx.resume(); // Đảm bảo audio context được kích hoạt
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); 
+        const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         if (type === 'click') {
             osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
@@ -243,51 +259,43 @@
         }
     }
 
-    // Khai báo các biến trạng thái
-    let historyExpr = "";          // Biểu thức hiện tại (chuỗi)
-    let targetInput = "";          // Giá trị mục tiêu (chuỗi)
-    let isTargetMode = false;      // Đang ở chế độ nhập mục tiêu?
-    let calculationHistory = [];    // Mảng lưu lịch sử tính toán (mỗi phần tử {expr, res})
-
-    // Tham chiếu đến các phần tử DOM
-    const exprDiv = document.getElementById('expression');
-    const resDiv = document.getElementById('result-preview');
-    const targetDiv = document.getElementById('target-display');
-    const targetBox = document.getElementById('target-box');
-    const msgDiv = document.getElementById('comparison-msg');
-    const hBox = document.getElementById('historyBox');
-    const hList = document.getElementById('historyList');
-
-    // Lấy tất cả các nút có thuộc tính data-val
-    const buttons = document.querySelectorAll('button[data-val]');
+    const buttons = document.querySelectorAll('[data-val]');
     buttons.forEach(btn => {
-        const handleAction = (e) => { e.preventDefault(); const val = btn.getAttribute('data-val'); handleCommand(val); };
-        btn.addEventListener('touchstart', handleAction, {passive: false}); // Xử lý chạm trên mobile
-        btn.addEventListener('mousedown', (e) => { if(e.button === 0) handleAction(e); }); // Xử lý click chuột
+        btn.addEventListener('pointerdown', (e) => { 
+            e.preventDefault(); vibrate(); handleCommand(btn.getAttribute('data-val')); 
+        });
     });
 
-    // Hàm xử lý chính dựa trên giá trị nút
     function handleCommand(val) {
         playSound('click');
-        if (val === 'C') clearAll();                     // Xóa
-        else if (val === '()') smartParenthesis();      // Thêm ngoặc
-        else if (val === '%') applyPercent();           // Xử lý phần trăm
-        else if (val === '-') addOp('-');                // Thêm toán tử -
-        else if (val === '*') addOp('*');                // Thêm toán tử *
-        else if (val === '+') addOp('+');                // Thêm toán tử +
-        else if (val === 'back') backspace();           // Xóa ký tự cuối
-        else if (val === '=') calculate();               // Tính toán
-        else if (val === '.') handleInput('.');          // Thêm dấu thập phân
-        else handleInput(val);                            // Thêm số
+        if (val === 'C') clearAll();
+        else if (val === '()') smartParenthesis();
+        else if (val === '%') applyPercent();
+        else if (val === '-') addOp('-');
+        else if (val === '*') addOp('*');
+        else if (val === '+') addOp('+');
+        else if (val === 'back') backspace();
+        else if (val === '=') calculate();
+        else if (val === '.') handleInput('.');
+        else handleInput(val);
     }
 
-    // Gán sự kiện cho các nút điều khiển
-    document.getElementById('openHistory').addEventListener('touchstart', (e) => { e.preventDefault(); toggleHistory(); });
-    document.getElementById('closeHistory').addEventListener('touchstart', (e) => { e.preventDefault(); toggleHistory(); });
-    document.getElementById('clearHistoryBtn').addEventListener('touchstart', (e) => { e.preventDefault(); clearHistory(); });
-    targetBox.addEventListener('touchstart', (e) => { e.preventDefault(); toggleTargetMode(); });
+    document.getElementById('theme-toggle').addEventListener('pointerdown', (e) => {
+        e.preventDefault(); vibrate();
+        const body = document.body;
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.getElementById('theme-icon').innerHTML = isDark ? 
+            '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>' :
+            '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+        playSound('click');
+    });
 
-    // Hàm định dạng số (thêm dấu chấm phân cách hàng nghìn, dấu phẩy thập phân)
+    document.getElementById('openHistory').addEventListener('pointerdown', (e) => { e.preventDefault(); vibrate(); toggleHistory(); });
+    document.getElementById('closeHistory').addEventListener('pointerdown', (e) => { e.preventDefault(); vibrate(); toggleHistory(); });
+    document.getElementById('clearHistoryBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); vibrate(); clearHistory(); });
+    targetBox.addEventListener('pointerdown', (e) => { e.preventDefault(); vibrate(); toggleTargetMode(); });
+
     function formatNumber(val) {
         if (!val && val !== 0) return "";
         let s = val.toString(); let parts = s.split('.');
@@ -295,10 +303,11 @@
         return parts.length > 1 ? parts[0] + "," + parts[1] : parts[0];
     }
 
-    // Hiển thị/ẩn hộp lịch sử
-    function toggleHistory() { hBox.style.display = hBox.style.display === 'flex' ? 'none' : 'flex'; renderHistory(); }
+    function toggleHistory() { 
+        hBox.style.display = hBox.style.display === 'flex' ? 'none' : 'flex'; 
+        if (hBox.style.display === 'flex') renderHistory(); 
+    }
     
-    /* CẬP NHẬT GIAO DIỆN LỊCH SỬ MỚI */
     function renderHistory() {
         hList.innerHTML = calculationHistory.map(item => `
             <div class="history-item">
@@ -308,40 +317,34 @@
         `).reverse().join('');
     }
     
-    // Xóa toàn bộ lịch sử
-    function clearHistory() { calculationHistory = []; renderHistory(); }
+    function clearHistory() { 
+        calculationHistory = []; localStorage.removeItem('calc_history'); renderHistory(); 
+    }
 
-    // Bật/tắt chế độ nhập mục tiêu
     function toggleTargetMode() {
         isTargetMode = !isTargetMode;
-        document.querySelector('.target-area').classList.toggle('active-target', isTargetMode);
+        document.getElementById('target-area-container').classList.toggle('active-target', isTargetMode);
         msgDiv.innerText = isTargetMode ? "Đang nhập Mục tiêu..." : "";
         msgDiv.style.color = "var(--target-color)";
     }
 
-    // Cập nhật hiển thị biểu thức và giá trị mục tiêu
     function renderDisplay() {
         if (!isTargetMode) {
-            // Thay thế các ký tự toán tử bằng ký tự đẹp hơn và thêm khoảng trắng
             let displayStr = historyExpr.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ').replace(/\+/g, ' + ').replace(/\-/g, ' − ');
-            // Định dạng số trong biểu thức
             displayStr = displayStr.replace(/(\d+(\.\d+)?)/g, (match) => formatNumber(match));
             exprDiv.innerText = displayStr;
-            exprDiv.scrollTop = exprDiv.scrollHeight; // HIỆU CHỈNH: Cuộn xuống đáy biểu thức
+            exprDiv.scrollTop = exprDiv.scrollHeight;
         }
         targetDiv.innerText = formatNumber(targetInput) || "0";
     }
 
-    // Xử lý khi nhập số hoặc dấu thập phân
     function handleInput(n) {
-        if (isTargetMode) { // Nếu đang ở chế độ nhập mục tiêu
-            if (n === '.' && targetInput.includes('.')) return; // Chỉ cho một dấu chấm
+        if (isTargetMode) {
+            if (n === '.' && targetInput.includes('.')) return;
             targetInput += n;
-        } else { // Chế độ nhập biểu thức
-            // Kiểm tra nếu đã có mục tiêu và đang nhập số, dự đoán nếu nhập tiếp sẽ vượt mục tiêu
+        } else {
             if (targetInput !== "" && !isNaN(n)) {
                 let cleanedExpr = historyExpr + n;
-                // Loại bỏ các ký tự không hợp lệ cuối
                 while (['+','-','*','/','(','.'].includes(cleanedExpr.slice(-1))) { cleanedExpr = cleanedExpr.slice(0, -1); }
                 try {
                     let open = (cleanedExpr.match(/\(/g) || []).length;
@@ -349,24 +352,20 @@
                     if (open > close) cleanedExpr += ")".repeat(open - close);
                     let potential = Math.round(eval(cleanedExpr) * 1000000) / 1000000;
                     if (potential > parseFloat(targetInput)) {
-                        // Cảnh báo nếu vượt mục tiêu
                         msgDiv.innerText = "⚠️ SẼ VƯỢT MỤC TIÊU!";
                         msgDiv.style.color = "var(--danger)";
                         msgDiv.classList.add('shake');
+                        setTimeout(() => msgDiv.classList.remove('shake'), 400);
                         resDiv.classList.add('neon-danger');
-                       
                         playSound('fail'); 
-                         // Không cho nhập nữa
                     }
                 } catch(e) {}
             }
-            historyExpr += n; 
-            autoPreview(); // Cập nhật kết quả tạm thời
+            historyExpr += n; autoPreview();
         }
         renderDisplay();
     }
 
-    // Xử lý thêm ngoặc thông minh (đóng mở ngoặc tự động)
     function smartParenthesis() {
         if (isTargetMode) return;
         let open = (historyExpr.match(/\(/g) || []).length;
@@ -376,122 +375,83 @@
         renderDisplay(); autoPreview();
     }
 
-    // Thêm toán tử
     function addOp(op) {
-        if (isTargetMode) { // Nếu đang ở chế độ target, thoát khỏi chế độ target
-            isTargetMode = false; 
-            document.querySelector('.target-area').classList.remove('active-target');
+        if (isTargetMode) {
+            isTargetMode = false; document.getElementById('target-area-container').classList.remove('active-target');
         }
         const last = historyExpr.slice(-1);
-        if (['+','-','*','/'].includes(last)) historyExpr = historyExpr.slice(0, -1) + op; // Thay thế toán tử cuối
-        else if (historyExpr !== "" || op === '-') historyExpr += op; // Thêm mới, cho phép dấu trừ đứng đầu
-        resDiv.classList.remove('neon-danger'); 
-        renderDisplay(); 
-        autoPreview();
+        if (['+','-','*','/'].includes(last)) historyExpr = historyExpr.slice(0, -1) + op;
+        else if (historyExpr !== "" || op === '-') historyExpr += op;
+        resDiv.classList.remove('neon-danger'); renderDisplay(); autoPreview();
     }
 
-    // Xử lý phần trăm (chuyển đổi % thành /100)
     function applyPercent() {
         if (isTargetMode) return;
         try {
-            // Tách biểu thức thành các phần tử dựa trên toán tử
             let parts = historyExpr.split(/([\+\-\*\/])/);
             let lastPart = parts.pop(); let op = parts.pop();
             let base = eval(parts.join("") || "0");
-            // Nếu toán tử là + hoặc -, thì phần trăm tính theo base, ngược lại chỉ là /100
             let val = (op === '+' || op === '-') ? base * (parseFloat(lastPart) / 100) : parseFloat(lastPart) / 100;
             historyExpr = parts.join("") + (op || "") + val;
             renderDisplay(); autoPreview();
         } catch(e) {}
     }
 
-    // Cập nhật kết quả tạm thời (preview) khi nhập
     function autoPreview() {
         try {
             let temp = historyExpr; if (!temp) { resDiv.innerText = "0"; return; }
-            // Loại bỏ các ký tự không hợp lệ ở cuối
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
             if (!temp) { resDiv.innerText = "0"; return; }
-            // Cân bằng số ngoặc (thêm ngoặc đóng nếu thiếu)
             let open = (temp.match(/\(/g) || []).length;
             let close = (temp.match(/\)/g) || []).length;
             if (open > close) temp += ")".repeat(open - close);
             let pVal = Math.round(eval(temp) * 1000000) / 1000000;
             resDiv.innerText = formatNumber(pVal);
-            // Kiểm tra vượt mục tiêu
             if (targetInput !== "" && pVal > parseFloat(targetInput)) {
-                resDiv.classList.add('neon-danger'); 
-                msgDiv.innerText = "⚠️ VƯỢT QUÁ!"; 
-                msgDiv.style.color = "var(--danger)";
+                resDiv.classList.add('neon-danger'); msgDiv.innerText = "⚠️ VƯỢT QUÁ!"; msgDiv.style.color = "var(--danger)";
             } else {
-                resDiv.classList.remove('neon-danger'); 
-                if(!isTargetMode) msgDiv.innerText = "";
+                resDiv.classList.remove('neon-danger'); if(!isTargetMode) msgDiv.innerText = "";
             }
         } catch(e) { resDiv.innerText = "0"; }
     }
 
-    // Hàm tính toán chính thức khi nhấn =
     function calculate() {
-        if (isTargetMode) { // Nếu đang ở chế độ target, thoát khỏi mà không tính
-            isTargetMode = false; 
-            document.querySelector('.target-area').classList.remove('active-target');
-            return;
+        if (isTargetMode) {
+            isTargetMode = false; document.getElementById('target-area-container').classList.remove('active-target'); return;
         }
         try {
             let temp = historyExpr; if (!temp) return;
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) { temp = temp.slice(0, -1); }
-            let res = eval(temp); 
-            let finalRes = Math.round(res * 1000000) / 1000000;
-            // So sánh với mục tiêu nếu có
+            let res = eval(temp); let finalRes = Math.round(res * 1000000) / 1000000;
             if (targetInput !== "") {
                 if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
-                    msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; 
-                    msgDiv.style.color = "var(--accent)"; 
-                    playSound('success');
+                    msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.style.color = "var(--accent)"; playSound('success');
                 } else {
                     let diff = Math.round((finalRes - parseFloat(targetInput)) * 100) / 100;
                     msgDiv.innerText = (diff > 0 ? "❌ VƯỢT: " : "❌ THIẾU: ") + formatNumber(Math.abs(diff));
-                    msgDiv.style.color = "var(--danger)"; 
-                    playSound('fail');
+                    msgDiv.style.color = "var(--danger)"; playSound('fail');
                 }
             }
-            // Lưu vào lịch sử
-            calculationHistory.push({ expr: exprDiv.innerText, res: finalRes });
-            resDiv.innerText = formatNumber(finalRes); 
-            historyExpr = finalRes.toString(); // Đặt biểu thức mới là kết quả
-            exprDiv.innerText = "";
+            calculationHistory.push({ expr: exprDiv.innerText || historyExpr, res: finalRes });
+            if (calculationHistory.length > 50) calculationHistory.shift();
+            localStorage.setItem('calc_history', JSON.stringify(calculationHistory));
+            resDiv.innerText = formatNumber(finalRes); historyExpr = finalRes.toString(); exprDiv.innerText = "";
         } catch(e) { resDiv.innerText = "Lỗi"; }
     }
 
-    // Xóa toàn bộ (nếu đang target thì xóa target, nếu không thì xóa cả biểu thức và target)
     function clearAll() {
         if (isTargetMode) targetInput = "";
         else { historyExpr = ""; targetInput = ""; msgDiv.innerText = ""; }
-        resDiv.innerText = "0"; 
-        resDiv.classList.remove('neon-danger'); 
-        renderDisplay();
+        resDiv.innerText = "0"; resDiv.classList.remove('neon-danger'); renderDisplay();
     }
 
-    // Xóa ký tự cuối (backspace)
     function backspace() {
         if (isTargetMode) targetInput = targetInput.slice(0, -1);
         else { historyExpr = historyExpr.slice(0, -1); autoPreview(); }
         renderDisplay();
     }
-    document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        // Khi người dùng vuốt thoát hoặc ẩn app:
-        // 1. Dừng mọi âm thanh đang phát để giải phóng AudioContext
-        if (audioCtx) audioCtx.suspend();
-        
-        // 2. Xóa biểu thức tạm thời nếu bạn muốn sự riêng tư (tùy chọn)
-        // historyExpr = ""; 
-        
-        // 3. Giải phóng các tiến trình vẽ màn hình
-        renderPending = false;
-    }
-});
 
+    document.body.addEventListener('pointerdown', () => { if (audioCtx.state === 'suspended') audioCtx.resume(); }, { once: true });
 </script>
 </body>
 </html>
