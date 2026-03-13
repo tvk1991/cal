@@ -431,7 +431,7 @@
     // SỰ KIỆN DI CHUYỂN (TOUCHMOVE) - DÙNG ĐỂ MIẾT NGÓN TAY
     exprDiv.addEventListener('touchmove', function(e) {
         if (historyExpr === "" || isTargetMode) return;
-        e.preventDefault(); // Ngăn cuộn màn hình khi đang di con trỏ
+        // Ngăn cuộn màn hình khi đang di con trỏ
         const touch = e.touches[0];
         updateCursorFromPoint(touch.clientX, touch.clientY);
     }, {passive: false});
