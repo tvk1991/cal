@@ -55,13 +55,16 @@
             word-wrap: break-word; overflow-wrap: break-word;
             word-break: normal; white-space: pre-wrap; scrollbar-width: none;
             -webkit-user-select: text; user-select: text;
+            /* Thêm cuộn mượt cho iOS */
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
         #expression::-webkit-scrollbar { display: none; }
         .expr-cursor {
             display: inline-block; width: 2.5px; height: 1.15em;
-            background: var(--led-green); vertical-align: text-bottom;
+            background: var(--led-green); vertical-align: middle;
             border-radius: 2px; animation: blink-cur 1s step-end infinite;
-            box-shadow: var(--led-green-glow); margin: 0 1px; pointer-events: none;
+            box-shadow: var(--led-green-glow); margin: 0 -1px; pointer-events: none;
         }
         @keyframes blink-cur { 50% { opacity: 0; } }
         #result-preview {
@@ -187,6 +190,7 @@
     let calculationHistory = JSON.parse(localStorage.getItem('calc_history') || '[]');
     let cursorPos = null; 
     let isResultDisplayed = false;
+    let isMovingCursor = false; // Biến kiểm soát trạng thái di chuyển con trỏ
 
     const exprDiv = document.getElementById('expression'), resDiv = document.getElementById('result-preview'), targetDiv = document.getElementById('target-display'), targetBox = document.getElementById('target-box'), msgDiv = document.getElementById('comparison-msg'), hBox = document.getElementById('historyBox'), hList = document.getElementById('historyList');
 
@@ -385,10 +389,10 @@
             }
         }
         targetDiv.innerText = formatNumber(targetInput) || "0";
-        exprDiv.scrollTop = exprDiv.scrollHeight;
+        // Chỉ tự động cuộn xuống nếu không đang di con trỏ
+        if (!isMovingCursor) exprDiv.scrollTop = exprDiv.scrollHeight;
     }
 
-    // HÀM CHUNG ĐỂ TÍNH TOÁN VỊ TRÍ CON TRỎ TỪ ĐIỂM CHẠM
     function updateCursorFromPoint(x, y) {
         if (historyExpr === "" || isTargetMode) return;
         let range, textNode, offset;
@@ -411,7 +415,7 @@
                 let visualText = exprDiv.innerText, visualPrefix = visualText.substring(0, totalOffset), rawPrefixLength = 0;
                 for(let i = 0; i < visualPrefix.length; i++) {
                     let char = visualPrefix[i];
-                    if (char.match(/[0-9\(\)]/) || ['×','÷','+','−', ','].includes(char)) rawPrefixLength++;
+                    if (char.match(/[0-9\(\)%,\.]/) || ['×','÷','+','−'].includes(char)) rawPrefixLength++;
                 }
                 cursorPos = Math.min(rawPrefixLength, historyExpr.length);
                 renderDisplay();
@@ -419,22 +423,26 @@
         }
     }
 
-    // SỰ KIỆN CHẠM (TOUCHSTART)
+    // TỐI ƯU HÓA DI CHUẨN CON TRỎ VÀ CUỘN
     exprDiv.addEventListener('touchstart', function(e) {
         if (historyExpr === "" || isTargetMode) return;
+        isMovingCursor = true;
         const touch = e.touches[0];
         if (cursorPos === null) cursorPos = historyExpr.length;
         updateCursorFromPoint(touch.clientX, touch.clientY);
         vibrate();
-    }, {passive: false});
+    }, {passive: true});
 
-    // SỰ KIỆN DI CHUYỂN (TOUCHMOVE) - DÙNG ĐỂ MIẾT NGÓN TAY
     exprDiv.addEventListener('touchmove', function(e) {
-        if (historyExpr === "" || isTargetMode) return;
-        // Ngăn cuộn màn hình khi đang di con trỏ
+        if (!isMovingCursor || historyExpr === "" || isTargetMode) return;
         const touch = e.touches[0];
-        updateCursorFromPoint(touch.clientX, touch.clientY);
-    }, {passive: false});
+        // Sử dụng requestAnimationFrame để mượt hơn
+        requestAnimationFrame(() => {
+            updateCursorFromPoint(touch.clientX, touch.clientY);
+        });
+    }, {passive: true});
+
+    exprDiv.addEventListener('touchend', () => { isMovingCursor = false; });
 
     function renderHistory() {
         hList.innerHTML = calculationHistory.map((item, i) => `
