@@ -48,15 +48,17 @@
             justify-content: flex-end; text-align: right;
             background: var(--screen-bg); z-index: 5;
         }
-        #expression {
-            font-size: 1.7rem; line-height: 1.5; color: var(--expr-text);
-            min-height: 9.75rem; max-height: 9.75rem;
-            overflow-y: auto; margin-bottom: 8px; font-weight: 500;
-            word-wrap: break-word; overflow-wrap: break-word;
-            word-break: break-all; white-space: pre-wrap; scrollbar-width: none;
-            -webkit-user-select: text; user-select: text;
-			touch-action: pan-y; /* Chỉ cho phép cuộn dọc bên trong khung, ngăn tác động ra ngoài */
-    -webkit-overflow-scrolling: touch; /* Giúp cuộn mượt trên iPhone */
+       #expression {
+    font-size: 1.7rem; line-height: 1.5; color: var(--expr-text);
+    min-height: 9.75rem; max-height: 9.75rem;
+    overflow-y: auto; margin-bottom: 8px; font-weight: 500;
+    word-wrap: break-word; overflow-wrap: break-word;
+    word-break: break-all; white-space: pre-wrap;
+    scrollbar-width: none;
+    -webkit-user-select: text; user-select: text;
+    /* Cấu hình quan trọng cho iOS */
+    touch-action: pan-y; 
+    -webkit-overflow-scrolling: touch; 
 }
         }
         #expression::-webkit-scrollbar { display: none; }
@@ -396,33 +398,39 @@
     }
     }
 
-  // Biến hỗ trợ phân biệt cuộn và chạm
+  // BIẾN ĐIỀU KHIỂN CHẠM
 let touchStartX = 0;
 let touchStartY = 0;
 let touchStartTime = 0;
+let isScrolling = false;
 
-// 1. Ghi nhận điểm bắt đầu (GIỮ LẠI ĐỂ PHÂN BIỆT CUỘN)
+// 1. Ghi nhận điểm bắt đầu
 exprDiv.addEventListener('touchstart', function(e) {
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchStartTime = Date.now();
+    isScrolling = false;
     e.stopPropagation(); 
 }, {passive: true});
 
-// 2. XỬ LÝ CHÍNH XÁC VỊ TRÍ KHI CHẠM (KHÔNG GÂY ĐƠ PHÍM)
+// 2. Kiểm tra nếu đang vuốt để cuộn
+exprDiv.addEventListener('touchmove', function(e) {
+    const moveX = Math.abs(e.touches[0].clientX - touchStartX);
+    const moveY = Math.abs(e.touches[0].clientY - touchStartY);
+    if (moveX > 5 || moveY > 5) isScrolling = true;
+}, {passive: true});
+
+// 3. Xử lý đặt con trỏ khi nhấc tay (chỉ khi không cuộn)
 exprDiv.addEventListener('touchend', function(e) {
     const duration = Date.now() - touchStartTime;
-    const moveX = Math.abs(e.changedTouches[0].clientX - touchStartX);
-    const moveY = Math.abs(e.changedTouches[0].clientY - touchStartY);
-
-    // Chỉ xử lý nếu là một cú chạm nhanh (tap) và không phải đang cuộn (di chuyển ít)
-    if (duration < 300 && moveX < 10 && moveY < 10) {
+    
+    // Chỉ xử lý nếu chạm nhanh và không phải đang cuộn nội dung
+    if (!isScrolling && duration < 300) {
         if (historyExpr === "" || isTargetMode) return;
-
-        const touch = e.changedTouches[0];
         
-        // Dùng cơ chế lấy vị trí trực tiếp từ hệ thống
+        const touch = e.changedTouches[0];
         let range, textNode, offset;
+
         if (document.caretRangeFromPoint) {
             range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
         } else if (document.caretPositionFromPoint) {
@@ -434,7 +442,8 @@ exprDiv.addEventListener('touchend', function(e) {
         if (textNode) {
             let totalOffset = 0;
             let found = false;
-            // Tính toán vị trí chữ dựa trên các Node con (Số, phép tính, con trỏ)
+            
+            // Tính toán vị trí hiển thị
             for (let node of exprDiv.childNodes) {
                 if (node === textNode) {
                     totalOffset += offset;
@@ -445,17 +454,17 @@ exprDiv.addEventListener('touchend', function(e) {
             }
 
             if (found) {
-                // Ánh xạ từ văn bản hiển thị (có dấu .) sang chuỗi gốc (không dấu .)
+                // Ánh xạ về chuỗi gốc (loại bỏ dấu chấm phân cách hàng nghìn ảo)
                 let visualPrefix = exprDiv.innerText.substring(0, totalOffset);
                 let rawIndex = 0;
                 for (let i = 0; i < visualPrefix.length; i++) {
                     let char = visualPrefix[i];
-                    // Chỉ đếm những ký tự thực sự tồn tại trong historyExpr
                     if (char.match(/[0-9\(\)%,\.]/) || ['×', '÷', '+', '−'].includes(char)) {
                         rawIndex++;
                     }
                 }
                 cursorPos = Math.min(rawIndex, historyExpr.length);
+                isResultDisplayed = false; // Cho phép sửa sau khi đã tính xong
                 renderDisplay();
                 vibrate();
             }
