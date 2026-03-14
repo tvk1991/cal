@@ -3,9 +3,51 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Component, ErrorInfo, ReactNode } from 'react';
+
+// Error Boundary Component
+class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error: Error | null}> {
+    constructor(props: {children: ReactNode}) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        console.error("Uncaught error:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div style={{ padding: '20px', textAlign: 'center', background: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <h2 style={{ color: '#c0392b' }}>Đã xảy ra lỗi!</h2>
+                    <p>Ứng dụng không thể khởi động. Vui lòng thử tải lại trang.</p>
+                    <pre style={{ background: '#f1f2f6', padding: '10px', borderRadius: '8px', fontSize: '12px', maxWidth: '100%', overflow: 'auto' }}>
+                        {this.state.error?.message}
+                    </pre>
+                    <button onClick={() => window.location.reload()} style={{ marginTop: '20px', padding: '10px 20px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+                        Tải lại trang
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
 
 export default function App() {
+    return (
+        <ErrorBoundary>
+            <CalculatorApp />
+        </ErrorBoundary>
+    );
+}
+
+function CalculatorApp() {
     // --- State gốc ---
     const [historyExpr, setHistoryExpr] = useState("");
     const [targetInput, setTargetInput] = useState("");
