@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2344/2344132.png">
     <title> Sentinel </title>
     <style>
         :root {
@@ -27,22 +29,66 @@
             box-sizing: border-box; -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             touch-action: manipulation; font-weight: 600; transition: background 0.2s, color 0.2s;
-            -webkit-user-select: none; user-select: none;
+            -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
         }
-        html, body { height: 100%; margin: 0; overflow: hidden; background-color: var(--bg-color); position: fixed; width: 100%; }
-        .clevcalc-container { width: 100vw; height: 100dvh; max-width: 500px; background: var(--bg-color); display: flex; flex-direction: column; overflow: hidden; margin: 0 auto; position: relative; }
-        .display-screen { flex: 1; width: 100%; padding: calc(env(safe-area-inset-top) + 10px) 25px 10px 25px; display: flex; flex-direction: column; justify-content: flex-end; text-align: right; background: var(--screen-bg); z-index: 5; }
-        #expression { font-size: 1.7rem; line-height: 1.5; color: var(--expr-text); min-height: 9.75rem; max-height: 9.75rem; overflow-y: auto; margin-bottom: 8px; font-weight: 500; word-wrap: break-word; white-space: pre-wrap; -webkit-user-select: text; user-select: text; scrollbar-width: none; }
+        html, body {
+            height: 100%; margin: 0; overflow: hidden;
+            background-color: var(--bg-color); position: fixed; width: 100%;
+            overscroll-behavior-y: contain;
+        }
+        .clevcalc-container {
+            width: 100vw; height: 100dvh; max-width: 500px;
+            background: var(--bg-color); display: flex; flex-direction: column;
+            overflow: hidden; margin: 0 auto; position: relative;
+        }
+        .display-screen {
+            flex: 1; width: 100%;
+            padding: calc(env(safe-area-inset-top) + 10px) 25px 10px 25px;
+            display: flex; flex-direction: column;
+            justify-content: flex-end; text-align: right;
+            background: var(--screen-bg); z-index: 5;
+        }
+        #expression {
+            font-size: 1.7rem; line-height: 1.5; color: var(--expr-text);
+            min-height: 9.75rem; max-height: 9.75rem;
+            overflow-y: auto; margin-bottom: 8px; font-weight: 500;
+            word-wrap: break-word; overflow-wrap: break-word;
+            word-break: normal; white-space: pre-wrap; scrollbar-width: none;
+            -webkit-user-select: text; user-select: text;
+        }
         #expression::-webkit-scrollbar { display: none; }
-        .expr-cursor { display: inline-block; width: 2.5px; height: 1.15em; background: var(--led-green); vertical-align: text-bottom; border-radius: 2px; animation: blink-cur 1s step-end infinite; box-shadow: var(--led-green-glow); margin: 0 1px; }
+        .expr-cursor {
+            display: inline-block; width: 2.5px; height: 1.15em;
+            background: var(--led-green); vertical-align: text-bottom;
+            border-radius: 2px; animation: blink-cur 1s step-end infinite;
+            box-shadow: var(--led-green-glow); margin: 0 1px; pointer-events: none;
+        }
         @keyframes blink-cur { 50% { opacity: 0; } }
-        #result-preview { font-size: clamp(2.2rem, 10vw, 2.8rem); color: var(--led-green); text-shadow: var(--led-green-glow); line-height: 1.1; overflow: hidden; white-space: nowrap; font-weight: 800; text-overflow: ellipsis; margin-bottom: 8px; }
+        #result-preview {
+            font-size: clamp(2.2rem, 10vw, 2.8rem); color: var(--led-green);
+            text-shadow: var(--led-green-glow); line-height: 1.1;
+            overflow: hidden; white-space: nowrap; font-weight: 800;
+            text-overflow: ellipsis; margin-bottom: 8px;
+        }
         #comparison-msg { font-size: 0.9rem; font-weight: 800; text-align: center; min-height: 22px; margin-bottom: 12px; }
-        .target-area { display: flex; align-items: center; background: var(--target-area-bg); border-radius: 14px; padding: 10px 15px; border: 1px solid var(--target-border); gap: 10px; margin-bottom: 5px; }
+        .target-area {
+            display: flex; align-items: center; background: var(--target-area-bg);
+            border-radius: 14px; padding: 10px 15px; border: 1px solid var(--target-border);
+            gap: 10px; margin-bottom: 5px;
+        }
         .active-target { background: #fff5eb !important; border-color: var(--target-color) !important; outline: 2px solid var(--target-color); }
         [data-theme="dark"] .active-target { background: #2a1f15 !important; }
-        .keypad { height: 50%; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr); background: var(--keypad-bg); gap: 1px; padding-bottom: env(safe-area-inset-bottom); }
-        button { background: var(--key-bg); border: none; font-size: 1.6rem; color: var(--key-text); display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .keypad {
+            height: 50%; width: 100%; display: grid;
+            grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr);
+            background: var(--keypad-bg); gap: 1px;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        button {
+            background: var(--key-bg); border: none; font-size: 1.6rem;
+            color: var(--key-text); display: flex; justify-content: center;
+            align-items: center; cursor: pointer; -webkit-user-drag: none;
+        }
         button:active { background: var(--key-active); }
         .btn-op { color: var(--op-color); font-weight: 900; }
         .btn-func { color: var(--accent); font-weight: 900; }
@@ -50,18 +96,22 @@
         .btn-equal { background: var(--accent); color: white; font-size: 2.2rem; font-weight: 800; }
         .btn-plus { grid-row: span 2; color: var(--op-color); font-weight: 900; }
         .control-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 5px; }
-        .control-btn svg { width: 22px; height: 22px; stroke-width: 2.5; fill: none; }
+        .control-btn svg { width: 22px; height: 22px; stroke-width: 2.5; fill: none; pointer-events: none; }
         #openHistory svg { stroke: var(--target-color); }
         #theme-toggle svg { fill: var(--target-color); }
         .btn-back-ctrl svg { stroke: var(--key-text); }
         .divider { width: 1px; height: 20px; background: var(--target-border); }
         .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; }
         #target-display { flex: 1; font-size: 1.4rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); font-weight: 900; }
-        .history-box { position: absolute; inset: 0; background: var(--screen-bg); z-index: 100; display: none; flex-direction: column; padding: 20px; padding-top: calc(env(safe-area-inset-top) + 15px); }
+        .history-box {
+            position: absolute; inset: 0; background: var(--screen-bg); z-index: 100;
+            display: none; flex-direction: column; padding: 20px;
+            padding-top: calc(env(safe-area-inset-top) + 15px);
+        }
         .history-list { flex: 1; overflow-y: auto; }
         .history-item { border-bottom: 1px solid var(--keypad-bg); padding: 15px 0; cursor: pointer; }
-        .history-expr { color: var(--expr-text); font-size: 1.1rem; margin-bottom: 4px; opacity: 0.7; }
-        .history-res { font-weight: 900; text-align: right; font-size: 1.6rem; color: var(--led-green); }
+        .history-expr { color: var(--expr-text); font-size: 1.1rem; margin-bottom: 4px; opacity: 0.7; pointer-events: none; }
+        .history-res { font-weight: 900; text-align: right; font-size: 1.6rem; color: var(--led-green); pointer-events: none; }
         .shake { animation: shake 0.4s both; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
         .neon-danger { color: var(--led-red) !important; text-shadow: var(--led-red-glow) !important; }
@@ -74,7 +124,9 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <span style="font-size: 1.6rem; font-weight: 900; color: var(--accent);">Lịch sử</span>
             <div id="closeHistory" class="control-btn">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--key-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </div>
         </div>
         <div id="historyList" class="history-list"></div>
@@ -86,22 +138,28 @@
         <div id="result-preview">0</div>
         <div id="comparison-msg"></div>
         <div class="target-area" id="target-area-container">
-            <div class="control-btn" id="openHistory"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+            <div class="control-btn" id="openHistory">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
             <div class="divider"></div>
-            <div class="control-btn" id="theme-toggle"><svg id="theme-icon" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg></div>
+            <div class="control-btn" id="theme-toggle">
+                <svg id="theme-icon" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+            </div>
             <div class="divider"></div>
             <div id="target-box" style="display:flex; align-items:center; flex:1; height:100%; cursor:pointer;">
                 <span class="target-label">MỤC TIÊU:</span>
                 <div id="target-display">0</div>
             </div>
-            <div class="control-btn btn-back-ctrl" id="btn-backspace"><svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg></div>
+            <div class="control-btn btn-back-ctrl" id="btn-backspace">
+                <svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+            </div>
         </div>
     </div>
 
     <div class="keypad">
         <button class="btn-clear" data-val="C">C</button>
         <button class="btn-func" data-val="()">()</button>
-        <button class="btn-op" data-val="/">÷</button>
+        <button class="btn-func" data-val="%">%</button>
         <button class="btn-op" data-val="*">×</button>
         <button data-val="7">7</button>
         <button data-val="8">8</button>
@@ -115,8 +173,8 @@
         <button data-val="2">2</button>
         <button data-val="3">3</button>
         <button data-val="0">0</button>
+        <button data-val="00">00</button>
         <button data-val=".">,</button>
-        <button class="btn-func" data-val="%">%</button>
         <button class="btn-equal" data-val="=">=</button>
     </div>
 </div>
@@ -130,44 +188,38 @@
     let cursorPos = null; 
     let isResultDisplayed = false;
 
-    const exprDiv = document.getElementById('expression'), 
-          resDiv = document.getElementById('result-preview'), 
-          targetDiv = document.getElementById('target-display'), 
-          targetBox = document.getElementById('target-box'), 
-          msgDiv = document.getElementById('comparison-msg'), 
-          hBox = document.getElementById('historyBox'), 
-          hList = document.getElementById('historyList');
+    const exprDiv = document.getElementById('expression'), resDiv = document.getElementById('result-preview'), targetDiv = document.getElementById('target-display'), targetBox = document.getElementById('target-box'), msgDiv = document.getElementById('comparison-msg'), hBox = document.getElementById('historyBox'), hList = document.getElementById('historyList');
 
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         if (type === 'click') {
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         } else if (type === 'success') {
-            osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1046, audioCtx.currentTime + 0.3);
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 0.3);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
             osc.start(); osc.stop(audioCtx.currentTime + 0.4);
         } else if (type === 'fail') {
             osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
             osc.start(); osc.stop(audioCtx.currentTime + 0.5);
         }
     }
     function vibrate() { if (navigator.vibrate) navigator.vibrate(15); }
 
+    // SỬA LỖI 1: Hàm định dạng số chuẩn cho cả số nguyên và thập phân
     function formatNumber(val) {
-        if (val === null || val === undefined || val === "") return "";
-        let parts = val.toString().split('.');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        return parts.join(',');
-    }
-
-    function parseInput(val) {
-        return val.replace(/\./g, '').replace(/,/g, '.');
+        if (!val && val !== 0) return "";
+        let s = val.toString().split('.');
+        s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return s.length > 1 ? s[0] + "," + s[1] : s[0];
     }
 
     document.querySelectorAll('[data-val]').forEach(btn => {
@@ -177,7 +229,7 @@
             if (v === 'C') clearAll();
             else if (v === '()') smartParenthesis();
             else if (v === '%') applyPercent();
-            else if (['+','-','*','/'].includes(v)) addOp(v);
+            else if (['+','-','*'].includes(v)) addOp(v);
             else if (v === '=') calculate();
             else handleInput(v);
         });
@@ -185,7 +237,9 @@
 
     function handleInput(n) {
         playSound('click');
-        if (isResultDisplayed && !isTargetMode) { historyExpr = ""; isResultDisplayed = false; cursorPos = null; }
+        if (isResultDisplayed && !isTargetMode) {
+            historyExpr = ""; isResultDisplayed = false; cursorPos = null;
+        }
 
         if (isTargetMode) {
             if (n === '.' && targetInput.includes('.')) return;
@@ -195,6 +249,21 @@
                 historyExpr = historyExpr.slice(0, cursorPos) + n + historyExpr.slice(cursorPos);
                 cursorPos += n.length;
             } else {
+                // Logic Sentinel cảnh báo vượt mục tiêu
+                if (targetInput !== "" && !isNaN(n)) {
+                    let cleanedExpr = historyExpr + n;
+                    while (['+','-','*','/','(','.'].includes(cleanedExpr.slice(-1))) cleanedExpr = cleanedExpr.slice(0, -1);
+                    try {
+                        let open = (cleanedExpr.match(/\(/g) ||[]).length, close = (cleanedExpr.match(/\)/g) ||[]).length;
+                        if (open > close) cleanedExpr += ")".repeat(open - close);
+                        let potential = Math.round(eval(cleanedExpr) * 1000000) / 1000000;
+                        if (potential > parseFloat(targetInput)) {
+                            msgDiv.innerText = "⚠️ SẼ VƯỢT MỤC TIÊU!"; msgDiv.style.color = "var(--danger)";
+                            msgDiv.classList.add('shake'); setTimeout(() => msgDiv.classList.remove('shake'), 400);
+                            resDiv.classList.add('neon-danger'); playSound('fail');
+                        }
+                    } catch(e) {}
+                }
                 historyExpr += n;
             }
             autoPreview();
@@ -205,43 +274,50 @@
     function addOp(op) {
         playSound('click'); isResultDisplayed = false;
         if (isTargetMode) isTargetMode = false;
-        const last = historyExpr.slice(-1);
-        if (['+','-','*','/'].includes(last)) {
-            historyExpr = historyExpr.slice(0, -1) + op;
-        } else if (historyExpr !== "" || op === '-') {
-            historyExpr += op;
+
+        if (cursorPos !== null) {
+            const charBefore = cursorPos > 0 ? historyExpr[cursorPos - 1] : '';
+            if (['+','-','*','/'].includes(charBefore)) {
+                historyExpr = historyExpr.slice(0, cursorPos - 1) + op + historyExpr.slice(cursorPos);
+            } else {
+                historyExpr = historyExpr.slice(0, cursorPos) + op + historyExpr.slice(cursorPos);
+                cursorPos++;
+            }
+        } else {
+            const last = historyExpr.slice(-1);
+            if (['+','-','*','/'].includes(last)) historyExpr = historyExpr.slice(0, -1) + op;
+            else if (historyExpr !== "" || op === '-') historyExpr += op;
         }
-        if (cursorPos !== null) cursorPos = historyExpr.length;
-        renderDisplay();
+        renderDisplay(); autoPreview();
     }
 
     function applyPercent() {
-        if (isTargetMode || !historyExpr) return;
-        playSound('click');
+        if (isTargetMode) return;
+        playSound('click'); cursorPos = null;
         try {
-            let val = eval(historyExpr.replace(/×/g, '*').replace(/÷/g, '/')) / 100;
-            historyExpr = val.toString();
+            let parts = historyExpr.split(/([\+\-\*\/])/), lastPart = parts.pop(), op = parts.pop();
+            let base = eval(parts.join("") || "0");
+            let val = (op === '+' || op === '-') ? base * (parseFloat(lastPart) / 100) : parseFloat(lastPart) / 100;
+            historyExpr = parts.join("") + (op || "") + val;
             renderDisplay(); autoPreview();
         } catch(e) {}
     }
 
+    let backTimer, backInterval;
+    const btnBack = document.getElementById('btn-backspace');
     function backspace() {
-        if (isTargetMode) {
-            targetInput = targetInput.slice(0, -1);
-        } else {
-            if (cursorPos !== null && cursorPos > 0) {
-                historyExpr = historyExpr.slice(0, cursorPos - 1) + historyExpr.slice(cursorPos);
-                cursorPos--;
-            } else {
-                historyExpr = historyExpr.slice(0, -1);
-            }
+        if (isTargetMode) targetInput = targetInput.slice(0, -1);
+        else {
+            if (cursorPos !== null) {
+                if (cursorPos > 0) {
+                    historyExpr = historyExpr.slice(0, cursorPos - 1) + historyExpr.slice(cursorPos);
+                    cursorPos--;
+                }
+            } else historyExpr = historyExpr.slice(0, -1);
             autoPreview();
         }
         renderDisplay();
     }
-
-    let backTimer, backInterval;
-    const btnBack = document.getElementById('btn-backspace');
     btnBack.addEventListener('pointerdown', (e) => {
         e.preventDefault(); vibrate(); playSound('click'); backspace();
         backTimer = setTimeout(() => { backInterval = setInterval(() => { vibrate(); backspace(); }, 70); }, 500);
@@ -251,52 +327,49 @@
 
     function calculate() {
         if (isTargetMode) { isTargetMode = false; renderDisplay(); return; }
-        if (!historyExpr) return;
+        let raw = historyExpr; if (!raw) return;
+        cursorPos = null;
         try {
-            let raw = historyExpr.replace(/×/g, '*').replace(/÷/g, '/');
             while (['+','-','*','/','(','.'].includes(raw.slice(-1))) raw = raw.slice(0, -1);
-            let res = eval(raw);
+            let res = eval(raw); 
             let finalRes = Math.round(res * 1000000) / 1000000;
 
             if (targetInput !== "") {
-                let targetNum = parseFloat(targetInput);
-                if (Math.abs(finalRes - targetNum) < 0.00001) {
+                if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
                     msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.style.color = "var(--accent)"; playSound('success');
                 } else {
-                    let diff = finalRes - targetNum;
-                    msgDiv.innerText = (diff > 0 ? "❌ VƯỢT: " : "❌ THIẾU: ") + formatNumber(Math.abs(diff).toFixed(2));
+                    let diff = Math.round((finalRes - parseFloat(targetInput)) * 100) / 100;
+                    msgDiv.innerText = (diff > 0 ? "❌ VƯỢT: " : "❌ THIẾU: ") + formatNumber(Math.abs(diff));
                     msgDiv.style.color = "var(--danger)"; playSound('fail');
                 }
             }
-            calculationHistory.push({ expr: exprDiv.innerText, res: finalRes, raw: historyExpr });
+            calculationHistory.push({ expr: exprDiv.innerText || historyExpr, res: finalRes, raw: raw });
             if (calculationHistory.length > 50) calculationHistory.shift();
             localStorage.setItem('calc_history', JSON.stringify(calculationHistory));
 
-            resDiv.innerText = formatNumber(finalRes);
-            historyExpr = finalRes.toString();
-            isResultDisplayed = true; cursorPos = null;
+            resDiv.innerText = formatNumber(finalRes); historyExpr = finalRes.toString();
+            exprDiv.innerText = ""; isResultDisplayed = true;
         } catch(e) { resDiv.innerText = "Lỗi"; }
         renderDisplay();
     }
 
+    // SỬA LỖI 2: Thêm bọc try-catch cho preview để không lỗi khi đang gõ dở
     function autoPreview() {
         try {
-            if (!historyExpr) { resDiv.innerText = "0"; return; }
-            let temp = historyExpr.replace(/×/g, '*').replace(/÷/g, '/');
+            let temp = historyExpr; if (!temp) { resDiv.innerText = "0"; return; }
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) temp = temp.slice(0, -1);
-            let open = (temp.match(/\(/g) || []).length, close = (temp.match(/\)/g) || []).length;
+            let open = (temp.match(/\(/g) ||[]).length, close = (temp.match(/\)/g) ||[]).length;
             if (open > close) temp += ")".repeat(open - close);
+            
             let pVal = Math.round(eval(temp) * 1000000) / 1000000;
             resDiv.innerText = formatNumber(pVal);
             
             if (targetInput !== "" && pVal > parseFloat(targetInput)) {
-                resDiv.classList.add('neon-danger');
-                msgDiv.innerText = "⚠️ VƯỢT QUÁ!"; msgDiv.style.color = "var(--danger)";
-            } else {
-                resDiv.classList.remove('neon-danger');
-                if (!isTargetMode) msgDiv.innerText = "";
-            }
-        } catch(e) { resDiv.innerText = "0"; }
+                resDiv.classList.add('neon-danger'); msgDiv.innerText = "⚠️ VƯỢT QUÁ!"; msgDiv.style.color = "var(--danger)";
+            } else { resDiv.classList.remove('neon-danger'); if (!isTargetMode) msgDiv.innerText = ""; }
+        } catch(e) { 
+            // Không hiển thị lỗi khi đang gõ dở
+        }
     }
 
     function renderDisplay() {
@@ -304,33 +377,104 @@
             document.getElementById('target-area-container').classList.add('active-target');
         } else {
             document.getElementById('target-area-container').classList.remove('active-target');
+            if (cursorPos !== null) {
+                const fmt = s => {
+                    let str = s.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
+                    // SỬA LỖI HIỂN THỊ: Chỉ định dạng số, không định dạng toán tử
+                    return str.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
+                };
+                const pre = fmt(historyExpr.slice(0, cursorPos));
+                const post = fmt(historyExpr.slice(cursorPos));
+                exprDiv.innerHTML = pre + '<span class="expr-cursor"></span>' + post;
+            } else {
+                let displayStr = historyExpr.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
+                displayStr = displayStr.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
+                exprDiv.innerHTML = displayStr;
+            }
         }
-
-        const fmt = (s) => s.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ')
-                            .replace(/(\d+(\.\d+)?)/g, m => formatNumber(m));
-
-        if (cursorPos !== null && !isResultDisplayed) {
-            let pre = fmt(historyExpr.slice(0, cursorPos));
-            let post = fmt(historyExpr.slice(cursorPos));
-            exprDiv.innerHTML = pre + '<span class="expr-cursor"></span>' + post;
-        } else {
-            exprDiv.innerHTML = isResultDisplayed ? "" : fmt(historyExpr);
-        }
-        
         targetDiv.innerText = formatNumber(targetInput) || "0";
         exprDiv.scrollTop = exprDiv.scrollHeight;
+    }
+
+    // GIỮ NGUYÊN THUẬT TOÁN ĐỒNG BỘ CON TRỎ CỦA BẠN
+    exprDiv.addEventListener('touchstart', function(e) {
+        if (historyExpr === "" || isTargetMode) return;
+        const touch = e.touches[0];
+        if (cursorPos === null) cursorPos = historyExpr.length;
+        renderDisplay();
+
+        setTimeout(() => {
+            let range, textNode, offset;
+            if (document.caretRangeFromPoint) {
+                range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+            } else if (e.target.ownerDocument.caretPositionFromPoint) {
+                const pos = e.target.ownerDocument.caretPositionFromPoint(touch.clientX, touch.clientY);
+                if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
+            }
+            if (range) { textNode = range.startContainer; offset = range.startOffset; }
+
+            if (textNode) {
+                let totalOffset = 0; let found = false;
+                for (let node of exprDiv.childNodes) {
+                    if (node === textNode) { totalOffset += offset; found = true; break; }
+                    if (node.nodeType === 3) {
+                        totalOffset += node.textContent.length;
+                    } else if (node.nodeType === 1 && node.className !== 'expr-cursor') {
+                        totalOffset += node.innerText.length;
+                    }
+                }
+                
+                if (found) { 
+                    let visualText = exprDiv.innerText;
+                    let visualPrefix = visualText.substring(0, totalOffset);
+                    let rawPrefixLength = 0;
+                    for(let i = 0; i < visualPrefix.length; i++) {
+                        let char = visualPrefix[i];
+                        if (char.match(/[0-9\(\)]/) ||['×','÷','+','−', ','].includes(char)) {
+                            rawPrefixLength++;
+                        }
+                    }
+                    cursorPos = Math.min(rawPrefixLength, historyExpr.length);
+                    renderDisplay(); 
+                }
+            }
+        }, 10);
+        vibrate();
+    }, {passive: false});
+
+    function renderHistory() {
+        hList.innerHTML = calculationHistory.map((item, i) => `
+            <div class="history-item" onclick="loadEditHistory(${i})">
+                <div class="history-expr">${item.expr} =</div>
+                <div class="history-res">${formatNumber(item.res)}</div>
+            </div>
+        `).reverse().join('');
+    }
+
+    // SỬA LỖI 3: Đồng bộ lại dấu khi nạp lịch sử
+    window.loadEditHistory = (i) => {
+        const item = calculationHistory[i];
+        historyExpr = item.raw || item.expr.replace(/ × /g,'*').replace(/ ÷ /g,'/').replace(/ − /g,'-').replace(/\./g,'').replace(/,/g,'.');
+        cursorPos = historyExpr.length;
+        isResultDisplayed = false;
+        hBox.style.display = 'none';
+        playSound('click'); renderDisplay(); autoPreview();
+    };
+
+    function clearAll() {
+        playSound('click');
+        if (isTargetMode) targetInput = "";
+        else { historyExpr = ""; targetInput = ""; msgDiv.innerText = ""; cursorPos = null; isResultDisplayed = false; }
+        resDiv.innerText = "0"; resDiv.classList.remove('neon-danger'); renderDisplay();
     }
 
     function smartParenthesis() {
         playSound('click');
         let open = (historyExpr.match(/\(/g) ||[]).length, close = (historyExpr.match(/\)/g) ||[]).length;
         let char = (open > close && !['+','-','*','/','('].includes(historyExpr.slice(-1))) ? ")" : "(";
-        handleInput(char);
-    }
-
-    function clearAll() {
-        if (isTargetMode) { targetInput = ""; } 
-        else { historyExpr = ""; targetInput = ""; msgDiv.innerText = ""; cursorPos = null; isResultDisplayed = false; resDiv.innerText = "0"; }
+        if (cursorPos !== null) {
+            historyExpr = historyExpr.slice(0, cursorPos) + char + historyExpr.slice(cursorPos); cursorPos++;
+        } else { historyExpr += char; }
         renderDisplay();
     }
 
@@ -338,39 +482,17 @@
         const body = document.body;
         const isDark = body.getAttribute('data-theme') === 'dark';
         body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.getElementById('theme-icon').innerHTML = isDark ? 
+            '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>' :
+            '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
         vibrate(); playSound('click');
     };
 
-    document.getElementById('openHistory').onclick = () => { hBox.style.display = 'flex'; renderHistory(); };
-    document.getElementById('closeHistory').onclick = () => hBox.style.display = 'none';
-    document.getElementById('clearHistoryBtn').onclick = () => { calculationHistory = []; renderHistory(); localStorage.removeItem('calc_history'); };
-    targetBox.onclick = () => { isTargetMode = !isTargetMode; renderDisplay(); };
-
-    function renderHistory() {
-        hList.innerHTML = calculationHistory.map((item, i) => `
-            <div class="history-item" onclick="loadEditHistory(${i})">
-                <div class="history-expr">${item.expr || item.raw} =</div>
-                <div class="history-res">${formatNumber(item.res)}</div>
-            </div>
-        `).reverse().join('');
-    }
-
-    window.loadEditHistory = (i) => {
-        const item = calculationHistory[i];
-        historyExpr = item.raw.toString();
-        isResultDisplayed = false; cursorPos = historyExpr.length;
-        hBox.style.display = 'none';
-        renderDisplay(); autoPreview();
-    };
-
-    // Hỗ trợ chạm để đặt con trỏ
-    exprDiv.addEventListener('touchstart', (e) => {
-        if (isResultDisplayed || isTargetMode) return;
-        cursorPos = historyExpr.length;
-        renderDisplay();
-    });
+    document.getElementById('openHistory').onclick = () => { hBox.style.display = 'flex'; renderHistory(); vibrate(); };
+    document.getElementById('closeHistory').onclick = () => { hBox.style.display = 'none'; vibrate(); };
+    document.getElementById('clearHistoryBtn').onclick = () => { calculationHistory = []; renderHistory(); vibrate(); };
+    targetBox.onclick = () => { isTargetMode = !isTargetMode; renderDisplay(); vibrate(); };
 
 </script>
 </body>
 </html>
-
