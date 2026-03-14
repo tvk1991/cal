@@ -396,93 +396,72 @@
     }
     }
 
-  // GIỮ LẠI VÀ CẬP NHẬT NHƯ SAU:
-let touchStartTime = 0;
+  // Biến hỗ trợ phân biệt cuộn và chạm
 let touchStartX = 0;
 let touchStartY = 0;
+let touchStartTime = 0;
 
+// 1. Ghi nhận điểm bắt đầu (GIỮ LẠI ĐỂ PHÂN BIỆT CUỘN)
 exprDiv.addEventListener('touchstart', function(e) {
-    // Ghi lại thời điểm và vị trí lúc bắt đầu chạm
-    touchStartTime = Date.now();
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
-    
-    // Ngăn chặn sự kiện lan ra ngoài khung chứa để không làm lag trang
+    touchStartTime = Date.now();
     e.stopPropagation(); 
 }, {passive: true});
 
-
-// 2. HÀM CHẠM VÀO KHUNG CHỨA (Đã sửa lỗi cuộn và lệch vị trí)
+// 2. XỬ LÝ CHÍNH XÁC VỊ TRÍ KHI CHẠM (KHÔNG GÂY ĐƠ PHÍM)
 exprDiv.addEventListener('touchend', function(e) {
-    const touchEndTime = Date.now();
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
+    const duration = Date.now() - touchStartTime;
+    const moveX = Math.abs(e.changedTouches[0].clientX - touchStartX);
+    const moveY = Math.abs(e.changedTouches[0].clientY - touchStartY);
 
-    const moveDist = Math.sqrt(Math.pow(touchEndX - touchStartX, 2) + Math.pow(touchEndY - touchStartY, 2));
-    const duration = touchEndTime - touchStartTime;
-
-    if (moveDist < 10 && duration < 300) {
+    // Chỉ xử lý nếu là một cú chạm nhanh (tap) và không phải đang cuộn (di chuyển ít)
+    if (duration < 300 && moveX < 10 && moveY < 10) {
         if (historyExpr === "" || isTargetMode) return;
-        
+
         const touch = e.changedTouches[0];
         
-        // BƯỚC 1: Render tạm thời không có con trỏ để lấy tọa độ chuẩn
-        const currentCursor = cursorPos;
-        const fmt = s => {
-            let str = s.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
-            return str.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
-        };
-        exprDiv.innerHTML = fmt(historyExpr); 
+        // Dùng cơ chế lấy vị trí trực tiếp từ hệ thống
+        let range, textNode, offset;
+        if (document.caretRangeFromPoint) {
+            range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+        } else if (document.caretPositionFromPoint) {
+            const pos = document.caretPositionFromPoint(touch.clientX, touch.clientY);
+            if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
+        }
+        if (range) { textNode = range.startContainer; offset = range.startOffset; }
 
-        // BƯỚC 2: Tính toán vị trí ngay lập tức
-        setTimeout(() => {
-            let range, textNode, offset;
-            if (document.caretRangeFromPoint) {
-                range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-            } else if (document.caretPositionFromPoint) {
-                const pos = document.caretPositionFromPoint(touch.clientX, touch.clientY);
-                if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
-            }
-            if (range) { textNode = range.startContainer; offset = range.startOffset; }
-
-            if (textNode) {
-                let totalOffset = 0;
-                let found = false;
-                for (let node of exprDiv.childNodes) {
-                    if (node === textNode) {
-                        totalOffset += offset;
-                        found = true;
-                        break;
-                    }
-                    totalOffset += (node.nodeType === 3) ? node.textContent.length : node.innerText.length;
+        if (textNode) {
+            let totalOffset = 0;
+            let found = false;
+            // Tính toán vị trí chữ dựa trên các Node con (Số, phép tính, con trỏ)
+            for (let node of exprDiv.childNodes) {
+                if (node === textNode) {
+                    totalOffset += offset;
+                    found = true;
+                    break;
                 }
-
-                if (found) {
-                    let visualText = exprDiv.innerText;
-                    let visualPrefix = visualText.substring(0, totalOffset);
-                    let rawIndex = 0;
-                    
-                    // Lọc bỏ dấu chấm phân cách hàng nghìn và khoảng trắng ảo
-                    for (let i = 0; i < visualPrefix.length; i++) {
-                        let char = visualPrefix[i];
-                        if (char.match(/[0-9\(\)%,\.\/]/) || ['×', '÷', '+', '−'].includes(char)) {
-                            rawIndex++;
-                        }
-                    }
-                    cursorPos = Math.min(rawIndex, historyExpr.length);
-                }
-            } else {
-                // Nếu chạm vào vùng trống phía dưới biểu thức, đưa con trỏ về cuối
-                cursorPos = historyExpr.length;
+                totalOffset += (node.nodeType === 3) ? node.textContent.length : (node.innerText ? node.innerText.length : 0);
             }
-            
-            // BƯỚC 3: Render lại giao diện có con trỏ ở vị trí mới
-            renderDisplay();
-            vibrate();
-        }, 0);
+
+            if (found) {
+                // Ánh xạ từ văn bản hiển thị (có dấu .) sang chuỗi gốc (không dấu .)
+                let visualPrefix = exprDiv.innerText.substring(0, totalOffset);
+                let rawIndex = 0;
+                for (let i = 0; i < visualPrefix.length; i++) {
+                    let char = visualPrefix[i];
+                    // Chỉ đếm những ký tự thực sự tồn tại trong historyExpr
+                    if (char.match(/[0-9\(\)%,\.]/) || ['×', '÷', '+', '−'].includes(char)) {
+                        rawIndex++;
+                    }
+                }
+                cursorPos = Math.min(rawIndex, historyExpr.length);
+                renderDisplay();
+                vibrate();
+            }
+        }
     }
 }, {passive: true});
-
                 if (found) {
                     let visualText = exprDiv.innerText;
                     let visualPrefix = visualText.substring(0, totalOffset);
