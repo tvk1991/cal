@@ -40,29 +40,14 @@
             width: 100vw; height: 100dvh; max-width: 500px;
             background: var(--bg-color); display: flex; flex-direction: column;
             overflow: hidden; margin: 0 auto; position: relative;
-        }.display-screen {
-    flex: 1; 
-    width: 100%;
-    /* Giữ nguyên padding để tránh vùng tai thỏ trên điện thoại */
-    padding: calc(env(safe-area-inset-top) + 10px) 25px 10px 25px;
-    display: flex; 
-    flex-direction: column;
-    justify-content: flex-end; 
-    text-align: right;
-    
-    /* Đổi màu nền ở đây: Màu xanh LCD cổ điển */
-    background-color: #8fa391; 
-    
-    /* Thêm các thuộc tính để khớp hoàn toàn với khung chứa */
-    border-bottom: 2px solid rgba(0,0,0,0.1); 
-    position: relative;
-    z-index: 5;
-    
-    /* Chống tràn nội dung khi cuộn */
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
+        }
+        .display-screen {
+            flex: 1; width: 100%;
+            padding: calc(env(safe-area-inset-top) + 10px) 25px 10px 25px;
+            display: flex; flex-direction: column;
+            justify-content: flex-end; text-align: right;
+            background: var(--screen-bg); z-index: 5;
+        }
         #expression {
             font-size: 1.7rem; line-height: 1.5; color: var(--expr-text);
             min-height: 9.75rem; max-height: 9.75rem;
@@ -70,16 +55,16 @@
             word-wrap: break-word; overflow-wrap: break-word;
             word-break: normal; white-space: pre-wrap; scrollbar-width: none;
             -webkit-user-select: text; user-select: text;
-            /* Thêm cuộn mượt cho iOS */
-            -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
+			touch-action: none; /* Ngăn chặn hoàn toàn việc cuộn trang từ vùng này */
+    -webkit-overflow-scrolling: auto; /* Tắt hiệu ứng cuộn đàn hồi của iOS */
+}
         }
         #expression::-webkit-scrollbar { display: none; }
         .expr-cursor {
             display: inline-block; width: 2.5px; height: 1.15em;
-            background: var(--led-green); vertical-align: middle;
+            background: var(--led-green); vertical-align: text-bottom;
             border-radius: 2px; animation: blink-cur 1s step-end infinite;
-            box-shadow: var(--led-green-glow); margin: 0 -1px; pointer-events: none;
+            box-shadow: var(--led-green-glow); margin: 0 1px; pointer-events: none;
         }
         @keyframes blink-cur { 50% { opacity: 0; } }
         #result-preview {
@@ -205,7 +190,6 @@
     let calculationHistory = JSON.parse(localStorage.getItem('calc_history') || '[]');
     let cursorPos = null; 
     let isResultDisplayed = false;
-    let isMovingCursor = false; // Biến kiểm soát trạng thái di chuyển con trỏ
 
     const exprDiv = document.getElementById('expression'), resDiv = document.getElementById('result-preview'), targetDiv = document.getElementById('target-display'), targetBox = document.getElementById('target-box'), msgDiv = document.getElementById('comparison-msg'), hBox = document.getElementById('historyBox'), hList = document.getElementById('historyList');
 
@@ -384,12 +368,14 @@
         } catch(e) { resDiv.innerText = "0"; }
     }
 
+   // 1. HÀM HIỂN THỊ (Đã thêm định dạng số khi đang sửa)
     function renderDisplay() {
         if (isTargetMode) {
             document.getElementById('target-area-container').classList.add('active-target');
         } else {
             document.getElementById('target-area-container').classList.remove('active-target');
             if (cursorPos !== null) {
+                // Hàm phụ giúp định dạng chuỗi cắt nửa
                 const fmt = s => {
                     let str = s.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
                     return str.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
@@ -404,60 +390,60 @@
             }
         }
         targetDiv.innerText = formatNumber(targetInput) || "0";
-        // Chỉ tự động cuộn xuống nếu không đang di con trỏ
-        if (!isMovingCursor) exprDiv.scrollTop = exprDiv.scrollHeight;
+        exprDiv.scrollTop = exprDiv.scrollHeight;
     }
 
-    function updateCursorFromPoint(x, y) {
-        if (historyExpr === "" || isTargetMode) return;
+    // 2. HÀM CHẠM VÀO MÀN HÌNH CỦA IPHONE (Thuật toán đồng bộ vị trí con trỏ)
+    // 2. HÀM CHẠM VÀO MÀN HÌNH CỦA IPHONE (Đã sửa để không di chuyển toàn trang)
+exprDiv.addEventListener('touchstart', function(e) {
+    // Ngăn chặn việc cuộn trang và lan truyền sự kiện ra ngoài khung chứa
+    if (e.cancelable) e.preventDefault(); 
+    e.stopPropagation();
+
+    if (historyExpr === "" || isTargetMode) return;
+    const touch = e.touches[0];
+    if (cursorPos === null) cursorPos = historyExpr.length;
+    renderDisplay(); 
+
+    setTimeout(() => {
         let range, textNode, offset;
         if (document.caretRangeFromPoint) {
-            range = document.caretRangeFromPoint(x, y);
-        } else if (document.caretPositionFromPoint) {
-            const pos = document.caretPositionFromPoint(x, y);
+            range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+        } else if (e.target.ownerDocument.caretPositionFromPoint) {
+            const pos = e.target.ownerDocument.caretPositionFromPoint(touch.clientX, touch.clientY);
             if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
         }
         if (range) { textNode = range.startContainer; offset = range.startOffset; }
 
         if (textNode) {
-            let totalOffset = 0, found = false;
+            let totalOffset = 0; let found = false;
             for (let node of exprDiv.childNodes) {
                 if (node === textNode) { totalOffset += offset; found = true; break; }
-                if (node.nodeType === 3) totalOffset += node.textContent.length;
-                else if (node.nodeType === 1 && node.className !== 'expr-cursor') totalOffset += node.innerText.length;
+                if (node.nodeType === 3) {
+                    totalOffset += node.textContent.length;
+                } else if (node.nodeType === 1 && node.className !== 'expr-cursor') {
+                    totalOffset += node.innerText.length;
+                }
             }
-            if (found) {
-                let visualText = exprDiv.innerText, visualPrefix = visualText.substring(0, totalOffset), rawPrefixLength = 0;
+            
+            if (found) { 
+                let visualText = exprDiv.innerText;
+                let visualPrefix = visualText.substring(0, totalOffset);
+                let rawPrefixLength = 0;
+                
                 for(let i = 0; i < visualPrefix.length; i++) {
                     let char = visualPrefix[i];
-                    if (char.match(/[0-9\(\)%,\.]/) || ['×','÷','+','−'].includes(char)) rawPrefixLength++;
+                    if (char.match(/[0-9\(\)]/) ||['×','÷','+','−', ','].includes(char)) {
+                        rawPrefixLength++;
+                    }
                 }
                 cursorPos = Math.min(rawPrefixLength, historyExpr.length);
-                renderDisplay();
+                renderDisplay(); 
             }
         }
-    }
-
-    // TỐI ƯU HÓA DI CHUẨN CON TRỎ VÀ CUỘN
-    exprDiv.addEventListener('touchstart', function(e) {
-        if (historyExpr === "" || isTargetMode) return;
-        isMovingCursor = true;
-        const touch = e.touches[0];
-        if (cursorPos === null) cursorPos = historyExpr.length;
-        updateCursorFromPoint(touch.clientX, touch.clientY);
-        vibrate();
-    }, {passive: true});
-
-    exprDiv.addEventListener('touchmove', function(e) {
-        if (!isMovingCursor || historyExpr === "" || isTargetMode) return;
-        const touch = e.touches[0];
-        // Sử dụng requestAnimationFrame để mượt hơn
-        requestAnimationFrame(() => {
-            updateCursorFromPoint(touch.clientX, touch.clientY);
-        });
-    }, {passive: true});
-
-    exprDiv.addEventListener('touchend', () => { isMovingCursor = false; });
+    }, 10);
+    vibrate();
+}, {passive: false}); // Quan trọng: passive: false để preventDefault có tác dụng
 
     function renderHistory() {
         hList.innerHTML = calculationHistory.map((item, i) => `
@@ -511,4 +497,4 @@
 
 </script>
 </body>
-</html>
+	</html>
