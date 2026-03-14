@@ -40,14 +40,29 @@
             width: 100vw; height: 100dvh; max-width: 500px;
             background: var(--bg-color); display: flex; flex-direction: column;
             overflow: hidden; margin: 0 auto; position: relative;
-        }
-        .display-screen {
-            flex: 1; width: 100%;
-            padding: calc(env(safe-area-inset-top) + 10px) 25px 10px 25px;
-            display: flex; flex-direction: column;
-            justify-content: flex-end; text-align: right;
-            background: var(--screen-bg); z-index: 5;
-        }
+        }.display-screen {
+    flex: 1; 
+    width: 100%;
+    /* Giữ nguyên padding để tránh vùng tai thỏ trên điện thoại */
+    padding: calc(env(safe-area-inset-top) + 10px) 25px 10px 25px;
+    display: flex; 
+    flex-direction: column;
+    justify-content: flex-end; 
+    text-align: right;
+    
+    /* Đổi màu nền ở đây: Màu xanh LCD cổ điển */
+    background-color: #8fa391; 
+    
+    /* Thêm các thuộc tính để khớp hoàn toàn với khung chứa */
+    border-bottom: 2px solid rgba(0,0,0,0.1); 
+    position: relative;
+    z-index: 5;
+    
+    /* Chống tràn nội dung khi cuộn */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
         #expression {
             font-size: 1.7rem; line-height: 1.5; color: var(--expr-text);
             min-height: 9.75rem; max-height: 9.75rem;
