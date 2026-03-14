@@ -53,7 +53,7 @@
             min-height: 9.75rem; max-height: 9.75rem;
             overflow-y: auto; margin-bottom: 8px; font-weight: 500;
             word-wrap: break-word; overflow-wrap: break-word;
-            word-break: normal; white-space: pre-wrap; scrollbar-width: none;
+            word-break: break-all; white-space: pre-wrap; scrollbar-width: none;
             -webkit-user-select: text; user-select: text;
 			touch-action: pan-y; /* Chỉ cho phép cuộn dọc bên trong khung, ngăn tác động ra ngoài */
     -webkit-overflow-scrolling: touch; /* Giúp cuộn mượt trên iPhone */
@@ -390,26 +390,29 @@
             }
         }
         targetDiv.innerText = formatNumber(targetInput) || "0";
+        // SỬA DÒNG NÀY: Chỉ tự động cuộn xuống cuối nếu không có con trỏ (đang nhập mới)
+    if (cursorPos === null) {
         exprDiv.scrollTop = exprDiv.scrollHeight;
     }
+    }
 
-    // 2. HÀM CHẠM VÀO MÀN HÌNH CỦA IPHONE (Thuật toán đồng bộ vị trí con trỏ)
-    // 2. HÀM CHẠM VÀO MÀN HÌNH CỦA IPHONE (Đã sửa để không di chuyển toàn trang)
-// 2. HÀM CHẠM VÀO KHUNG CHỨA (Chỉ di chuyển con trỏ khi chạm, vẫn cho phép cuộn)
+  // GIỮ LẠI VÀ CẬP NHẬT NHƯ SAU:
 let touchStartTime = 0;
 let touchStartX = 0;
 let touchStartY = 0;
 
 exprDiv.addEventListener('touchstart', function(e) {
+    // Ghi lại thời điểm và vị trí lúc bắt đầu chạm
     touchStartTime = Date.now();
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     
-    // Ngăn chặn việc kéo toàn bộ trang web (Safari bounce effect)
-    // nhưng vẫn giữ lại sự kiện để khung nội bộ có thể cuộn
+    // Ngăn chặn sự kiện lan ra ngoài khung chứa để không làm lag trang
     e.stopPropagation(); 
 }, {passive: true});
 
+
+// 2. HÀM CHẠM VÀO KHUNG CHỨA (Đã sửa lỗi cuộn và lệch vị trí)
 exprDiv.addEventListener('touchend', function(e) {
     const touchEndTime = Date.now();
     const touchEndX = e.changedTouches[0].clientX;
@@ -418,14 +421,20 @@ exprDiv.addEventListener('touchend', function(e) {
     const moveDist = Math.sqrt(Math.pow(touchEndX - touchStartX, 2) + Math.pow(touchEndY - touchStartY, 2));
     const duration = touchEndTime - touchStartTime;
 
-    // THUẬT TOÁN: Nếu di chuyển ít (< 10px) và chạm nhanh (< 200ms) thì mới coi là đặt con trỏ
-    if (moveDist < 10 && duration < 200) {
+    if (moveDist < 10 && duration < 300) {
         if (historyExpr === "" || isTargetMode) return;
         
         const touch = e.changedTouches[0];
-        if (cursorPos === null) cursorPos = historyExpr.length;
-        renderDisplay();
+        
+        // BƯỚC 1: Render tạm thời không có con trỏ để lấy tọa độ chuẩn
+        const currentCursor = cursorPos;
+        const fmt = s => {
+            let str = s.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
+            return str.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
+        };
+        exprDiv.innerHTML = fmt(historyExpr); 
 
+        // BƯỚC 2: Tính toán vị trí ngay lập tức
         setTimeout(() => {
             let range, textNode, offset;
             if (document.caretRangeFromPoint) {
@@ -434,25 +443,45 @@ exprDiv.addEventListener('touchend', function(e) {
                 const pos = document.caretPositionFromPoint(touch.clientX, touch.clientY);
                 if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
             }
-
             if (range) { textNode = range.startContainer; offset = range.startOffset; }
 
             if (textNode) {
                 let totalOffset = 0;
                 let found = false;
-                // Duyệt qua tất cả node con để tính toán vị trí thực tế
                 for (let node of exprDiv.childNodes) {
                     if (node === textNode) {
                         totalOffset += offset;
                         found = true;
                         break;
                     }
-                    if (node.nodeType === 3) { // Text node
-                        totalOffset += node.textContent.length;
-                    } else if (node.nodeType === 1 && node.className !== 'expr-cursor') { // Element node (số đã format)
-                        totalOffset += node.innerText.length;
-                    }
+                    totalOffset += (node.nodeType === 3) ? node.textContent.length : node.innerText.length;
                 }
+
+                if (found) {
+                    let visualText = exprDiv.innerText;
+                    let visualPrefix = visualText.substring(0, totalOffset);
+                    let rawIndex = 0;
+                    
+                    // Lọc bỏ dấu chấm phân cách hàng nghìn và khoảng trắng ảo
+                    for (let i = 0; i < visualPrefix.length; i++) {
+                        let char = visualPrefix[i];
+                        if (char.match(/[0-9\(\)%,\.\/]/) || ['×', '÷', '+', '−'].includes(char)) {
+                            rawIndex++;
+                        }
+                    }
+                    cursorPos = Math.min(rawIndex, historyExpr.length);
+                }
+            } else {
+                // Nếu chạm vào vùng trống phía dưới biểu thức, đưa con trỏ về cuối
+                cursorPos = historyExpr.length;
+            }
+            
+            // BƯỚC 3: Render lại giao diện có con trỏ ở vị trí mới
+            renderDisplay();
+            vibrate();
+        }, 0);
+    }
+}, {passive: true});
 
                 if (found) {
                     let visualText = exprDiv.innerText;
