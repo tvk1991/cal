@@ -55,8 +55,8 @@
             word-wrap: break-word; overflow-wrap: break-word;
             word-break: normal; white-space: pre-wrap; scrollbar-width: none;
             -webkit-user-select: text; user-select: text;
-			touch-action: none; /* Ngăn chặn hoàn toàn việc cuộn trang từ vùng này */
-    -webkit-overflow-scrolling: auto; /* Tắt hiệu ứng cuộn đàn hồi của iOS */
+			touch-action: pan-y; /* Chỉ cho phép cuộn dọc bên trong khung, ngăn tác động ra ngoài */
+    -webkit-overflow-scrolling: touch; /* Giúp cuộn mượt trên iPhone */
 }
         }
         #expression::-webkit-scrollbar { display: none; }
@@ -395,55 +395,87 @@
 
     // 2. HÀM CHẠM VÀO MÀN HÌNH CỦA IPHONE (Thuật toán đồng bộ vị trí con trỏ)
     // 2. HÀM CHẠM VÀO MÀN HÌNH CỦA IPHONE (Đã sửa để không di chuyển toàn trang)
+// 2. HÀM CHẠM VÀO KHUNG CHỨA (Chỉ di chuyển con trỏ khi chạm, vẫn cho phép cuộn)
+let touchStartTime = 0;
+let touchStartX = 0;
+let touchStartY = 0;
+
 exprDiv.addEventListener('touchstart', function(e) {
-    // Ngăn chặn việc cuộn trang và lan truyền sự kiện ra ngoài khung chứa
-    if (e.cancelable) e.preventDefault(); 
-    e.stopPropagation();
+    touchStartTime = Date.now();
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    
+    // Ngăn chặn việc kéo toàn bộ trang web (Safari bounce effect)
+    // nhưng vẫn giữ lại sự kiện để khung nội bộ có thể cuộn
+    e.stopPropagation(); 
+}, {passive: true});
 
-    if (historyExpr === "" || isTargetMode) return;
-    const touch = e.touches[0];
-    if (cursorPos === null) cursorPos = historyExpr.length;
-    renderDisplay(); 
+exprDiv.addEventListener('touchend', function(e) {
+    const touchEndTime = Date.now();
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
 
-    setTimeout(() => {
-        let range, textNode, offset;
-        if (document.caretRangeFromPoint) {
-            range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-        } else if (e.target.ownerDocument.caretPositionFromPoint) {
-            const pos = e.target.ownerDocument.caretPositionFromPoint(touch.clientX, touch.clientY);
-            if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
-        }
-        if (range) { textNode = range.startContainer; offset = range.startOffset; }
+    const moveDist = Math.sqrt(Math.pow(touchEndX - touchStartX, 2) + Math.pow(touchEndY - touchStartY, 2));
+    const duration = touchEndTime - touchStartTime;
 
-        if (textNode) {
-            let totalOffset = 0; let found = false;
-            for (let node of exprDiv.childNodes) {
-                if (node === textNode) { totalOffset += offset; found = true; break; }
-                if (node.nodeType === 3) {
-                    totalOffset += node.textContent.length;
-                } else if (node.nodeType === 1 && node.className !== 'expr-cursor') {
-                    totalOffset += node.innerText.length;
-                }
+    // THUẬT TOÁN: Nếu di chuyển ít (< 10px) và chạm nhanh (< 200ms) thì mới coi là đặt con trỏ
+    if (moveDist < 10 && duration < 200) {
+        if (historyExpr === "" || isTargetMode) return;
+        
+        const touch = e.changedTouches[0];
+        if (cursorPos === null) cursorPos = historyExpr.length;
+        renderDisplay();
+
+        setTimeout(() => {
+            let range, textNode, offset;
+            if (document.caretRangeFromPoint) {
+                range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+            } else if (document.caretPositionFromPoint) {
+                const pos = document.caretPositionFromPoint(touch.clientX, touch.clientY);
+                if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
             }
-            
-            if (found) { 
-                let visualText = exprDiv.innerText;
-                let visualPrefix = visualText.substring(0, totalOffset);
-                let rawPrefixLength = 0;
-                
-                for(let i = 0; i < visualPrefix.length; i++) {
-                    let char = visualPrefix[i];
-                    if (char.match(/[0-9\(\)]/) ||['×','÷','+','−', ','].includes(char)) {
-                        rawPrefixLength++;
+
+            if (range) { textNode = range.startContainer; offset = range.startOffset; }
+
+            if (textNode) {
+                let totalOffset = 0;
+                let found = false;
+                // Duyệt qua tất cả node con để tính toán vị trí thực tế
+                for (let node of exprDiv.childNodes) {
+                    if (node === textNode) {
+                        totalOffset += offset;
+                        found = true;
+                        break;
+                    }
+                    if (node.nodeType === 3) { // Text node
+                        totalOffset += node.textContent.length;
+                    } else if (node.nodeType === 1 && node.className !== 'expr-cursor') { // Element node (số đã format)
+                        totalOffset += node.innerText.length;
                     }
                 }
-                cursorPos = Math.min(rawPrefixLength, historyExpr.length);
-                renderDisplay(); 
+
+                if (found) {
+                    let visualText = exprDiv.innerText;
+                    let visualPrefix = visualText.substring(0, totalOffset);
+                    let rawPrefixLength = 0;
+
+                    // Chuyển đổi từ vị trí hiển thị (có dấu chấm/cách) sang vị trí chuỗi gốc
+                    for (let i = 0; i < visualPrefix.length; i++) {
+                        let char = visualPrefix[i];
+                        // Nếu ký tự khớp với ký tự có trong historyExpr gốc
+                        if (char.match(/[0-9\(\)%,\.]/) || ['×', '÷', '+', '−'].includes(char)) {
+                            // Lưu ý: dấu '−' trong hiển thị là '-', '×' là '*'
+                            rawPrefixLength++;
+                        }
+                    }
+                    cursorPos = Math.min(rawPrefixLength, historyExpr.length);
+                    renderDisplay();
+                }
             }
-        }
-    }, 10);
-    vibrate();
-}, {passive: false}); // Quan trọng: passive: false để preventDefault có tác dụng
+        }, 0);
+        vibrate();
+    }
+}, {passive: true});
 
     function renderHistory() {
         hList.innerHTML = calculationHistory.map((item, i) => `
