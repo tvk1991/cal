@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2344/2344132.png">
-    <title> Sentinel </title>
+    <title>Sentinel</title>
     <style>
         :root {
             --bg-color: #ffffff; --screen-bg: #ffffff; --keypad-bg: #f1f2f6;
@@ -40,7 +40,6 @@
             background: var(--bg-color); display: flex; flex-direction: column;
             overflow: hidden; margin: 0 auto; position: relative;
         }
-        /* TỐI ƯU: Tỷ lệ 60/40 */
         .display-screen {
             height: 40%; width: 100%;
             padding: 10px 20px 5px 20px;
@@ -55,7 +54,6 @@
             word-wrap: break-word; overflow-wrap: break-word;
             white-space: pre-wrap; scrollbar-width: none;
             -webkit-user-select: text; user-select: text;
-            /* TỐI ƯU: Hiển thị 5 dòng */
             display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
         }
         #expression::-webkit-scrollbar { display: none; }
@@ -83,7 +81,6 @@
         }
         .active-target { background: #fff5eb !important; border-color: var(--target-color) !important; outline: 2px solid var(--target-color); }
         [data-theme="dark"] .active-target { background: #2a1f15 !important; }
-        /* TỐI ƯU: Keypad 40% */
         .keypad {
             height: 60%; width: 100%; display: grid;
             grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr);
@@ -127,38 +124,48 @@
         .shake { animation: shake 0.4s both; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
         .neon-danger { color: var(--led-red) !important; text-shadow: var(--led-red-glow) !important; }
-   /* LED blink cho các trạng thái */
-@keyframes blink-led-green {
-    0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent); }
-    50% { opacity: 0.5; text-shadow: 0 0 5px var(--accent), 0 0 15px var(--accent); }
-}
 
-@keyframes blink-led-red {
-    0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--danger), 0 0 20px var(--danger); }
-    50% { opacity: 0.5; text-shadow: 0 0 5px var(--danger), 0 0 15px var(--danger); }
-}
+        /* LED blink states */
+        @keyframes blink-led-green {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent); }
+            50% { opacity: 0.5; text-shadow: 0 0 5px var(--accent), 0 0 15px var(--accent); }
+        }
+        @keyframes blink-led-red {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--danger), 0 0 20px var(--danger); }
+            50% { opacity: 0.5; text-shadow: 0 0 5px var(--danger), 0 0 15px var(--danger); }
+        }
+        @keyframes blink-led-orange {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--led-orange), 0 0 20px var(--led-orange); }
+            50% { opacity: 0.5; text-shadow: 0 0 5px var(--led-orange), 0 0 15px var(--led-orange); }
+        }
+        @keyframes blink-led-warning {
+            0%, 100% { 
+                opacity: 1; 
+                text-shadow: 0 0 10px var(--danger), 0 0 20px var(--danger);
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.3; 
+                text-shadow: 0 0 20px var(--danger), 0 0 40px var(--danger);
+                transform: scale(1.05);
+                color: #ff4444;
+            }
+        }
+        .led-blink-green { animation: blink-led-green 1.2s ease-in-out infinite !important; }
+        .led-blink-red { animation: blink-led-red 1.2s ease-in-out infinite !important; }
+        .led-blink-orange { animation: blink-led-orange 1.2s ease-in-out infinite !important; }
+        .led-blink-warning { animation: blink-led-warning 0.8s ease-in-out infinite !important; }
 
-@keyframes blink-led-orange {
-    0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--led-orange), 0 0 20px var(--led-orange); }
-    50% { opacity: 0.5; text-shadow: 0 0 5px var(--led-orange), 0 0 15px var(--led-orange); }
-}
-
-.led-blink-green {
-    animation: blink-led-green 1.2s ease-in-out infinite !important;
-}
-
-.led-blink-red {
-    animation: blink-led-red 1.2s ease-in-out infinite !important;
-}
-
-.led-blink-orange {
-    animation: blink-led-orange 1.2s ease-in-out infinite !important;
-}
+        /* Màu sắc cho các số trong biểu thức */
+        .first-number { color: #3498db !important; font-weight: 800; }
+        .first-number { color: var(--key-text) !important; font-weight: 800; }
+		.other-numbers { color: var(--key-text) !important; font-weight: 800; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div class="clevcalc-container">
+    <!-- History box -->
     <div id="historyBox" class="history-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <span style="font-size: 1.4rem; font-weight: 900; color: var(--accent);">Lịch sử</span>
@@ -172,6 +179,7 @@
         <button id="clearHistoryBtn" style="margin-top: 12px; min-height: 48px; background: var(--keypad-bg); font-size: 0.95rem; border-radius: 10px; color: var(--danger); width:100%">Xóa tất cả lịch sử</button>
     </div>
 
+    <!-- Main display -->
     <div class="display-screen">
         <div id="expression"></div>
         <div id="result-preview">0</div>
@@ -195,6 +203,7 @@
         </div>
     </div>
 
+    <!-- Keypad -->
     <div class="keypad">
         <button class="btn-clear" data-val="C">C</button>
         <button class="btn-func" data-val="()">()</button>
@@ -219,366 +228,526 @@
 </div>
 
 <script>
-    let audioCtx;
-    try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    } catch(e) {}
-
-    let historyExpr = ""; 
-    let targetInput = "";
-    let isTargetMode = false;
-    let calculationHistory = JSON.parse(localStorage.getItem('calc_history') || '[]');
-    let cursorPos = null; 
-    let isResultDisplayed = false;
-
-    const exprDiv = document.getElementById('expression'), 
-          resDiv = document.getElementById('result-preview'), 
-          targetDiv = document.getElementById('target-display'), 
-          targetBox = document.getElementById('target-box'), 
-          msgDiv = document.getElementById('comparison-msg'), 
-          hBox = document.getElementById('historyBox'), 
-          hList = document.getElementById('historyList');
-
-    function playSound(type) {
-        if (!audioCtx) return;
+    (function() {
+        // Audio context
+        let audioCtx;
         try {
-            if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
-            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            if (type === 'click') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-            } else if (type === 'success') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-            } else if (type === 'fail') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-            }
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         } catch(e) {}
-    }
-    
-    function vibrate() { if (navigator.vibrate) navigator.vibrate(10); }
 
-    function formatNumber(val) {
-        if (!val && val !== 0) return "";
-        let s = val.toString().split('.');
-        s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        return s.length > 1 ? s[0] + "," + s[1] : s[0];
-    }
+        // State variables
+        let historyExpr = "";
+        let targetInput = "";
+        let isTargetMode = false;
+        let calculationHistory = JSON.parse(localStorage.getItem('calc_history') || '[]');
+        let cursorPos = null;
+        let isResultDisplayed = false;
 
-    // TỐI ƯU: Xử lý touch
-    function handleButtonPress(e, btn) {
-        e.preventDefault();
-        e.stopPropagation();
-        btn.classList.add('touch-active');
-        vibrate(); 
-        const v = btn.getAttribute('data-val');
-        if (v === 'C') clearAll();
-        else if (v === '()') smartParenthesis();
-        else if (v === '%') applyPercent();
-        else if (['+','-','*'].includes(v)) addOp(v);
-        else if (v === '=') calculate();
-        else handleInput(v);
-        setTimeout(() => btn.classList.remove('touch-active'), 100);
-    }
+        // DOM elements
+        const exprDiv = document.getElementById('expression');
+        const resDiv = document.getElementById('result-preview');
+        const targetDiv = document.getElementById('target-display');
+        const targetBox = document.getElementById('target-box');
+        const msgDiv = document.getElementById('comparison-msg');
+        const hBox = document.getElementById('historyBox');
+        const hList = document.getElementById('historyList');
 
-    document.querySelectorAll('[data-val]').forEach(btn => {
-        btn.removeEventListener('touchstart', btn._handler);
-        btn._handler = (e) => handleButtonPress(e, btn);
-        btn.addEventListener('touchstart', btn._handler, { passive: false });
-        btn.addEventListener('mousedown', (e) => handleButtonPress(e, btn));
-    });
-
-    function handleInput(n) {
-        playSound('click');
-        if (isResultDisplayed && !isTargetMode) {
-            historyExpr = ""; isResultDisplayed = false; cursorPos = null;
-        }
-
-        if (isTargetMode) {
-            if (n === '.' && targetInput.includes('.')) return;
-            targetInput += n;
-        } else {
-            if (cursorPos !== null) {
-                historyExpr = historyExpr.slice(0, cursorPos) + n + historyExpr.slice(cursorPos);
-                cursorPos += n.length;
-            } else {
-                if (targetInput !== "" && !isNaN(n)) {
-                    let cleanedExpr = historyExpr + n;
-                    while (['+','-','*','/','(','.'].includes(cleanedExpr.slice(-1))) cleanedExpr = cleanedExpr.slice(0, -1);
-                    try {
-                        let open = (cleanedExpr.match(/\(/g) ||[]).length, close = (cleanedExpr.match(/\)/g) ||[]).length;
-                        if (open > close) cleanedExpr += ")".repeat(open - close);
-                        let potential = Math.round(eval(cleanedExpr) * 1000000) / 1000000;
-                        if (potential > parseFloat(targetInput)) {
-                            msgDiv.innerText = "⚠️ SẼ VƯỢT MỤC TIÊU!"; msgDiv.style.color = "var(--danger)";
-                            msgDiv.classList.add('shake'); setTimeout(() => msgDiv.classList.remove('shake'), 400);
-                            resDiv.classList.add('neon-danger'); playSound('fail');
-                        }
-                    } catch(e) {}
+        // Helper functions
+        function playSound(type) {
+            if (!audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.1);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'fail') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.5);
                 }
-                historyExpr += n;
-            }
-            autoPreview();
+            } catch(e) {}
         }
-        renderDisplay();
-    }
 
-    function addOp(op) {
-        playSound('click'); isResultDisplayed = false;
-        if (isTargetMode) isTargetMode = false;
-
-        if (cursorPos !== null) {
-            const charBefore = cursorPos > 0 ? historyExpr[cursorPos - 1] : '';
-            if (['+','-','*','/'].includes(charBefore)) {
-                historyExpr = historyExpr.slice(0, cursorPos - 1) + op + historyExpr.slice(cursorPos);
-            } else {
-                historyExpr = historyExpr.slice(0, cursorPos) + op + historyExpr.slice(cursorPos);
-                cursorPos++;
-            }
-        } else {
-            const last = historyExpr.slice(-1);
-            if (['+','-','*','/'].includes(last)) historyExpr = historyExpr.slice(0, -1) + op;
-            else if (historyExpr !== "" || op === '-') historyExpr += op;
+        function vibrate() {
+            if (navigator.vibrate) navigator.vibrate(10);
         }
-        renderDisplay(); autoPreview();
-    }
 
-    function applyPercent() {
-        if (isTargetMode) return;
-        playSound('click'); cursorPos = null;
-        try {
-            let parts = historyExpr.split(/([\+\-\*\/])/), lastPart = parts.pop(), op = parts.pop();
-            let base = eval(parts.join("") || "0");
-            let val = (op === '+' || op === '-') ? base * (parseFloat(lastPart) / 100) : parseFloat(lastPart) / 100;
-            historyExpr = parts.join("") + (op || "") + val;
-            renderDisplay(); autoPreview();
-        } catch(e) {}
-    }
-
-    let backTimer, backInterval;
-    const btnBack = document.getElementById('btn-backspace');
-    function backspace() {
-        if (isTargetMode) targetInput = targetInput.slice(0, -1);
-        else {
-            if (cursorPos !== null) {
-                if (cursorPos > 0) {
-                    historyExpr = historyExpr.slice(0, cursorPos - 1) + historyExpr.slice(cursorPos);
-                    cursorPos--;
-                }
-            } else historyExpr = historyExpr.slice(0, -1);
-            autoPreview();
+        function formatNumber(val) {
+            if (!val && val !== 0) return "";
+            let s = val.toString().split('.');
+            s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return s.length > 1 ? s[0] + "," + s[1] : s[0];
         }
-        renderDisplay();
-    }
 
-    btnBack.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        vibrate(); playSound('click'); backspace();
-        backTimer = setTimeout(() => { 
-            backInterval = setInterval(() => { 
-                vibrate(); backspace(); 
-            }, 70); 
-        }, 500);
-    }, { passive: false });
-    
-    const stopBack = () => { 
-        clearTimeout(backTimer); 
-        clearInterval(backInterval); 
-    };
-    btnBack.addEventListener('touchend', stopBack, { passive: false });
-    btnBack.addEventListener('touchcancel', stopBack, { passive: false });
-    btnBack.addEventListener('touchmove', stopBack, { passive: false });
-
-    function calculate() {
-    // Xóa tất cả hiệu ứng LED cũ
-    msgDiv.classList.remove('led-blink-green', 'led-blink-red', 'led-blink-orange');
-    
-    if (isTargetMode) { isTargetMode = false; renderDisplay(); return; }
-    let raw = historyExpr; if (!raw) return;
-    cursorPos = null;
-    try {
-        while (['+','-','*','/','(','.'].includes(raw.slice(-1))) raw = raw.slice(0, -1);
-        let res = eval(raw); 
-        let finalRes = Math.round(res * 1000000) / 1000000;
-
-        if (targetInput !== "") {
-            if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
-                msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; 
-                msgDiv.style.color = "var(--accent)";
-                msgDiv.classList.add('led-blink-green'); // Nhấp nháy xanh
-                playSound('success');
-            } else {
-                let diff = Math.round((finalRes - parseFloat(targetInput)) * 100) / 100;
-                if (diff > 0) {
-                    msgDiv.innerText = "❌ VƯỢT: " + formatNumber(Math.abs(diff));
-                    msgDiv.classList.add('led-blink-red'); // Nhấp nháy đỏ
+        // Tô màu biểu thức: số đầu xanh dương, các số sau đỏ, toán tử cam
+        function colorizeExpression(expr) {
+            if (!expr) return '';
+            let parts = expr.split(/([\+\-\*\/\(\)])/);
+            let result = [];
+            let numberCount = 0;
+            for (let i = 0; i < parts.length; i++) {
+                let part = parts[i];
+                if (!part) continue;
+                if (['+', '-', '*', '/', '(', ')'].includes(part)) {
+                    let opChar = part;
+                    if (opChar === '*') opChar = '×';
+                    else if (opChar === '/') opChar = '÷';
+                    else if (opChar === '-') opChar = '−';
+                    result.push(`<span class="expr-operator">${opChar}</span>`);
+                } else if (part.match(/^[0-9\.]+$/)) {
+                    numberCount++;
+                    let formattedNum = formatNumber(parseFloat(part));
+                    if (numberCount === 1) {
+                        result.push(`<span class="first-number">${formattedNum}</span>`);
+                    } else {
+                        result.push(`<span class="other-numbers">${formattedNum}</span>`);
+                    }
                 } else {
-                    msgDiv.innerText = "❌ THIẾU: " + formatNumber(Math.abs(diff));
-                    msgDiv.classList.add('led-blink-orange'); // Nhấp nháy cam
+                    result.push(part);
                 }
-                msgDiv.style.color = "var(--danger)";
-                playSound('fail');
             }
+            return result.join('');
         }
-        } catch(e) { resDiv.innerText = "Lỗi"; }
-        renderDisplay();
-    }
 
-    function autoPreview() {
-        try {
-            let temp = historyExpr; if (!temp) { resDiv.innerText = "0"; return; }
-            while (['+','-','*','/','(','.'].includes(temp.slice(-1))) temp = temp.slice(0, -1);
-            let open = (temp.match(/\(/g) ||[]).length, close = (temp.match(/\)/g) ||[]).length;
-            if (open > close) temp += ")".repeat(open - close);
-            
-            let pVal = Math.round(eval(temp) * 1000000) / 1000000;
-            resDiv.innerText = formatNumber(pVal);
-            
-            if (targetInput !== "" && pVal > parseFloat(targetInput)) {
-                resDiv.classList.add('neon-danger'); msgDiv.innerText = "⚠️ VƯỢT QUÁ!"; msgDiv.style.color = "var(--danger)";
-            } else { resDiv.classList.remove('neon-danger'); if (!isTargetMode) msgDiv.innerText = ""; }
-        } catch(e) {}
-    }
+        // Xóa tất cả class LED blink
+        function removeAllLedBlink() {
+            msgDiv.classList.remove('led-blink-green', 'led-blink-red', 'led-blink-orange', 'led-blink-warning');
+        }
 
-    function renderDisplay() {
-    // Xóa hiệu ứng LED khi không còn thông báo
-    if (msgDiv.innerText === "" || !msgDiv.innerText.includes("KHỚP") && !msgDiv.innerText.includes("VƯỢT") && !msgDiv.innerText.includes("THIẾU")) {
-        msgDiv.classList.remove('led-blink-green', 'led-blink-red', 'led-blink-orange');
-    }
-        if (isTargetMode) {
-            document.getElementById('target-area-container').classList.add('active-target');
-        } else {
-            document.getElementById('target-area-container').classList.remove('active-target');
-            if (cursorPos !== null) {
-                const fmt = s => {
-                    let str = s.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
-                    return str.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
-                };
-                const pre = fmt(historyExpr.slice(0, cursorPos));
-                const post = fmt(historyExpr.slice(cursorPos));
-                exprDiv.innerHTML = pre + '<span class="expr-cursor"></span>' + post;
+        // Render display
+        function renderDisplay() {
+            // Xóa LED blink nếu không còn thông báo phù hợp
+            if (msgDiv.innerText === "" || 
+                (!msgDiv.innerText.includes("KHỚP") && 
+                 !msgDiv.innerText.includes("VƯỢT") && 
+                 !msgDiv.innerText.includes("THIẾU") &&
+                 !msgDiv.innerText.includes("⚠️"))) {
+                removeAllLedBlink();
+            }
+
+            if (isTargetMode) {
+                document.getElementById('target-area-container').classList.add('active-target');
+                exprDiv.innerHTML = ''; // không hiển thị biểu thức khi đang nhập target
             } else {
-                let displayStr = historyExpr.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
-                displayStr = displayStr.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
-                exprDiv.innerHTML = displayStr;
+                document.getElementById('target-area-container').classList.remove('active-target');
+                if (cursorPos !== null) {
+                    // Khi có con trỏ, hiển thị đơn giản (không tô màu)
+                    const fmt = s => {
+                        let str = s.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
+                        return str.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
+                    };
+                    const pre = fmt(historyExpr.slice(0, cursorPos));
+                    const post = fmt(historyExpr.slice(cursorPos));
+                    exprDiv.innerHTML = pre + '<span class="expr-cursor"></span>' + post;
+                } else {
+                    exprDiv.innerHTML = colorizeExpression(historyExpr);
+                }
             }
+            targetDiv.innerText = formatNumber(targetInput) || "0";
+            exprDiv.scrollTop = exprDiv.scrollHeight;
         }
-        targetDiv.innerText = formatNumber(targetInput) || "0";
-        exprDiv.scrollTop = exprDiv.scrollHeight;
-    }
 
-    exprDiv.addEventListener('touchstart', function(e) {
-        if (historyExpr === "" || isTargetMode) return;
-        const touch = e.touches[0];
-        if (cursorPos === null) cursorPos = historyExpr.length;
-        renderDisplay();
+        // Auto preview kết quả
+        function autoPreview() {
+            try {
+                let temp = historyExpr;
+                if (!temp) {
+                    resDiv.innerText = "0";
+                    return;
+                }
+                while (['+','-','*','/','(','.'].includes(temp.slice(-1))) temp = temp.slice(0, -1);
+                let open = (temp.match(/\(/g) || []).length;
+                let close = (temp.match(/\)/g) || []).length;
+                if (open > close) temp += ")".repeat(open - close);
+                let pVal = Math.round(eval(temp) * 1000000) / 1000000;
+                resDiv.innerText = formatNumber(pVal);
 
-        setTimeout(() => {
-            let range, textNode, offset;
-            if (document.caretRangeFromPoint) {
-                range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-            } else if (e.target.ownerDocument.caretPositionFromPoint) {
-                const pos = e.target.ownerDocument.caretPositionFromPoint(touch.clientX, touch.clientY);
-                if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
-            }
-            if (range) { textNode = range.startContainer; offset = range.startOffset; }
-
-            if (textNode) {
-                let totalOffset = 0; let found = false;
-                for (let node of exprDiv.childNodes) {
-                    if (node === textNode) { totalOffset += offset; found = true; break; }
-                    if (node.nodeType === 3) {
-                        totalOffset += node.textContent.length;
-                    } else if (node.nodeType === 1 && node.className !== 'expr-cursor') {
-                        totalOffset += node.innerText.length;
+                // Cảnh báo vượt quá
+                if (targetInput !== "" && pVal > parseFloat(targetInput)) {
+                    resDiv.classList.add('neon-danger');
+                    msgDiv.innerText = "⚠️ VƯỢT QUÁ!";
+                    msgDiv.style.color = "var(--danger)";
+                    msgDiv.classList.add('led-blink-warning');
+                } else {
+                    resDiv.classList.remove('neon-danger');
+                    msgDiv.classList.remove('led-blink-warning');
+                    if (!isTargetMode && !msgDiv.innerText.includes("KHỚP") && !msgDiv.innerText.includes("VƯỢT") && !msgDiv.innerText.includes("THIẾU")) {
+                        msgDiv.innerText = "";
                     }
                 }
-                
-                if (found) { 
-                    let visualText = exprDiv.innerText;
-                    let visualPrefix = visualText.substring(0, totalOffset);
-                    let rawPrefixLength = 0;
-                    for(let i = 0; i < visualPrefix.length; i++) {
-                        let char = visualPrefix[i];
-                        if (char.match(/[0-9\(\)]/) ||['×','÷','+','−', ','].includes(char)) {
-                            rawPrefixLength++;
+            } catch(e) {}
+        }
+
+        // Xử lý nhập số và dấu chấm
+        function handleInput(n) {
+            playSound('click');
+            if (isResultDisplayed && !isTargetMode) {
+                historyExpr = "";
+                isResultDisplayed = false;
+                cursorPos = null;
+            }
+
+            if (isTargetMode) {
+                if (n === '.' && targetInput.includes('.')) return;
+                targetInput += n;
+            } else {
+                if (cursorPos !== null) {
+                    historyExpr = historyExpr.slice(0, cursorPos) + n + historyExpr.slice(cursorPos);
+                    cursorPos += n.length;
+                } else {
+                    // Dự đoán nếu nhập số này làm vượt mục tiêu
+                    if (targetInput !== "" && !isNaN(n)) {
+                        let cleanedExpr = historyExpr + n;
+                        while (['+','-','*','/','(','.'].includes(cleanedExpr.slice(-1))) cleanedExpr = cleanedExpr.slice(0, -1);
+                        try {
+                            let open = (cleanedExpr.match(/\(/g) || []).length;
+                            let close = (cleanedExpr.match(/\)/g) || []).length;
+                            if (open > close) cleanedExpr += ")".repeat(open - close);
+                            let potential = Math.round(eval(cleanedExpr) * 1000000) / 1000000;
+                            if (potential > parseFloat(targetInput)) {
+                                msgDiv.innerText = "⚠️ SẼ VƯỢT MỤC TIÊU!";
+                                msgDiv.style.color = "var(--danger)";
+                                msgDiv.classList.add('led-blink-warning', 'shake');
+                                setTimeout(() => msgDiv.classList.remove('shake'), 400);
+                                resDiv.classList.add('neon-danger');
+                                playSound('fail');
+                            } else {
+                                msgDiv.classList.remove('led-blink-warning');
+                            }
+                        } catch(e) {}
+                    }
+                    historyExpr += n;
+                }
+                autoPreview();
+            }
+            renderDisplay();
+        }
+
+        // Thêm toán tử
+        function addOp(op) {
+            playSound('click');
+            isResultDisplayed = false;
+            if (isTargetMode) isTargetMode = false;
+
+            if (cursorPos !== null) {
+                const charBefore = cursorPos > 0 ? historyExpr[cursorPos - 1] : '';
+                if (['+','-','*','/'].includes(charBefore)) {
+                    historyExpr = historyExpr.slice(0, cursorPos - 1) + op + historyExpr.slice(cursorPos);
+                } else {
+                    historyExpr = historyExpr.slice(0, cursorPos) + op + historyExpr.slice(cursorPos);
+                    cursorPos++;
+                }
+            } else {
+                const last = historyExpr.slice(-1);
+                if (['+','-','*','/'].includes(last)) {
+                    historyExpr = historyExpr.slice(0, -1) + op;
+                } else if (historyExpr !== "" || op === '-') {
+                    historyExpr += op;
+                }
+            }
+            renderDisplay();
+            autoPreview();
+        }
+
+        // Phần trăm
+        function applyPercent() {
+            if (isTargetMode) return;
+            playSound('click');
+            cursorPos = null;
+            try {
+                let parts = historyExpr.split(/([\+\-\*\/])/);
+                let lastPart = parts.pop();
+                let op = parts.pop();
+                let base = eval(parts.join("") || "0");
+                let val = (op === '+' || op === '-') ? base * (parseFloat(lastPart) / 100) : parseFloat(lastPart) / 100;
+                historyExpr = parts.join("") + (op || "") + val;
+                renderDisplay();
+                autoPreview();
+            } catch(e) {}
+        }
+
+        // Backspace
+        let backTimer, backInterval;
+        const btnBack = document.getElementById('btn-backspace');
+        function backspace() {
+            if (isTargetMode) {
+                targetInput = targetInput.slice(0, -1);
+            } else {
+                if (cursorPos !== null) {
+                    if (cursorPos > 0) {
+                        historyExpr = historyExpr.slice(0, cursorPos - 1) + historyExpr.slice(cursorPos);
+                        cursorPos--;
+                    }
+                } else {
+                    historyExpr = historyExpr.slice(0, -1);
+                }
+                autoPreview();
+            }
+            renderDisplay();
+        }
+
+        btnBack.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            vibrate();
+            playSound('click');
+            backspace();
+            backTimer = setTimeout(() => {
+                backInterval = setInterval(() => {
+                    vibrate();
+                    backspace();
+                }, 70);
+            }, 500);
+        }, { passive: false });
+
+        const stopBack = () => {
+            clearTimeout(backTimer);
+            clearInterval(backInterval);
+        };
+        btnBack.addEventListener('touchend', stopBack, { passive: false });
+        btnBack.addEventListener('touchcancel', stopBack, { passive: false });
+        btnBack.addEventListener('touchmove', stopBack, { passive: false });
+
+        // Tính toán (dấu =)
+        function calculate() {
+            removeAllLedBlink();
+
+            if (isTargetMode) {
+                isTargetMode = false;
+                renderDisplay();
+                return;
+            }
+            let raw = historyExpr;
+            if (!raw) return;
+            cursorPos = null;
+            try {
+                while (['+','-','*','/','(','.'].includes(raw.slice(-1))) raw = raw.slice(0, -1);
+                let res = eval(raw);
+                let finalRes = Math.round(res * 1000000) / 1000000;
+
+                if (targetInput !== "") {
+                    if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
+                        msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI";
+                        msgDiv.style.color = "var(--accent)";
+                        msgDiv.classList.add('led-blink-green');
+                        playSound('success');
+                    } else {
+                        let diff = Math.round((finalRes - parseFloat(targetInput)) * 100) / 100;
+                        if (diff > 0) {
+                            msgDiv.innerText = "❌ VƯỢT: " + formatNumber(Math.abs(diff));
+                            msgDiv.classList.add('led-blink-red');
+                        } else {
+                            msgDiv.innerText = "❌ THIẾU: " + formatNumber(Math.abs(diff));
+                            msgDiv.classList.add('led-blink-orange');
+                        }
+                        msgDiv.style.color = "var(--danger)";
+                        playSound('fail');
+                    }
+                }
+
+                // Lưu vào lịch sử
+                calculationHistory.push({
+                    expr: exprDiv.innerText || historyExpr,
+                    res: finalRes,
+                    raw: raw
+                });
+                if (calculationHistory.length > 50) calculationHistory.shift();
+                localStorage.setItem('calc_history', JSON.stringify(calculationHistory));
+
+                resDiv.innerText = formatNumber(finalRes);
+                historyExpr = finalRes.toString();
+                exprDiv.innerText = "";
+                isResultDisplayed = true;
+            } catch(e) {
+                resDiv.innerText = "Lỗi";
+            }
+            renderDisplay();
+        }
+
+        // Xóa tất cả (C)
+        function clearAll() {
+            removeAllLedBlink();
+            playSound('click');
+            if (isTargetMode) {
+                targetInput = "";
+            } else {
+                historyExpr = "";
+                targetInput = "";
+                msgDiv.innerText = "";
+                cursorPos = null;
+                isResultDisplayed = false;
+            }
+            resDiv.innerText = "0";
+            resDiv.classList.remove('neon-danger');
+            renderDisplay();
+        }
+
+        // Thêm dấu ngoặc thông minh
+        function smartParenthesis() {
+            playSound('click');
+            let open = (historyExpr.match(/\(/g) || []).length;
+            let close = (historyExpr.match(/\)/g) || []).length;
+            let char = (open > close && !['+','-','*','/','('].includes(historyExpr.slice(-1))) ? ")" : "(";
+            if (cursorPos !== null) {
+                historyExpr = historyExpr.slice(0, cursorPos) + char + historyExpr.slice(cursorPos);
+                cursorPos++;
+            } else {
+                historyExpr += char;
+            }
+            renderDisplay();
+        }
+
+        // Gán sự kiện cho các nút
+        document.querySelectorAll('[data-val]').forEach(btn => {
+            btn.removeEventListener('touchstart', btn._handler);
+            btn._handler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                btn.classList.add('touch-active');
+                vibrate();
+                const v = btn.getAttribute('data-val');
+                if (v === 'C') clearAll();
+                else if (v === '()') smartParenthesis();
+                else if (v === '%') applyPercent();
+                else if (['+','-','*'].includes(v)) addOp(v);
+                else if (v === '=') calculate();
+                else handleInput(v);
+                setTimeout(() => btn.classList.remove('touch-active'), 100);
+            };
+            btn.addEventListener('touchstart', btn._handler, { passive: false });
+            btn.addEventListener('mousedown', (e) => btn._handler(e));
+        });
+
+        // Lịch sử
+        function renderHistory() {
+            hList.innerHTML = calculationHistory.map((item, i) => `
+                <div class="history-item" onclick="loadEditHistory(${i})">
+                    <div class="history-expr">${item.expr} =</div>
+                    <div class="history-res">${formatNumber(item.res)}</div>
+                </div>
+            `).reverse().join('');
+        }
+
+        window.loadEditHistory = (i) => {
+            const item = calculationHistory[i];
+            historyExpr = item.raw || item.expr.replace(/ × /g,'*').replace(/ ÷ /g,'/').replace(/ − /g,'-').replace(/\./g,'').replace(/,/g,'.');
+            cursorPos = historyExpr.length;
+            isResultDisplayed = false;
+            hBox.style.display = 'none';
+            playSound('click');
+            renderDisplay();
+            autoPreview();
+        };
+
+        document.getElementById('openHistory').onclick = () => {
+            hBox.style.display = 'flex';
+            renderHistory();
+            vibrate();
+        };
+        document.getElementById('closeHistory').onclick = () => {
+            hBox.style.display = 'none';
+            vibrate();
+        };
+        document.getElementById('clearHistoryBtn').onclick = () => {
+            calculationHistory = [];
+            localStorage.setItem('calc_history', '[]');
+            renderHistory();
+            vibrate();
+        };
+
+        // Chuyển đổi theme
+        document.getElementById('theme-toggle').onclick = () => {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            document.getElementById('theme-icon').innerHTML = isDark ?
+                '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>' :
+                '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+            vibrate();
+            playSound('click');
+        };
+
+        // Chế độ target
+        targetBox.onclick = () => {
+            isTargetMode = !isTargetMode;
+            renderDisplay();
+            vibrate();
+        };
+
+        // Con trỏ soạn thảo
+        exprDiv.addEventListener('touchstart', function(e) {
+            if (historyExpr === "" || isTargetMode) return;
+            const touch = e.touches[0];
+            if (cursorPos === null) cursorPos = historyExpr.length;
+            renderDisplay();
+
+            setTimeout(() => {
+                let range, textNode, offset;
+                if (document.caretRangeFromPoint) {
+                    range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
+                } else if (e.target.ownerDocument.caretPositionFromPoint) {
+                    const pos = e.target.ownerDocument.caretPositionFromPoint(touch.clientX, touch.clientY);
+                    if (pos) { textNode = pos.offsetNode; offset = pos.offset; }
+                }
+                if (range) { textNode = range.startContainer; offset = range.startOffset; }
+
+                if (textNode) {
+                    let totalOffset = 0;
+                    let found = false;
+                    for (let node of exprDiv.childNodes) {
+                        if (node === textNode) {
+                            totalOffset += offset;
+                            found = true;
+                            break;
+                        }
+                        if (node.nodeType === 3) {
+                            totalOffset += node.textContent.length;
+                        } else if (node.nodeType === 1 && node.className !== 'expr-cursor') {
+                            totalOffset += node.innerText.length;
                         }
                     }
-                    cursorPos = Math.min(rawPrefixLength, historyExpr.length);
-                    renderDisplay(); 
+                    if (found) {
+                        let visualText = exprDiv.innerText;
+                        let visualPrefix = visualText.substring(0, totalOffset);
+                        let rawPrefixLength = 0;
+                        for (let i = 0; i < visualPrefix.length; i++) {
+                            let char = visualPrefix[i];
+                            if (char.match(/[0-9\(\)]/) || ['×','÷','+','−', ','].includes(char)) {
+                                rawPrefixLength++;
+                            }
+                        }
+                        cursorPos = Math.min(rawPrefixLength, historyExpr.length);
+                        renderDisplay();
+                    }
                 }
-            }
-        }, 10);
-        vibrate();
-    }, {passive: false});
+            }, 10);
+            vibrate();
+        }, { passive: false });
 
-    function renderHistory() {
-        hList.innerHTML = calculationHistory.map((item, i) => `
-            <div class="history-item" onclick="loadEditHistory(${i})">
-                <div class="history-expr">${item.expr} =</div>
-                <div class="history-res">${formatNumber(item.res)}</div>
-            </div>
-        `).reverse().join('');
-    }
+        // Ngăn chặn context menu
+        document.querySelector('.keypad').addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
 
-    window.loadEditHistory = (i) => {
-        const item = calculationHistory[i];
-        historyExpr = item.raw || item.expr.replace(/ × /g,'*').replace(/ ÷ /g,'/').replace(/ − /g,'-').replace(/\./g,'').replace(/,/g,'.');
-        cursorPos = historyExpr.length;
-        isResultDisplayed = false;
-        hBox.style.display = 'none';
-        playSound('click'); renderDisplay(); autoPreview();
-    };
-
-    function clearAll() {
-        // Xóa tất cả hiệu ứng LED
-    msgDiv.classList.remove('led-blink-green', 'led-blink-red', 'led-blink-orange');
-    
-   
-        playSound('click');
-        if (isTargetMode) targetInput = "";
-        else { historyExpr = ""; targetInput = ""; msgDiv.innerText = ""; cursorPos = null; isResultDisplayed = false; }
-        resDiv.innerText = "0"; resDiv.classList.remove('neon-danger'); renderDisplay();
-    }
-
-    function smartParenthesis() {
-        playSound('click');
-        let open = (historyExpr.match(/\(/g) ||[]).length, close = (historyExpr.match(/\)/g) ||[]).length;
-        let char = (open > close && !['+','-','*','/','('].includes(historyExpr.slice(-1))) ? ")" : "(";
-        if (cursorPos !== null) {
-            historyExpr = historyExpr.slice(0, cursorPos) + char + historyExpr.slice(cursorPos); cursorPos++;
-        } else { historyExpr += char; }
+        // Khởi tạo hiển thị
         renderDisplay();
-    }
-
-    document.getElementById('theme-toggle').onclick = () => {
-        const body = document.body;
-        const isDark = body.getAttribute('data-theme') === 'dark';
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        document.getElementById('theme-icon').innerHTML = isDark ? 
-            '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>' :
-            '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
-        vibrate(); playSound('click');
-    };
-
-    document.getElementById('openHistory').onclick = () => { hBox.style.display = 'flex'; renderHistory(); vibrate(); };
-    document.getElementById('closeHistory').onclick = () => { hBox.style.display = 'none'; vibrate(); };
-    document.getElementById('clearHistoryBtn').onclick = () => { calculationHistory = []; renderHistory(); vibrate(); };
-    targetBox.onclick = () => { isTargetMode = !isTargetMode; renderDisplay(); vibrate(); };
-
-    document.querySelector('.keypad').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-    }, { passive: false });
-
+    })();
 </script>
 </body>
-        </html>
+</html>
