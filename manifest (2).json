@@ -1,0 +1,31 @@
+{
+  "background_color": "#ffffff",
+  "dir": "auto",
+  "display": "fullscreen",
+  "name": "tvk1991.github",
+  "orientation": "portrait",
+  "scope": "tvk1991.github.io/cal",
+  "short_name": "tvk1991.github",
+  "start_url": " https://tvk1991.github.io/cal",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2344/2344132.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "isSquare": true,
+      "isPng": true,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 512,
+      "is512x512": true,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "lang": "vi",
+  "display_override": [
+    "fullscreen",
+    "window-controls-overlay"
+  ]
+}
