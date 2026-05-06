@@ -116,8 +116,9 @@
         .btn-back-ctrl svg { stroke: var(--key-text); }
         .divider { width: 1px; height: 20px; background: var(--target-border); flex-shrink: 0; }
         .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; flex-shrink: 0; transition: opacity 0.2s; }
+        /* THAY ĐỔI 1: Tăng font-size gốc từ 1.4rem lên 1.8rem */
         #target-display { 
-            flex: 1; font-size: 1.4rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); 
+            flex: 1; font-size: 1.8rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); 
             font-weight: 900; margin-left: 5px;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
             transition: font-size 0.2s ease;
@@ -467,15 +468,15 @@
         }
         
         let tLen = targetInput.length;
-        // KHI BẤM 2 SỐ TRỞ LÊN (tLen > 1)
+        // THAY ĐỔI 2: Tăng font-size cơ sở lên 1.8rem trong logic tính toán co giãn
         if (tLen > 1) {
             targetLabelEl.style.display = 'none';
-            // Tự động co nhỏ dần dựa trên số lượng chữ số vượt quá 1
-            let newSize = Math.max(0.8, 1.4 - (tLen - 1) * 0.1);
+            // Bắt đầu từ 1.8rem và trừ dần 0.12rem cho mỗi số tiếp theo
+            let newSize = Math.max(1.0, 1.8 - (tLen - 1) * 0.12);
             targetDiv.style.fontSize = newSize + 'rem';
         } else {
             targetLabelEl.style.display = 'inline-block';
-            targetDiv.style.fontSize = '1.4rem';
+            targetDiv.style.fontSize = '1.8rem';
         }
         targetDiv.innerText = formatNumber(targetInput) || "0";
 
