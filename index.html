@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2344/2344132.png">
-    <title>ClevCalc Sentinel History+</title>
+    <title>ClevCalc Pro Ultimate</title>
     <style>
         :root {
             --bg-color: #ffffff; --screen-bg: #ffffff; --keypad-bg: #f1f2f6;
@@ -54,7 +54,6 @@
             overflow-y: auto; margin-bottom: 8px; font-weight: 500;
             word-wrap: break-word; overflow-wrap: break-word;
             word-break: normal; white-space: pre-wrap; scrollbar-width: none;
-            -webkit-user-select: none; user-select: none; touch-action: none; 
         }
         #expression::-webkit-scrollbar { display: none; }
         .expr-cursor {
@@ -72,25 +71,34 @@
         }
         #comparison-msg { font-size: 0.9rem; font-weight: 800; text-align: center; min-height: 22px; margin-bottom: 12px; }
         
+        /* --- KHU VỰC HÀNH ĐỘNG MÀU CAM --- */
         .action-row {
-            display: flex; align-items: stretch; gap: 8px; margin-bottom: 5px; height: 48px;
-            width: 100%; /* Đảm bảo không tràn màn hình */
+            display: flex; align-items: stretch; gap: 8px; margin-bottom: 5px; height: 52px; width: 100%;
         }
         .target-area {
             flex: 1; display: flex; align-items: center; background: var(--target-area-bg);
-            border-radius: 14px; padding: 0 15px; border: 1px solid var(--target-border);
-            gap: 10px;
-            min-width: 0; /* QUAN TRỌNG: Ngăn flexbox đẩy nội dung quá lố */
+            border-radius: 14px; padding: 0 10px; border: 1px solid var(--target-border);
+            gap: 8px; min-width: 0; overflow: hidden;
+        }
+        .target-clickable-zone {
+            flex: 1; display: flex; align-items: center; justify-content: flex-end;
+            height: 100%; min-width: 0; cursor: pointer;
+        }
+        .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; flex-shrink: 0; margin-right: 4px; }
+        #target-display { 
+            font-size: 1.5rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); 
+            font-weight: 900; white-space: nowrap; transition: font-size 0.15s ease;
         }
         .btn-back-wrap {
             background: var(--target-area-bg); border: 1px solid var(--target-border);
-            border-radius: 14px; padding: 0 20px; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; /* QUAN TRỌNG: Giữ kích thước cố định, không bị méo hay văng khỏi màn hình */
+            border-radius: 14px; width: 65px; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; /* Giữ nút Back cố định */
         }
-        [data-theme="dark"] .btn-back-wrap { background: var(--target-area-bg); border-color: var(--target-border); }
+        /* ---------------------------------- */
 
         .active-target { background: #fff5eb !important; border-color: var(--target-color) !important; outline: 2px solid var(--target-color); }
         [data-theme="dark"] .active-target { background: #2a1f15 !important; }
+        
         .keypad {
             height: 55%; width: 100%; display: grid;
             grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr);
@@ -100,8 +108,7 @@
         button {
             background: var(--key-bg); border: none; font-size: 1.6rem;
             color: var(--key-text); display: flex; justify-content: center;
-            align-items: center; cursor: pointer; -webkit-user-drag: none;
-            touch-action: manipulation;
+            align-items: center; cursor: pointer;
         }
         button:active { background: var(--key-active); transition: background 0.02s; }
         .btn-op { color: var(--op-color); font-weight: 900; }
@@ -109,51 +116,31 @@
         .btn-clear { color: var(--danger); font-weight: 900; }
         .btn-equal { background: var(--accent); color: white; font-size: 2.2rem; font-weight: 800; }
         .btn-plus { grid-row: span 2; color: var(--op-color); font-weight: 900; }
-        .control-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; }
+        
+        .control-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
         .control-btn svg { width: 22px; height: 22px; stroke-width: 2.5; fill: none; pointer-events: none; }
         #openHistory svg { stroke: var(--target-color); }
         #theme-toggle svg { fill: var(--target-color); stroke: var(--target-color); }
-        .btn-back-ctrl svg { stroke: var(--key-text); }
+        .btn-back-ctrl svg { stroke: var(--key-text); width: 26px; height: 26px; }
         .divider { width: 1px; height: 20px; background: var(--target-border); flex-shrink: 0; }
-        .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; flex-shrink: 0; }
-        #target-display { 
-            flex: 1; font-size: 1.4rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); 
-            font-weight: 900; margin-left: 5px;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; /* Cắt bớt nếu vẫn quá dài */
-            transition: font-size 0.2s ease; /* Hiệu ứng thu nhỏ mượt mà */
-        }
+
+        /* Lịch sử Box */
         .history-box {
             position: absolute; inset: 0; background: var(--screen-bg); z-index: 100;
             display: none; flex-direction: column; padding: 20px;
             padding-top: calc(env(safe-area-inset-top) + 15px);
         }
         .history-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .history-item { border-bottom: 1px solid var(--keypad-bg); padding: 15px 0; cursor: pointer; touch-action: manipulation; }
+        .history-item { border-bottom: 1px solid var(--keypad-bg); padding: 15px 0; cursor: pointer; }
         .history-expr { color: var(--expr-text); font-size: 1.1rem; margin-bottom: 4px; opacity: 0.7; pointer-events: none; }
         .history-res { font-weight: 900; text-align: right; font-size: 1.6rem; color: var(--led-green); pointer-events: none; }
-        .shake { animation: shake 0.4s both; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+        /* Hiệu ứng LED */
         .neon-danger { color: var(--led-red) !important; text-shadow: var(--led-red-glow) !important; }
-        @keyframes blink-led-green {
-            0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent); }
-            50% { opacity: 0.5; text-shadow: 0 0 5px var(--accent), 0 0 15px var(--accent); }
-        }
-        @keyframes blink-led-red {
-            0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--danger), 0 0 20px var(--danger); }
-            50% { opacity: 0.5; text-shadow: 0 0 5px var(--danger), 0 0 15px var(--danger); }
-        }
-        @keyframes blink-led-orange {
-            0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--led-orange), 0 0 20px var(--led-orange); }
-            50% { opacity: 0.5; text-shadow: 0 0 5px var(--led-orange), 0 0 15px var(--led-orange); }
-        }
-        @keyframes blink-led-warning {
-            0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--danger), 0 0 20px var(--danger); transform: scale(1);}
-            50% { opacity: 0.3; text-shadow: 0 0 20px var(--danger), 0 0 40px var(--danger); transform: scale(1.02); color: #ff4444;}
-        }
-        .led-blink-green { animation: blink-led-green 1.2s ease-in-out infinite !important; }
-        .led-blink-red { animation: blink-led-red 1.2s ease-in-out infinite !important; }
-        .led-blink-orange { animation: blink-led-orange 1.2s ease-in-out infinite !important; }
-        .led-blink-warning { animation: blink-led-warning 0.8s ease-in-out infinite !important; }
+        @keyframes blink-led-green { 50% { opacity: 0.5; } }
+        @keyframes blink-led-red { 50% { color: #ff4444; transform: scale(1.02); } }
+        .led-blink-green { animation: blink-led-green 1.2s infinite; }
+        .led-blink-red { animation: blink-led-red 0.8s infinite; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -163,13 +150,11 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <span style="font-size: 1.6rem; font-weight: 900; color: var(--accent);">Lịch sử</span>
             <div id="closeHistory" class="control-btn" style="padding: 5px;">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--key-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </div>
         </div>
         <div id="historyList" class="history-list"></div>
-        <button id="clearHistoryBtn" style="margin-top: 15px; min-height: 55px; background: var(--keypad-bg); font-size: 1rem; border-radius: 12px; color: var(--danger); width:100%; touch-action: manipulation;">Xóa tất cả lịch sử</button>
+        <button id="clearHistoryBtn" style="margin-top: 15px; min-height: 55px; background: var(--keypad-bg); font-size: 1rem; border-radius: 12px; color: var(--danger); width:100%;">Xóa tất cả lịch sử</button>
     </div>
 
     <div class="display-screen">
@@ -180,21 +165,21 @@
         <div class="action-row">
             <div class="target-area" id="target-area-container">
                 <div class="control-btn" id="openHistory" style="padding: 5px;">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" fill="none"></circle><polyline points="12 6 12 12 16 14" stroke="currentColor" fill="none"></polyline></svg>
+                    <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 </div>
                 <div class="divider"></div>
                 <div class="control-btn" id="theme-toggle" style="padding: 5px;">
-                    <svg id="theme-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+                    <svg id="theme-icon" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
                 </div>
                 <div class="divider"></div>
-                <div id="target-box" style="display:flex; align-items:center; flex:1; height:100%; cursor:pointer; touch-action: manipulation; justify-content: flex-end;">
-                    <span class="target-label">MỤC TIÊU:</span>
+                <div class="target-clickable-zone" id="target-box">
+                    <span class="target-label" id="target-lbl">MỤC TIÊU:</span>
                     <div id="target-display">0</div>
                 </div>
             </div>
             
-            <div class="control-btn btn-back-ctrl btn-back-wrap" id="btn-backspace">
-                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+            <div class="btn-back-wrap btn-back-ctrl" id="btn-backspace">
+                <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
             </div>
         </div>
     </div>
@@ -223,58 +208,13 @@
 </div>
 
 <script>
+    // --- KHỞI TẠO ÂM THANH & BIẾN TOÀN CỤC ---
     let audioCtx = null;
-    function initAudio() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        return audioCtx;
-    }
+    function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
     
-    let historyExpr = ""; 
-    let targetInput = "";
-    let isTargetMode = false;
-    let calculationHistory = JSON.parse(localStorage.getItem('calc_history') || '[]');
-    let cursorPos = null; 
-    let isResultDisplayed = false;
+    let historyExpr = "", targetInput = "", isTargetMode = false, calculationHistory = JSON.parse(localStorage.getItem('calc_history') || '[]'), cursorPos = null, isResultDisplayed = false;
 
-    const exprDiv = document.getElementById('expression'), resDiv = document.getElementById('result-preview'), targetDiv = document.getElementById('target-display'), targetBox = document.getElementById('target-box'), msgDiv = document.getElementById('comparison-msg'), hBox = document.getElementById('historyBox'), hList = document.getElementById('historyList');
-	
-    function removeLedBlink() {
-        msgDiv.classList.remove('led-blink-green', 'led-blink-red', 'led-blink-orange', 'led-blink-warning');
-    }
-    
-    function playSound(type) {
-        try {
-            const ctx = initAudio();
-            const osc = ctx.createOscillator(), gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            if (type === 'click') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                osc.start(); osc.stop(ctx.currentTime + 0.1);
-            } else if (type === 'success') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.7, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                osc.start(); osc.stop(ctx.currentTime + 0.4);
-            } else if (type === 'fail') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctx.currentTime);
-                gain.gain.setValueAtTime(1.0, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
-                osc.start(); osc.stop(ctx.currentTime + 0.5);
-            }
-        } catch(e) { console.log('Audio error', e); }
-    }
-    
-    function lightImpact() {
-        if (window.webkit && window.webkit.messageHandlers) return;
-        if (window.TapticEngine) { try { window.TapticEngine.impact('light'); } catch(e) {} }
-        else if (navigator.vibrate) navigator.vibrate(8);
-    }
+    const exprDiv = document.getElementById('expression'), resDiv = document.getElementById('result-preview'), targetDiv = document.getElementById('target-display'), targetLbl = document.getElementById('target-lbl'), targetBox = document.getElementById('target-box'), msgDiv = document.getElementById('comparison-msg'), hBox = document.getElementById('historyBox'), hList = document.getElementById('historyList');
 
     function formatNumber(val) {
         if (!val && val !== 0) return "";
@@ -283,308 +223,214 @@
         return s.length > 1 ? s[0] + "," + s[1] : s[0];
     }
 
-    // Tiền xử lý chuỗi tính toán để hỗ trợ dấu % theo logic kế toán và dấu ngoặc
+    function playSound(type) {
+        try {
+            const ctx = initAudio(); if (ctx.state === 'suspended') ctx.resume();
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            if (type === 'click') {
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(); osc.stop(ctx.currentTime + 0.1);
+            } else if (type === 'success') {
+                osc.frequency.setValueAtTime(523, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1046, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                osc.start(); osc.stop(ctx.currentTime + 0.3);
+            }
+        } catch(e){}
+    }
+
+    function lightImpact() { if (navigator.vibrate) navigator.vibrate(10); }
+
+    // --- LOGIC TÍNH TOÁN % VÀ NGOẶC ---
     function preprocessForEval(raw) {
         let str = raw;
-        // Logic 1: Phép cộng % (VD: 500 + 2% -> 500 * (1 + 2/100))
+        // 500 + 10% -> 500 * (1 + 10/100)
         str = str.replace(/\+\s*([\d\.]+)%/g, ' * (1 + $1/100)');
-        // Logic 2: Phép trừ % (VD: 500 - 2% -> 500 * (1 - 2/100))
+        // 500 - 10% -> 500 * (1 - 10/100)
         str = str.replace(/\-\s*([\d\.]+)%/g, ' * (1 - $1/100)');
-        // Logic 3: Phần trăm thông thường hoặc trong ngoặc (VD: 1.5% -> (1.5/100))
+        // Phần trăm thông thường 10% -> (10/100)
         str = str.replace(/([\d\.]+)%/g, '($1/100)');
         return str;
     }
 
-    document.querySelectorAll('[data-val]').forEach(btn => {
-        btn.addEventListener('pointerdown', (e) => {
-            if (e.clientY && e.clientY > window.innerHeight - 35) return;
-            e.preventDefault(); lightImpact(); 
-            const v = btn.getAttribute('data-val');
-            if (v === 'C') clearAll();
-            else if (v === '()') smartParenthesis();
-            else if (v === '%') applyPercent(); 
-            else if (['+','-','*'].includes(v)) addOp(v);
-            else if (v === '=') calculate();
-            else handleInput(v);
-        });
-    });
-
+    // --- XỬ LÝ NHẬP LIỆU ---
     function handleInput(n) {
         playSound('click');
-        if (isResultDisplayed && !isTargetMode) {
-            historyExpr = ""; isResultDisplayed = false; cursorPos = null;
-        }
-
+        if (isResultDisplayed && !isTargetMode) { historyExpr = ""; isResultDisplayed = false; cursorPos = null; }
         if (isTargetMode) {
             if (n === '.' && targetInput.includes('.')) return;
-            // Không cho phép nhập % vào phần mục tiêu
-            if (n === '%') return; 
+            if (n === '%') return;
             targetInput += n;
         } else {
             if (cursorPos !== null) {
                 historyExpr = historyExpr.slice(0, cursorPos) + n + historyExpr.slice(cursorPos);
                 cursorPos += n.length;
-            } else {
-                historyExpr += n;
-            }
+            } else historyExpr += n;
             autoPreview();
         }
         renderDisplay();
     }
 
-    function addOp(op) {
-        playSound('click'); isResultDisplayed = false;
-        if (isTargetMode) isTargetMode = false;
-        if (cursorPos !== null) {
-            const charBefore = cursorPos > 0 ? historyExpr[cursorPos - 1] : '';
-            if (['+','-','*','/'].includes(charBefore)) {
-                historyExpr = historyExpr.slice(0, cursorPos - 1) + op + historyExpr.slice(cursorPos);
-            } else {
-                historyExpr = historyExpr.slice(0, cursorPos) + op + historyExpr.slice(cursorPos);
-                cursorPos++;
-            }
+    function renderDisplay() {
+        // Cập nhật giao diện Khung Mục Tiêu (Màu Cam)
+        if (isTargetMode) document.getElementById('target-area-container').classList.add('active-target');
+        else document.getElementById('target-area-container').classList.remove('active-target');
+
+        // Logic ẩn nhãn "MỤC TIÊU:" khi số dài hơn 5 chữ số
+        if (targetInput.length > 5) targetLbl.style.display = 'none';
+        else targetLbl.style.display = 'block';
+
+        // Tự động thu nhỏ font chữ Mục tiêu
+        let tLen = targetInput.length;
+        if (tLen > 5) {
+            let newSize = Math.max(0.8, 1.5 - (tLen - 5) * 0.12);
+            targetDiv.style.fontSize = newSize + 'rem';
         } else {
-            const last = historyExpr.slice(-1);
-            if (['+','-','*','/'].includes(last)) historyExpr = historyExpr.slice(0, -1) + op;
-            else if (historyExpr !== "" || op === '-') historyExpr += op;
+            targetDiv.style.fontSize = '1.5rem';
         }
-        renderDisplay(); autoPreview();
-    }
+        targetDiv.innerText = formatNumber(targetInput) || "0";
 
-    // Cập nhật hàm applyPercent để thêm % trực tiếp vào chuỗi (hỗ trợ tính toán nâng cao)
-    function applyPercent() {
-        if (isTargetMode) return;
-        handleInput('%');
-    }
-
-    let backTimer, backInterval;
-    const btnBack = document.getElementById('btn-backspace');
-    function backspace() {
-        if (isTargetMode) targetInput = targetInput.slice(0, -1);
-        else {
-            if (cursorPos !== null) {
-                if (cursorPos > 0) {
-                    historyExpr = historyExpr.slice(0, cursorPos - 1) + historyExpr.slice(cursorPos);
-                    cursorPos--;
-                }
-            } else historyExpr = historyExpr.slice(0, -1);
-            autoPreview();
+        // Cập nhật biểu thức chính và con trỏ
+        let displayStr = historyExpr.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
+        displayStr = displayStr.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
+        
+        if (cursorPos !== null && !isTargetMode) {
+            const pre = displayStr.substring(0, cursorPos); 
+            const post = displayStr.substring(cursorPos);
+            exprDiv.innerHTML = pre + '<span class="expr-cursor"></span>' + post;
+        } else {
+            exprDiv.innerHTML = displayStr;
         }
-        renderDisplay();
-    }
-    btnBack.addEventListener('pointerdown', (e) => {
-        if (e.clientY && e.clientY > window.innerHeight - 35) return;
-        e.preventDefault(); lightImpact(); playSound('click'); backspace();
-        backTimer = setTimeout(() => { backInterval = setInterval(() => { lightImpact(); backspace(); }, 70); }, 500);
-    });
-    const stopBack = () => { clearTimeout(backTimer); clearInterval(backInterval); };
-    btnBack.addEventListener('pointerup', stopBack); btnBack.addEventListener('pointerleave', stopBack);
-
-    function calculate() {
-        playSound('click');
-        if (isTargetMode) { isTargetMode = false; renderDisplay(); return; }
-        let raw = historyExpr; if (!raw) return;
-        cursorPos = null;
-        try {
-            while (['+','-','*','/','(','.'].includes(raw.slice(-1))) raw = raw.slice(0, -1);
-            
-            // Xử lý ngoặc và phần trăm trước khi eval
-            let processedRaw = preprocessForEval(raw);
-            let open = (processedRaw.match(/\(/g) ||[]).length, close = (processedRaw.match(/\)/g) ||[]).length;
-            if (open > close) processedRaw += ")".repeat(open - close);
-
-            let res = eval(processedRaw); 
-            let finalRes = Math.round(res * 1000000) / 1000000;
-            if (targetInput !== "") {
-                if (Math.abs(finalRes - parseFloat(targetInput)) < 0.00001) {
-                    msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; 
-                    msgDiv.style.color = "var(--accent)"; 
-                    msgDiv.classList.add('led-blink-green');
-                    playSound('success');
-                } else {
-                    let diff = Math.round((finalRes - parseFloat(targetInput)) * 100) / 100;
-                    if (diff > 0) {
-                        msgDiv.innerText = "❌ VƯỢT: " + formatNumber(Math.abs(diff));
-                        msgDiv.classList.add('led-blink-red');
-                    } else {
-                        msgDiv.innerText = "❌ THIẾU: " + formatNumber(Math.abs(diff));
-                        msgDiv.classList.add('led-blink-orange');
-                    }
-                    msgDiv.style.color = "var(--danger)"; 
-                    playSound('fail');
-                }
-            }
-            calculationHistory.push({ expr: exprDiv.innerText || historyExpr, res: finalRes, raw: raw });
-            if (calculationHistory.length > 50) calculationHistory.shift();
-            localStorage.setItem('calc_history', JSON.stringify(calculationHistory));
-            resDiv.innerText = formatNumber(finalRes); historyExpr = finalRes.toString();
-            exprDiv.innerHTML = ""; isResultDisplayed = true;
-        } catch(e) { resDiv.innerText = "Lỗi"; }
-        renderDisplay();
+        if (exprDiv.scrollHeight > exprDiv.clientHeight) exprDiv.scrollTop = exprDiv.scrollHeight;
     }
 
     function autoPreview() {
         try {
             let temp = historyExpr; if (!temp) { resDiv.innerText = "0"; return; }
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) temp = temp.slice(0, -1);
+            let processed = preprocessForEval(temp);
+            let open = (processed.match(/\(/g) ||[]).length, close = (processed.match(/\)/g) ||[]).length;
+            if (open > close) processed += ")".repeat(open - close);
+            let val = eval(processed);
+            let finalVal = Math.round(val * 1000000) / 1000000;
+            resDiv.innerText = formatNumber(finalVal);
             
-            // Áp dụng tiền xử lý % cho Auto Preview
-            let processedTemp = preprocessForEval(temp);
-            
-            let open = (processedTemp.match(/\(/g) ||[]).length, close = (processedTemp.match(/\)/g) ||[]).length;
-            if (open > close) processedTemp += ")".repeat(open - close);
-            let pVal = Math.round(eval(processedTemp) * 1000000) / 1000000;
-            resDiv.innerText = formatNumber(pVal);
-            if (targetInput !== "" && pVal > parseFloat(targetInput)) {
-                resDiv.classList.add('neon-danger'); 
-                msgDiv.innerText = "⚠️ VƯỢT QUÁ!"; 
-                msgDiv.style.color = "var(--danger)";
-                msgDiv.classList.add('led-blink-warning');
-            } else { 
-                resDiv.classList.remove('neon-danger'); 
-                if (!msgDiv.innerText.includes("KHỚP") && !msgDiv.innerText.includes("VƯỢT") && !msgDiv.innerText.includes("THIẾU"))
-                    msgDiv.classList.remove('led-blink-warning');
-                if (!isTargetMode && !msgDiv.innerText.includes("KHỚP")) msgDiv.innerText = ""; 
-            }
-        } catch(e) { resDiv.innerText = "0"; }
-    }
-
-    function renderDisplay() {
-        if (!msgDiv.innerText.includes("KHỚP") && !msgDiv.innerText.includes("VƯỢT") && !msgDiv.innerText.includes("THIẾU") && !msgDiv.innerText.includes("⚠️")) {
-            removeLedBlink();
-        }
-        if (isTargetMode) {
-            document.getElementById('target-area-container').classList.add('active-target');
-        } else {
-            document.getElementById('target-area-container').classList.remove('active-target');
-            if (cursorPos !== null) {
-                const fmt = s => {
-                    let str = s.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
-                    return str.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
-                };
-                const pre = fmt(historyExpr.slice(0, cursorPos));
-                const post = fmt(historyExpr.slice(cursorPos));
-                exprDiv.innerHTML = pre + '<span class="expr-cursor"></span>' + post;
+            // Cảnh báo nếu vượt mục tiêu
+            if (targetInput !== "" && finalVal > parseFloat(targetInput)) {
+                resDiv.classList.add('neon-danger');
             } else {
-                let displayStr = historyExpr.replace(/\*/g,' × ').replace(/\//g,' ÷ ').replace(/\+/g,' + ').replace(/\-/g,' − ');
-                displayStr = displayStr.replace(/(\d+(\.\d+)?)/g, match => formatNumber(match));
-                exprDiv.innerHTML = displayStr;
+                resDiv.classList.remove('neon-danger');
             }
-        }
-        
-        // Logic Tự động thu nhỏ font chữ cho mục tiêu
-        let tLen = targetInput.length;
-        if (tLen > 6) {
-            // Giảm dần kích thước từ 1.4rem, nhỏ nhất là 0.7rem
-            let newSize = Math.max(0.7, 1.4 - (tLen - 6) * 0.12);
-            targetDiv.style.fontSize = newSize + 'rem';
-        } else {
-            targetDiv.style.fontSize = '1.4rem';
-        }
-        targetDiv.innerText = formatNumber(targetInput) || "0";
-
-        if (exprDiv.scrollHeight > exprDiv.clientHeight) exprDiv.scrollTop = exprDiv.scrollHeight;
+        } catch(e) {}
     }
 
-    let touchStartX = 0;
-    let initialCursorPos = 0;
+    function calculate() {
+        if (isTargetMode) { isTargetMode = false; renderDisplay(); return; }
+        if (!historyExpr) return;
+        try {
+            let rawForHistory = historyExpr;
+            let processed = preprocessForEval(historyExpr);
+            let res = eval(processed);
+            let finalRes = Math.round(res * 1000000) / 1000000;
+            
+            // So sánh với Mục Tiêu
+            if (targetInput !== "") {
+                let targetNum = parseFloat(targetInput);
+                if (Math.abs(finalRes - targetNum) < 0.001) {
+                    msgDiv.innerText = "✅ KHỚP TUYỆT ĐỐI"; msgDiv.className = "led-blink-green"; playSound('success');
+                } else {
+                    let diff = finalRes - targetNum;
+                    msgDiv.innerText = (diff > 0 ? "❌ VƯỢT: " : "❌ THIẾU: ") + formatNumber(Math.abs(diff));
+                    msgDiv.className = "led-blink-red";
+                }
+            }
+            
+            // Lưu lịch sử
+            calculationHistory.push({ expr: exprDiv.innerText, res: finalRes, raw: rawForHistory });
+            localStorage.setItem('calc_history', JSON.stringify(calculationHistory));
 
-    exprDiv.addEventListener('touchstart', function(e) {
-        if (historyExpr === "" || isTargetMode) return;
-        e.preventDefault(); 
-        const touch = e.touches[0];
-        touchStartX = touch.clientX;
+            resDiv.innerText = formatNumber(finalRes);
+            historyExpr = finalRes.toString();
+            isResultDisplayed = true;
+            cursorPos = null;
+            renderDisplay();
+        } catch(e) { resDiv.innerText = "Lỗi"; }
+    }
+
+    // --- VUỐT DI CHUYỂN CON TRỎ ---
+    let touchStartX = 0, initialCursorPos = 0;
+    exprDiv.addEventListener('touchstart', (e) => {
+        if (!historyExpr || isTargetMode) return;
+        touchStartX = e.touches[0].clientX;
         if (cursorPos === null) cursorPos = historyExpr.length;
         initialCursorPos = cursorPos;
-        renderDisplay();
         lightImpact();
-    }, { passive: false });
+    });
+    exprDiv.addEventListener('touchmove', (e) => {
+        if (!historyExpr || isTargetMode) return;
+        let deltaX = e.touches[0].clientX - touchStartX;
+        let move = Math.round(deltaX / 15);
+        let newPos = Math.max(0, Math.min(historyExpr.length, initialCursorPos + move));
+        if (newPos !== cursorPos) { cursorPos = newPos; renderDisplay(); lightImpact(); }
+    });
 
-    exprDiv.addEventListener('touchmove', function(e) {
-        if (historyExpr === "" || isTargetMode) return;
-        e.preventDefault(); 
-        const touch = e.touches[0];
-        let deltaX = touch.clientX - touchStartX;
-        let charsToMove = Math.round(deltaX / 15);
-        let newPos = initialCursorPos + charsToMove;
-        newPos = Math.max(0, Math.min(historyExpr.length, newPos));
-        if (newPos !== cursorPos) {
-            cursorPos = newPos;
-            renderDisplay();
-            lightImpact();
-        }
-    }, { passive: false });
-
-    function renderHistory() {
-        hList.innerHTML = [...calculationHistory].reverse().map((item, idx) => {
-            const originalIdx = calculationHistory.length - 1 - idx;
-            return `<div class="history-item" data-history-index="${originalIdx}">
-                        <div class="history-expr">${item.expr} =</div>
-                        <div class="history-res">${formatNumber(item.res)}</div>
-                    </div>`;
-        }).join('');
-        document.querySelectorAll('.history-item').forEach(el => {
-            el.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const idx = parseInt(el.getAttribute('data-history-index'));
-                if (!isNaN(idx)) loadEditHistory(idx);
-            });
+    // --- SỰ KIỆN NÚT BẤM ---
+    document.querySelectorAll('[data-val]').forEach(btn => {
+        btn.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); lightImpact();
+            const v = btn.getAttribute('data-val');
+            if (v === 'C') { historyExpr = ""; targetInput = ""; msgDiv.innerText = ""; resDiv.innerText = "0"; cursorPos = null; renderDisplay(); }
+            else if (v === '=') calculate();
+            else if (v === '()') {
+                let open = (historyExpr.match(/\(/g) ||[]).length, close = (historyExpr.match(/\)/g) ||[]).length;
+                handleInput(open > close && !['+','-','*','/','('].includes(historyExpr.slice(-1)) ? ")" : "(");
+            }
+            else if (['+','-','*','/'].includes(v)) { isTargetMode = false; handleInput(v); }
+            else handleInput(v);
         });
-    }
+    });
 
-    function loadEditHistory(index) {
-        const item = calculationHistory[index];
-        if (!item) return;
-        historyExpr = item.raw || item.expr.replace(/ × /g,'*').replace(/ ÷ /g,'/').replace(/ − /g,'-').replace(/\./g,'').replace(/,/g,'.');
-        cursorPos = historyExpr.length;
-        isResultDisplayed = false;
-        hBox.style.display = 'none';
-        playSound('click'); renderDisplay(); autoPreview();
-    }
-    window.loadEditHistory = loadEditHistory;
-
-    function clearAll() {
-        playSound('click');
-        if (isTargetMode) targetInput = "";
-        else { historyExpr = ""; targetInput = ""; msgDiv.innerText = ""; cursorPos = null; isResultDisplayed = false; }
-        resDiv.innerText = "0"; resDiv.classList.remove('neon-danger'); renderDisplay();
-    }
-
-    function smartParenthesis() {
-        playSound('click');
-        let open = (historyExpr.match(/\(/g) ||[]).length, close = (historyExpr.match(/\)/g) ||[]).length;
-        let char = (open > close && !['+','-','*','/','('].includes(historyExpr.slice(-1))) ? ")" : "(";
-        if (cursorPos !== null) {
-            historyExpr = historyExpr.slice(0, cursorPos) + char + historyExpr.slice(cursorPos); cursorPos++;
-        } else { historyExpr += char; }
-        renderDisplay(); autoPreview();
-    }
-
-    document.getElementById('theme-toggle').onclick = () => {
-        const body = document.body;
-        const isDark = body.getAttribute('data-theme') === 'dark';
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        const icon = document.getElementById('theme-icon');
-        if (!isDark) {
-            icon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
-            icon.setAttribute('fill', 'currentColor');
-        } else {
-            icon.innerHTML = '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>';
-            icon.setAttribute('fill', 'none');
+    document.getElementById('btn-backspace').addEventListener('pointerdown', (e) => {
+        e.preventDefault(); playSound('click'); lightImpact();
+        if (isTargetMode) targetInput = targetInput.slice(0, -1);
+        else {
+            if (cursorPos !== null && cursorPos > 0) {
+                historyExpr = historyExpr.slice(0, cursorPos - 1) + historyExpr.slice(cursorPos);
+                cursorPos--;
+            } else historyExpr = historyExpr.slice(0, -1);
         }
-        lightImpact(); playSound('click');
-    };
+        autoPreview(); renderDisplay();
+    });
 
-    document.getElementById('openHistory').onclick = () => { hBox.style.display = 'flex'; renderHistory(); lightImpact(); };
-    document.getElementById('closeHistory').onclick = () => { hBox.style.display = 'none'; lightImpact(); };
-    document.getElementById('clearHistoryBtn').onclick = () => { calculationHistory = []; localStorage.setItem('calc_history', '[]'); renderHistory(); lightImpact(); playSound('click'); };
     targetBox.onclick = () => { isTargetMode = !isTargetMode; renderDisplay(); lightImpact(); };
     
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-icon').innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
-        document.getElementById('theme-icon').setAttribute('fill', 'currentColor');
-    }
+    // --- CHẾ ĐỘ TỐI / LỊCH SỬ ---
+    document.getElementById('theme-toggle').onclick = () => {
+        document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        lightImpact();
+    };
+
+    document.getElementById('openHistory').onclick = () => {
+        hBox.style.display = 'flex';
+        hList.innerHTML = [...calculationHistory].reverse().map((item, i) => `
+            <div class="history-item" onclick="loadHist(${calculationHistory.length-1-i})">
+                <div class="history-expr">${item.expr} =</div>
+                <div class="history-res">${formatNumber(item.res)}</div>
+            </div>`).join('');
+    };
+    
+    window.loadHist = (idx) => {
+        const item = calculationHistory[idx];
+        historyExpr = item.raw; cursorPos = historyExpr.length;
+        hBox.style.display = 'none'; renderDisplay(); autoPreview();
+    };
+
+    document.getElementById('closeHistory').onclick = () => hBox.style.display = 'none';
+    document.getElementById('clearHistoryBtn').onclick = () => { calculationHistory = []; localStorage.removeItem('calc_history'); hList.innerHTML = ""; };
+
     renderDisplay();
 </script>
 </body>
