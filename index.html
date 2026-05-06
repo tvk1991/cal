@@ -467,9 +467,10 @@
         }
         
         let tLen = targetInput.length;
-        if (tLen > 5) {
+        // PHẦN HIỆU CHỈNH: Đổi ngưỡng từ 5 sang 3 để thu nhỏ sớm hơn
+        if (tLen > 2) {
             targetLabelEl.style.display = 'none';
-            let newSize = Math.max(0.8, 1.4 - (tLen - 5) * 0.1);
+            let newSize = Math.max(0.8, 1.4 - (tLen - 2) * 0.1);
             targetDiv.style.fontSize = newSize + 'rem';
         } else {
             targetLabelEl.style.display = 'inline-block';
