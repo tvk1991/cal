@@ -467,10 +467,11 @@
         }
         
         let tLen = targetInput.length;
-        // PHẦN HIỆU CHỈNH: Đổi ngưỡng từ 5 sang 3 để thu nhỏ sớm hơn
-        if (tLen > 2) {
+        // KHI BẤM 2 SỐ TRỞ LÊN (tLen > 1)
+        if (tLen > 1) {
             targetLabelEl.style.display = 'none';
-            let newSize = Math.max(0.8, 1.4 - (tLen - 2) * 0.1);
+            // Tự động co nhỏ dần dựa trên số lượng chữ số vượt quá 1
+            let newSize = Math.max(0.8, 1.4 - (tLen - 1) * 0.1);
             targetDiv.style.fontSize = newSize + 'rem';
         } else {
             targetLabelEl.style.display = 'inline-block';
