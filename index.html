@@ -74,18 +74,18 @@
         
         .action-row {
             display: flex; align-items: stretch; gap: 8px; margin-bottom: 5px; height: 48px;
-            width: 100%; /* Đảm bảo không tràn màn hình */
+            width: 100%;
         }
         .target-area {
             flex: 1; display: flex; align-items: center; background: var(--target-area-bg);
             border-radius: 14px; padding: 0 15px; border: 1px solid var(--target-border);
             gap: 10px;
-            min-width: 0; /* QUAN TRỌNG: Ngăn flexbox đẩy nội dung quá lố */
+            min-width: 0;
         }
         .btn-back-wrap {
             background: var(--target-area-bg); border: 1px solid var(--target-border);
             border-radius: 14px; padding: 0 20px; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; /* QUAN TRỌNG: Giữ kích thước cố định, không bị méo hay văng khỏi màn hình */
+            flex-shrink: 0;
         }
         [data-theme="dark"] .btn-back-wrap { background: var(--target-area-bg); border-color: var(--target-border); }
 
@@ -115,12 +115,12 @@
         #theme-toggle svg { fill: var(--target-color); stroke: var(--target-color); }
         .btn-back-ctrl svg { stroke: var(--key-text); }
         .divider { width: 1px; height: 20px; background: var(--target-border); flex-shrink: 0; }
-        .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; flex-shrink: 0; }
+        .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; flex-shrink: 0; transition: opacity 0.2s; }
         #target-display { 
             flex: 1; font-size: 1.4rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); 
             font-weight: 900; margin-left: 5px;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; /* Cắt bớt nếu vẫn quá dài */
-            transition: font-size 0.2s ease; /* Hiệu ứng thu nhỏ mượt mà */
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            transition: font-size 0.2s ease;
         }
         .history-box {
             position: absolute; inset: 0; background: var(--screen-bg); z-index: 100;
@@ -188,7 +188,7 @@
                 </div>
                 <div class="divider"></div>
                 <div id="target-box" style="display:flex; align-items:center; flex:1; height:100%; cursor:pointer; touch-action: manipulation; justify-content: flex-end;">
-                    <span class="target-label">MỤC TIÊU:</span>
+                    <span class="target-label" id="target-label-text">MỤC TIÊU:</span>
                     <div id="target-display">0</div>
                 </div>
             </div>
@@ -283,14 +283,10 @@
         return s.length > 1 ? s[0] + "," + s[1] : s[0];
     }
 
-    // Tiền xử lý chuỗi tính toán để hỗ trợ dấu % theo logic kế toán và dấu ngoặc
     function preprocessForEval(raw) {
         let str = raw;
-        // Logic 1: Phép cộng % (VD: 500 + 2% -> 500 * (1 + 2/100))
         str = str.replace(/\+\s*([\d\.]+)%/g, ' * (1 + $1/100)');
-        // Logic 2: Phép trừ % (VD: 500 - 2% -> 500 * (1 - 2/100))
         str = str.replace(/\-\s*([\d\.]+)%/g, ' * (1 - $1/100)');
-        // Logic 3: Phần trăm thông thường hoặc trong ngoặc (VD: 1.5% -> (1.5/100))
         str = str.replace(/([\d\.]+)%/g, '($1/100)');
         return str;
     }
@@ -317,7 +313,6 @@
 
         if (isTargetMode) {
             if (n === '.' && targetInput.includes('.')) return;
-            // Không cho phép nhập % vào phần mục tiêu
             if (n === '%') return; 
             targetInput += n;
         } else {
@@ -351,7 +346,6 @@
         renderDisplay(); autoPreview();
     }
 
-    // Cập nhật hàm applyPercent để thêm % trực tiếp vào chuỗi (hỗ trợ tính toán nâng cao)
     function applyPercent() {
         if (isTargetMode) return;
         handleInput('%');
@@ -388,7 +382,6 @@
         try {
             while (['+','-','*','/','(','.'].includes(raw.slice(-1))) raw = raw.slice(0, -1);
             
-            // Xử lý ngoặc và phần trăm trước khi eval
             let processedRaw = preprocessForEval(raw);
             let open = (processedRaw.match(/\(/g) ||[]).length, close = (processedRaw.match(/\)/g) ||[]).length;
             if (open > close) processedRaw += ")".repeat(open - close);
@@ -428,7 +421,6 @@
             let temp = historyExpr; if (!temp) { resDiv.innerText = "0"; return; }
             while (['+','-','*','/','(','.'].includes(temp.slice(-1))) temp = temp.slice(0, -1);
             
-            // Áp dụng tiền xử lý % cho Auto Preview
             let processedTemp = preprocessForEval(temp);
             
             let open = (processedTemp.match(/\(/g) ||[]).length, close = (processedTemp.match(/\)/g) ||[]).length;
@@ -450,6 +442,8 @@
     }
 
     function renderDisplay() {
+        const targetLabelEl = document.getElementById('target-label-text');
+
         if (!msgDiv.innerText.includes("KHỚP") && !msgDiv.innerText.includes("VƯỢT") && !msgDiv.innerText.includes("THIẾU") && !msgDiv.innerText.includes("⚠️")) {
             removeLedBlink();
         }
@@ -472,13 +466,13 @@
             }
         }
         
-        // Logic Tự động thu nhỏ font chữ cho mục tiêu
         let tLen = targetInput.length;
-        if (tLen > 6) {
-            // Giảm dần kích thước từ 1.4rem, nhỏ nhất là 0.7rem
-            let newSize = Math.max(0.7, 1.4 - (tLen - 6) * 0.12);
+        if (tLen > 5) {
+            targetLabelEl.style.display = 'none';
+            let newSize = Math.max(0.8, 1.4 - (tLen - 5) * 0.1);
             targetDiv.style.fontSize = newSize + 'rem';
         } else {
+            targetLabelEl.style.display = 'inline-block';
             targetDiv.style.fontSize = '1.4rem';
         }
         targetDiv.innerText = formatNumber(targetInput) || "0";
@@ -588,4 +582,4 @@
     renderDisplay();
 </script>
 </body>
-    </html>
+</html>
