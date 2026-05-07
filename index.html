@@ -72,9 +72,11 @@
         }
         #comparison-msg { font-size: 0.9rem; font-weight: 800; text-align: center; min-height: 22px; margin-bottom: 12px; }
         
+        /* Đã điều chỉnh: Tăng chiều ngang để cân xứng với bàn phím bên dưới */
         .action-row {
             display: flex; align-items: stretch; gap: 8px; margin-bottom: 5px; height: 48px;
-            width: 100%;
+            width: calc(100% + 30px); /* Mở rộng thêm 30px */
+            margin-left: -15px;       /* Đưa về trung tâm */
         }
         .target-area {
             flex: 1; display: flex; align-items: center; background: var(--target-area-bg);
@@ -116,7 +118,6 @@
         .btn-back-ctrl svg { stroke: var(--key-text); }
         .divider { width: 1px; height: 20px; background: var(--target-border); flex-shrink: 0; }
         .target-label { font-size: 0.7rem; color: var(--target-color); font-weight: 800; flex-shrink: 0; transition: opacity 0.2s; }
-        /* THAY ĐỔI 1: Tăng font-size gốc từ 1.4rem lên 1.8rem */
         #target-display { 
             flex: 1; font-size: 1.8rem; color: var(--led-orange); text-shadow: var(--led-orange-glow); 
             font-weight: 900; margin-left: 5px;
@@ -241,7 +242,7 @@
     let isResultDisplayed = false;
 
     const exprDiv = document.getElementById('expression'), resDiv = document.getElementById('result-preview'), targetDiv = document.getElementById('target-display'), targetBox = document.getElementById('target-box'), msgDiv = document.getElementById('comparison-msg'), hBox = document.getElementById('historyBox'), hList = document.getElementById('historyList');
-	
+    
     function removeLedBlink() {
         msgDiv.classList.remove('led-blink-green', 'led-blink-red', 'led-blink-orange', 'led-blink-warning');
     }
@@ -468,10 +469,8 @@
         }
         
         let tLen = targetInput.length;
-        // THAY ĐỔI 2: Tăng font-size cơ sở lên 1.8rem trong logic tính toán co giãn
         if (tLen > 1) {
             targetLabelEl.style.display = 'none';
-            // Bắt đầu từ 1.8rem và trừ dần 0.12rem cho mỗi số tiếp theo
             let newSize = Math.max(1.0, 1.8 - (tLen - 1) * 0.12);
             targetDiv.style.fontSize = newSize + 'rem';
         } else {
